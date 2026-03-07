@@ -32,8 +32,8 @@
         
         /* Animace pro plynulé přechody mezi pohledy */
         .view-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
-        .view-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; }
-        .view-active { opacity: 1; transform: translateY(0); position: relative; }
+        .view-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; z-index: -1; }
+        .view-active { opacity: 1; transform: translateY(0); position: relative; z-index: 10; }
     </style>
     
     <script>
@@ -66,7 +66,7 @@
                 <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
                 
                 <div class="grid md:grid-cols-2 gap-6">
-                    <button onclick="goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                    <button onclick="window.goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
                         <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm">
                             <i class="fa-solid fa-house-chimney-window"></i>
                         </div>
@@ -76,7 +76,7 @@
                         </div>
                     </button>
 
-                    <button onclick="goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                    <button onclick="window.goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
                         <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm">
                             <i class="fa-solid fa-toolbox"></i>
                         </div>
@@ -90,7 +90,7 @@
 
             <div id="view-auth-form" class="view-transition view-hidden max-w-md mx-auto">
                 
-                <button onclick="goBackToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 transition mb-6 flex items-center gap-2">
+                <button onclick="window.goBackToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 transition mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Zpět na výběr
                 </button>
 
@@ -100,8 +100,8 @@
                 </div>
 
                 <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-8">
-                    <button onclick="switchTab('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
-                    <button onclick="switchTab('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-500">Registrace</button>
+                    <button onclick="window.switchTab('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
+                    <button onclick="window.switchTab('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-500">Registrace</button>
                     <div id="auth-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300"></div>
                 </div>
 
@@ -109,7 +109,7 @@
                 <div id="auth-success" class="hidden mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold text-center"></div>
 
                 <div id="form-login">
-                    <form onsubmit="handleLogin(event)">
+                    <form onsubmit="window.handleLogin(event)">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
@@ -130,7 +130,7 @@
                 </div>
 
                 <div id="form-register" class="hidden">
-                    <form onsubmit="handleRegister(event)">
+                    <form onsubmit="window.handleRegister(event)">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Jméno a příjmení / Název firmy</label>
@@ -162,24 +162,30 @@
 
     <script>
         // ==========================================
-        // NASTAVENÍ SUPABASE
+        // BEZPEČNÁ INICIALIZACE SUPABASE
         // ==========================================
         const supabaseUrl = 'https://iyvvwsnhezjrjrkscbyc.supabase.co'; 
         const supabaseKey = 'sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Proměnná pro uložení role (customer / craftsman), kterou uživatel naklikl na rozcestníku
-        let activeRole = 'customer'; 
-
-        // ==========================================
-        // LOGIKA UI PŘECHODŮ
-        // ==========================================
         
-        // Přejít z rozcestníku na formulář
-        function goToAuth(role) {
-            activeRole = role; // Uložíme si vybranou roli do paměti
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            } else {
+                console.error("Supabase script se nenačetl.");
+            }
+        } catch (e) {
+            console.error("Chyba při inicializaci Supabase:", e);
+        }
 
-            // Změna textu v informačním panelu nad formulářem
+        // ==========================================
+        // LOGIKA UI PŘECHODŮ (Vše napojené na window)
+        // ==========================================
+        window.activeRole = 'customer'; 
+
+        window.goToAuth = function(role) {
+            window.activeRole = role; 
+
             const iconEl = document.getElementById('selected-role-icon');
             const textEl = document.getElementById('selected-role-text');
             
@@ -191,25 +197,21 @@
                 textEl.innerText = 'Pokračujete jako Řemeslník';
             }
 
-            // Přepnutí views (skryjeme rozcestník, ukážeme formuláře)
             document.getElementById('view-role-select').classList.replace('view-active', 'view-hidden');
             document.getElementById('view-auth-form').classList.replace('view-hidden', 'view-active');
             
-            // Vymažeme případné staré chyby a resetneme na "Login" tab
-            clearMessages();
-            switchTab('login');
-        }
+            window.clearMessages();
+            window.switchTab('login');
+        };
 
-        // Tlačítko Zpět (na rozcestník)
-        function goBackToRoles() {
+        window.goBackToRoles = function() {
             document.getElementById('view-auth-form').classList.replace('view-active', 'view-hidden');
             document.getElementById('view-role-select').classList.replace('view-hidden', 'view-active');
-            clearMessages();
-        }
+            window.clearMessages();
+        };
 
-        // Přepínač Login / Register
-        function switchTab(tab) {
-            clearMessages();
+        window.switchTab = function(tab) {
+            window.clearMessages();
             const slider = document.getElementById('auth-slider');
             const btnLogin = document.getElementById('btn-tab-login');
             const btnRegister = document.getElementById('btn-tab-register');
@@ -233,38 +235,39 @@
                 formRegister.classList.remove('hidden');
                 formLogin.classList.add('hidden');
             }
-        }
+        };
 
-        // ==========================================
-        // POMOCNÉ FUNKCE PRO ZPRÁVY
-        // ==========================================
-        function showError(msg) {
+        window.showError = function(msg) {
             const box = document.getElementById('auth-error');
             box.innerText = msg;
             box.classList.remove('hidden');
             document.getElementById('auth-success').classList.add('hidden');
-        }
+        };
 
-        function showSuccess(msg) {
+        window.showSuccess = function(msg) {
             const box = document.getElementById('auth-success');
             box.innerText = msg;
             box.classList.remove('hidden');
             document.getElementById('auth-error').classList.add('hidden');
-        }
+        };
 
-        function clearMessages() {
+        window.clearMessages = function() {
             document.getElementById('auth-error').classList.add('hidden');
             document.getElementById('auth-success').classList.add('hidden');
-        }
+        };
 
         // ==========================================
         // KOMUNIKACE S DATABÁZÍ SUPABASE
         // ==========================================
-
-        // REGISTRACE
-        async function handleRegister(e) {
+        window.handleRegister = async function(e) {
             e.preventDefault();
-            clearMessages();
+            window.clearMessages();
+            
+            if (!supabaseClient) {
+                window.showError("Nepodařilo se připojit k databázi.");
+                return;
+            }
+
             const btn = document.getElementById('btn-submit-register');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vytvářím účet...';
@@ -274,33 +277,40 @@
             const password = document.getElementById('reg-password').value;
             const name = document.getElementById('reg-name').value;
 
-            // Odeslání do Supabase vč. metadat (jméno a vybraná role)
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        full_name: name,
-                        role: activeRole // Zde posíláme roli (customer/craftsman)
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            role: window.activeRole
+                        }
                     }
-                }
-            });
+                });
 
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+                if (error) throw error;
 
-            if (error) {
-                showError("Chyba při registraci: " + error.message);
-            } else {
-                showSuccess("Registrace byla úspěšná! Nyní se můžete přihlásit.");
-                setTimeout(() => { switchTab('login'); }, 2000); // Po chvíli ho to hodí na přihlášení
+                window.showSuccess("Registrace byla úspěšná! Nyní se přihlaste.");
+                setTimeout(() => { window.switchTab('login'); }, 2000);
+
+            } catch (err) {
+                window.showError("Chyba při registraci: " + err.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-        }
+        };
 
-        // PŘIHLÁŠENÍ
-        async function handleLogin(e) {
+        window.handleLogin = async function(e) {
             e.preventDefault();
-            clearMessages();
+            window.clearMessages();
+
+            if (!supabaseClient) {
+                window.showError("Nepodařilo se připojit k databázi.");
+                return;
+            }
+
             const btn = document.getElementById('btn-submit-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Přihlašuji...';
@@ -309,32 +319,33 @@
             const email = document.getElementById('log-email').value;
             const password = document.getElementById('log-password').value;
 
-            // Odeslání přihlašovacích údajů do Supabase
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
 
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+                if (error) throw error;
 
-            if (error) {
-                showError("Špatný e-mail nebo heslo.");
-            } else {
-                // Přihlášení úspěšné
-                showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
+                window.showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
                 
-                // Můžeme si vyčíst roli z uživatelských dat
-                const userRole = data.user.user_metadata.role;
-                console.log("Přihlášen jako:", userRole, data.user);
+                // Můžeš si vypsat roli uživatele do konzole pro kontrolu
+                const userRole = data.user.user_metadata.role || 'Neznámá role';
+                console.log("Přihlášen jako:", userRole);
                 
-                // ZDE BUDE POZDĚJI PŘESMĚROVÁNÍ NA NÁSTĚNKU
+                // Zde proběhne přesměrování (nebo spuštění aplikace)
                 // např. window.location.href = '/dashboard.html';
+
+            } catch (err) {
+                window.showError("Špatný e-mail nebo heslo.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-        }
+        };
 
         // ==========================================
-        // DARK MODE TOGGLE (PRO TESTOVÁNÍ)
+        // DARK MODE TOGGLE
         // ==========================================
         const themeToggleBtn = document.getElementById('theme-toggle');
         const updateIcons = () => {
