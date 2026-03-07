@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixit App | Klientský a Řemeslnický portál</title>
+    <title>Fixit App | Vstup</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -192,7 +192,7 @@
                 </button>
                 <div class="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                     <div class="w-10 h-10 rounded-full bg-fixit-100 overflow-hidden shrink-0">
-                        <img id="user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=f59e0b" alt="User">
+                        <img id="user-avatar" src="" alt="User">
                     </div>
                     <div class="text-left truncate">
                         <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" id="user-name">Jan Novák</p>
@@ -220,11 +220,9 @@
 
     <div id="modal-payment-success" class="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-payment-box">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30">
-                <i class="fa-solid fa-check"></i>
-            </div>
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30"><i class="fa-solid fa-check"></i></div>
             <h3 class="text-2xl font-extrabold mb-2">Peníze jsou v úschově!</h3>
-            <p class="text-slate-500 mb-8 leading-relaxed">Částka 1 200 Kč byla rezervována z vaší karty. Řemeslník Karel V. dostal zprávu, že může vyrazit.</p>
+            <p class="text-slate-500 mb-8 leading-relaxed">Částka byla rezervována z vaší karty. Řemeslník dostal zprávu, že může vyrazit.</p>
             <button onclick="window.closePaymentModal()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-fixit-500 transition">Zpět na Nástěnku</button>
         </div>
     </div>
@@ -245,7 +243,7 @@
         } catch (e) { console.error("Chyba Supabase:", e); }
 
         // ==========================================
-        // 2. AUTH LOGIKA (Přihlašování / Vstup)
+        // 2. AUTH LOGIKA
         // ==========================================
         window.activeRole = 'customer'; 
 
@@ -360,7 +358,7 @@
 
                 window.showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
                 
-                // === SPOUŠTĚNÍ APLIKACE PO PŘIHLÁŠENÍ ===
+                // Získání dat z databáze
                 const userRole = data.user.user_metadata?.role || 'customer';
                 const userName = data.user.user_metadata?.full_name || 'Uživatel';
                 
@@ -368,16 +366,16 @@
                     const authScreen = document.getElementById('auth-screen');
                     const mainApp = document.getElementById('main-app');
                     
-                    authScreen.style.opacity = '0'; // Zmizení přihlašování
+                    authScreen.style.opacity = '0';
                     setTimeout(() => {
                         authScreen.classList.add('hidden');
                         
-                        // Inicializujeme aplikaci s daty z databáze
+                        // Inicializace prázdného prostředí
                         window.initApp(userRole, userName);
                         
                         mainApp.classList.remove('hidden');
-                        void mainApp.offsetWidth; // Reflow hack
-                        mainApp.style.opacity = '1'; // Zobrazení aplikace
+                        void mainApp.offsetWidth;
+                        mainApp.style.opacity = '1';
                     }, 500);
                 }, 1000);
 
@@ -391,14 +389,14 @@
         };
 
         // ==========================================
-        // 3. LOGIKA APLIKACE (Nástěnka, Poptávky...)
+        // 3. LOGIKA PRÁZDNÉ APLIKACE (EMPTY STATES)
         // ==========================================
         const appStructure = {
             customer: {
                 nav: [
                     { id: 'c-dashboard', icon: 'fa-house', text: 'Nástěnka' },
                     { id: 'c-requests', icon: 'fa-list-check', text: 'Moje poptávky' },
-                    { id: 'c-messages', icon: 'fa-comment-dots', text: 'Zprávy', badge: true },
+                    { id: 'c-messages', icon: 'fa-comment-dots', text: 'Zprávy' },
                     { id: 'c-payments', icon: 'fa-shield-halved', text: 'Platby & Escrow' },
                     { id: 'c-new', icon: 'fa-plus', text: 'Nová poptávka', hidden: true }
                 ],
@@ -422,29 +420,26 @@
         window.initApp = function(role, name) {
             const config = appStructure[role];
 
-            // Nastavení profilu z databáze
+            // Údaje o uživateli
             document.getElementById('user-name').innerText = name;
             document.getElementById('user-role-label').innerText = config.roleLabel;
-            document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${config.seed}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
+            document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/\s+/g, '')}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
             
             document.getElementById('header-cta-container').innerHTML = config.cta;
 
-            // Vygenerování levého menu
+            // Navigace
             const navHtml = config.nav.filter(item => !item.hidden).map(item => `
                 <button onclick="window.switchAppTab('${item.id}', '${item.text}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                    <div class="relative">
-                        <i class="fa-solid ${item.icon} w-5 text-center"></i>
-                        ${item.badge ? '<span class="absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>' : ''}
-                    </div>
+                    <i class="fa-solid ${item.icon} w-5 text-center"></i>
                     ${item.text}
                 </button>
             `).join('');
             document.getElementById('main-nav').innerHTML = navHtml;
 
-            // Vykreslení HTML kódu Nástěnek
+            // Vykreslení HTML panelů
             document.getElementById('views-container').innerHTML = role === 'customer' ? window.getCustomerHTML(name) : window.getCraftsmanHTML();
             
-            // Přepneme na úvodní záložku
+            // Otevřít první panel
             window.switchAppTab(config.nav[0].id, config.nav[0].text);
         };
 
@@ -471,113 +466,41 @@
             if(title) document.getElementById('header-title').innerText = title;
         };
 
-        // HTML PRO ZÁKAZNÍKA
+        // --- PRÁZDNÉ HTML PRO ZÁKAZNÍKA ---
         window.getCustomerHTML = function(name) {
             let firstName = name.split(' ')[0] || name;
             return `
                 <div id="view-c-dashboard" class="view-section hidden">
                     <div class="mb-10">
                         <h2 class="text-3xl font-extrabold mb-2">Vítejte doma, ${firstName} 👋</h2>
-                        <p class="text-slate-500 dark:text-slate-400">Máte jednu aktivní poptávku, která vyžaduje vaši pozornost.</p>
+                        <p class="text-slate-500 dark:text-slate-400">Tady se objeví vaše aktivní poptávky, jakmile nějakou vytvoříte.</p>
                     </div>
-
-                    <div class="grid xl:grid-cols-3 gap-8">
-                        <div class="xl:col-span-2 space-y-6">
-                            <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
-                                <div class="flex justify-between items-start mb-6">
-                                    <div>
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <span class="text-fixit-500 font-bold text-sm uppercase tracking-widest">Instalatérství</span>
-                                            <span id="status-badge" class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Vyberte nabídku</span>
-                                        </div>
-                                        <h4 class="text-2xl font-extrabold">Oprava protékajícího dřezu</h4>
-                                    </div>
-                                    <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=200&h=200" class="w-16 h-16 rounded-xl object-cover border border-slate-100">
-                                </div>
-                                <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">Voda kape ze sifonu pod kuchyňskou linkou. Zkoušel jsem to dotáhnout, ale nepomohlo to. Potřebuji přetěsnit nebo vyměnit sifon.</p>
-                                
-                                <div id="offers-section" class="border-t border-slate-100 dark:border-slate-700 pt-6">
-                                    <h5 class="font-bold text-sm text-slate-500 uppercase tracking-widest mb-4">Obdržené nabídky (2)</h5>
-                                    <div class="bg-fixit-50 dark:bg-fixit-500/10 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-3 border border-fixit-500">
-                                        <div class="flex items-center gap-4 w-full sm:w-auto">
-                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karel&backgroundColor=0f172a" class="w-12 h-12 rounded-full border-2 border-white">
-                                            <div>
-                                                <p class="font-extrabold flex items-center gap-2">Karel V. <span class="bg-white dark:bg-slate-800 text-yellow-500 px-2 py-0.5 rounded-md text-xs"><i class="fa-solid fa-star"></i> 4.9</span></p>
-                                                <p class="text-sm text-slate-500 dark:text-slate-400">Může dorazit: <strong class="text-fixit-600 dark:text-fixit-400">Dnes v 15:30</strong></p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                            <div class="text-right">
-                                                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Cena celkem</p>
-                                                <p class="font-black text-xl">1 200 Kč</p>
-                                            </div>
-                                            <button onclick="window.payEscrow()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3 rounded-xl font-bold shadow-md transition hover:scale-105 whitespace-nowrap">Zaplatit do úschovy</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="paid-section" class="hidden border-t border-slate-100 dark:border-slate-700 pt-6 text-center">
-                                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-check"></i></div>
-                                    <h4 class="text-xl font-extrabold mb-2">Částka 1 200 Kč je v bezpečí Escrow</h4>
-                                    <p class="text-slate-500 mb-6">Řemeslník Karel V. je na cestě. Až práci dokončí, potvrďte to zde.</p>
-                                    <div class="flex gap-4 justify-center">
-                                        <button onclick="window.switchAppTab('c-messages', 'Zprávy')" class="bg-slate-100 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Napsat zprávu</button>
-                                        <button class="bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition shadow-lg"><i class="fa-solid fa-check-double"></i> Potvrdit hotovou práci</button>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-12 border border-slate-200 dark:border-slate-700 shadow-sm text-center max-w-3xl mx-auto">
+                        <div class="w-20 h-20 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
+                            <i class="fa-solid fa-clipboard-list"></i>
                         </div>
-                        <div class="space-y-6">
-                            <div class="bg-fixit-dark text-white p-8 rounded-3xl relative overflow-hidden shadow-xl">
-                                <i class="fa-solid fa-shield-halved absolute -bottom-4 -right-4 text-8xl text-fixit-500 opacity-20"></i>
-                                <h3 class="font-extrabold text-xl mb-2 relative z-10 text-fixit-500">100% Escrow Ochrana</h3>
-                                <p class="text-slate-300 text-sm leading-relaxed relative z-10 mb-4">Peníze strhneme z vaší karty, ale řemeslníkovi je pošleme až ve chvíli, kdy kliknete na "Potvrdit hotovou práci".</p>
-                                <button onclick="window.switchAppTab('c-payments', 'Platby & Escrow')" class="w-full bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-xl font-bold text-sm transition">Zobrazit moje platby</button>
-                            </div>
-                        </div>
+                        <h3 class="text-2xl font-extrabold mb-2">Zatím nemáte žádnou poptávku</h3>
+                        <p class="text-slate-500 mb-8">Potřebujete s něčím pomoct? Náš AI asistent Bořek je připraven vytvořit profi zadání.</p>
+                        <button onclick="window.switchAppTab('c-new', 'Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg hover:scale-105">Vytvořit novou poptávku</button>
                     </div>
                 </div>
 
                 <div id="view-c-requests" class="view-section hidden">
                     <h2 class="text-3xl font-extrabold mb-6">Moje poptávky</h2>
                     <div id="my-requests-list" class="space-y-4">
-                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
-                            <div>
-                                <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
-                                <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
-                                <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                        <div id="empty-requests-msg" class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl text-slate-500">
+                            <i class="fa-solid fa-folder-open text-4xl mb-4 text-slate-300 dark:text-slate-600"></i>
+                            <p class="font-bold">Zatím zde nic není.</p>
+                            <p class="text-sm">Vaše historie poptávek se zobrazí zde.</p>
                         </div>
                     </div>
                 </div>
 
                 <div id="view-c-messages" class="view-section hidden h-[calc(100vh-160px)]">
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 h-full flex overflow-hidden shadow-sm">
-                        <div class="w-1/3 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-2">
-                            <div class="bg-white dark:bg-slate-700 p-3 rounded-xl shadow-sm border-l-4 border-fixit-500 cursor-pointer">
-                                <div class="flex justify-between items-center mb-1">
-                                    <p class="font-bold text-sm">Karel V.</p><span class="text-xs text-slate-400">10:42</span>
-                                </div>
-                                <p class="text-xs text-slate-500 truncate text-fixit-600 dark:text-fixit-400 font-medium">Budu tam přesně v 15:30.</p>
-                            </div>
-                        </div>
-                        <div class="flex-1 flex flex-col">
-                            <div class="h-16 border-b border-slate-200 dark:border-slate-700 flex items-center px-6 gap-4 bg-white dark:bg-slate-800">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karel&backgroundColor=0f172a" class="w-10 h-10 rounded-full">
-                                <div><p class="font-bold leading-tight">Karel V.</p><p class="text-xs text-green-500 font-medium">● Online</p></div>
-                            </div>
-                            <div class="flex-1 p-6 bg-slate-50 dark:bg-slate-900/50 overflow-y-auto space-y-4">
-                                <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none w-max max-w-[70%] border border-slate-200 dark:border-slate-700 shadow-sm text-sm">
-                                    Dobrý den, děkuji za přijetí nabídky. Budu tam v 15:30.
-                                </div>
-                            </div>
-                            <div class="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex gap-2">
-                                <input type="text" placeholder="Napište zprávu..." class="flex-1 bg-slate-100 dark:bg-slate-900 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fixit-500 border border-transparent dark:border-slate-700">
-                                <button class="w-10 h-10 bg-fixit-500 text-white rounded-full flex items-center justify-center hover:bg-fixit-600 transition"><i class="fa-solid fa-paper-plane"></i></button>
-                            </div>
-                        </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 h-full flex flex-col items-center justify-center shadow-sm text-slate-500">
+                        <i class="fa-solid fa-comment-slash text-5xl mb-4 text-slate-300 dark:text-slate-600"></i>
+                        <h3 class="font-bold text-xl mb-1 text-slate-700 dark:text-slate-300">Schránka je prázdná</h3>
+                        <p class="text-sm">Jakmile vám řemeslník odepíše, zprávy najdete tady.</p>
                     </div>
                 </div>
 
@@ -587,14 +510,18 @@
                         <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
                             <i class="fa-brands fa-cc-visa absolute -right-4 -top-4 text-8xl opacity-10"></i>
                             <p class="text-slate-400 font-bold tracking-widest uppercase text-xs mb-2">Moje platební karta</p>
-                            <p class="font-mono text-xl tracking-widest mb-6">**** **** **** 4242</p>
-                            <button class="text-sm font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">Změnit kartu</button>
+                            <p class="font-mono text-xl tracking-widest mb-6 opacity-50">Zatím nepřidána</p>
+                            <button class="text-sm font-bold bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-lg transition border border-white/20">Přidat platební metodu</button>
                         </div>
                         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-sm">
                             <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-2">Aktuálně v úschově (Escrow)</p>
                             <p class="text-4xl font-extrabold text-fixit-500 mb-2" id="escrow-balance">0 Kč</p>
                             <p class="text-sm text-slate-500"><i class="fa-solid fa-lock text-green-500"></i> Prostředky jsou chráněny do potvrzení práce.</p>
                         </div>
+                    </div>
+                    <h3 class="font-bold text-lg mb-4">Historie transakcí</h3>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
+                        Zatím neproběhly žádné transakce.
                     </div>
                 </div>
 
@@ -619,6 +546,7 @@
             `;
         };
 
+        // --- PRÁZDNÉ HTML PRO ŘEMESLNÍKA ---
         window.getCraftsmanHTML = function() {
             return `
                 <div id="view-r-market" class="view-section hidden">
@@ -628,49 +556,36 @@
                             <p class="text-slate-500 dark:text-slate-400">Brno a okolí do 15 km.</p>
                         </div>
                     </div>
-                    <div class="grid lg:grid-cols-2 gap-6">
-                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-shadow cursor-pointer group">
-                            <div class="flex justify-between items-start mb-4">
-                                <span class="bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Elektrikář</span>
-                                <span class="text-sm font-bold text-slate-400"><i class="fa-solid fa-location-dot"></i> Královo Pole (3.2 km)</span>
-                            </div>
-                            <h4 class="text-xl font-extrabold mb-2 group-hover:text-fixit-500 transition-colors">Výměna vyhořelých zásuvek</h4>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6">Při zapojení rychlovarné konvice to zajiskřilo a dvě zásuvky v kuchyni nefungují.</p>
-                            <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
-                                <div><p class="text-xs text-slate-500 font-bold">Odhad AI</p><p class="font-black text-slate-900 dark:text-white">800 - 1500 Kč</p></div>
-                                <button class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-xl font-bold transition hover:scale-105 shadow-md">Dát nabídku</button>
-                            </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-12 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+                        <div class="w-20 h-20 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
+                            <i class="fa-solid fa-mug-hot"></i>
                         </div>
+                        <h3 class="text-2xl font-extrabold mb-2">Žádné nové zakázky</h3>
+                        <p class="text-slate-500">Momentálně ve vašem okolí nikdo nic nepotřebuje. Dáme vám vědět, jakmile se objeví nová poptávka.</p>
                     </div>
                 </div>
-                <div id="view-r-jobs" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Moje práce</h2></div>
-                <div id="view-r-messages" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Zprávy</h2></div>
-                <div id="view-r-earnings" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Výdělky</h2></div>
+                <div id="view-r-jobs" class="view-section hidden">
+                    <h2 class="text-3xl font-extrabold mb-6">Moje práce</h2>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
+                        Zatím nemáte přiřazené žádné zakázky.
+                    </div>
+                </div>
+                <div id="view-r-messages" class="view-section hidden">
+                    <h2 class="text-3xl font-extrabold mb-6">Zprávy</h2>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
+                        Schránka je prázdná.
+                    </div>
+                </div>
+                <div id="view-r-earnings" class="view-section hidden">
+                    <h2 class="text-3xl font-extrabold mb-6">Výdělky</h2>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
+                        Zatím neevidujeme žádné výdělky.
+                    </div>
+                </div>
             `;
         };
 
-        window.payEscrow = function() {
-            const modal = document.getElementById('modal-payment-success');
-            const box = document.getElementById('modal-payment-box');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            box.classList.remove('scale-90');
-            box.classList.add('scale-100');
-
-            document.getElementById('offers-section').classList.add('hidden');
-            document.getElementById('paid-section').classList.remove('hidden');
-            document.getElementById('status-badge').innerText = "Oprava probíhá";
-            document.getElementById('status-badge').className = "bg-fixit-100 text-fixit-600 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest";
-            document.getElementById('escrow-balance').innerText = "1 200 Kč";
-        };
-
-        window.closePaymentModal = function() {
-            const modal = document.getElementById('modal-payment-success');
-            const box = document.getElementById('modal-payment-box');
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            box.classList.remove('scale-100');
-            box.classList.add('scale-90');
-        };
-
+        // --- SIMULACE VYTVOŘENÍ NOVÉ POPTÁVKY ---
         window.simulateAI = function() {
             const input = document.getElementById('new-request-input');
             const text = input.value.trim();
@@ -701,7 +616,10 @@
                 `;
                 
                 const requestsList = document.getElementById('my-requests-list');
+                const emptyMsg = document.getElementById('empty-requests-msg');
+                
                 if (requestsList) {
+                    if (emptyMsg) emptyMsg.style.display = 'none'; // Skryje prázdný stav
                     requestsList.insertAdjacentHTML('afterbegin', newRequestHTML);
                     setTimeout(() => { requestsList.firstElementChild.classList.remove('animate-pulse'); }, 2000);
                 }
