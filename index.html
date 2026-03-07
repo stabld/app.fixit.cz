@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixit App | Zákazník</title>
+    <title>Fixit App | Klientský a Řemeslnický portál</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,10 @@
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
-                        fixit: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', dark: '#020617', slate: '#0f172a' }
+                        fixit: { 
+                            50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 
+                            600: '#d97706', 700: '#b45309', dark: '#020617', slate: '#0f172a'
+                        }
                     }
                 }
             }
@@ -45,17 +48,55 @@
 <body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white h-screen overflow-hidden relative">
 
     <div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500">
-        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 text-center">
-            <div class="flex justify-center items-center gap-3 mb-8">
-                <div class="w-12 h-12 bg-fixit-500 rounded-xl flex items-center justify-center text-white"><i class="fa-solid fa-house text-2xl"></i></div>
-                <span class="font-extrabold text-3xl tracking-tighter dark:text-white">Fixit</span>
-            </div>
-            <h2 class="text-2xl font-extrabold mb-2">Vítejte doma</h2>
-            <p class="text-slate-500 mb-8">Zákaznický portál pro vaše opravy.</p>
+        <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12">
             
-            <button onclick="login()" id="btn-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl transition shadow-lg flex justify-center items-center gap-2">
-                Přihlásit se jako Zákazník
-            </button>
+            <div class="flex justify-center items-center gap-3 mb-8">
+                <div class="w-14 h-14 relative flex items-center justify-center">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
+                        <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
+                        <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
+                    </svg>
+                </div>
+                <span class="font-extrabold text-4xl tracking-tighter text-slate-900 dark:text-white">Fixit</span>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Vítejte v aplikaci</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <button onclick="login('customer', this)" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                    <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm">
+                        <i class="fa-solid fa-house-chimney-window"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptávající</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Potřebuji opravit něco doma a hledám ověřeného profíka.</p>
+                    </div>
+                    <div class="loading-overlay absolute inset-0 bg-white/90 dark:bg-slate-800/90 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-fixit-500 mb-2"></i>
+                        <span class="font-bold text-sm text-fixit-600">Přihlašuji...</span>
+                    </div>
+                </button>
+
+                <button onclick="login('craftsman', this)" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                    <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm">
+                        <i class="fa-solid fa-toolbox"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako řemeslník</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profík a chci získat přístup k novým zakázkám v okolí.</p>
+                    </div>
+                    <div class="loading-overlay absolute inset-0 bg-white/90 dark:bg-slate-800/90 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-fixit-500 mb-2"></i>
+                        <span class="font-bold text-sm text-fixit-600">Přihlašuji...</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <a href="#" class="text-sm font-bold text-slate-400 hover:text-fixit-500 transition">Zpět na hlavní web</a>
+            </div>
         </div>
     </div>
 
@@ -64,32 +105,18 @@
         <aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-shrink-0 z-50">
             <div>
                 <div class="h-20 flex items-center px-8 border-b border-slate-200 dark:border-slate-800">
-                    <svg width="32" height="32" viewBox="0 0 100 100" fill="none" class="mr-3">
-                        <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
-                        <circle cx="50" cy="48" r="16" fill="white"/>
-                        <path d="M40 58 L30 68 L45 64 Z" fill="white"/>
-                    </svg>
+                    <div class="w-10 h-10 relative flex items-center justify-center mr-3">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
+                            <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
+                            <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
+                            <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
+                        </svg>
+                    </div>
                     <span class="font-extrabold text-2xl tracking-tighter dark:text-white">Fixit</span>
+                    <span class="ml-2 px-2 py-0.5 bg-fixit-500/10 text-fixit-500 text-[10px] font-black uppercase tracking-widest rounded-full">App</span>
                 </div>
 
-                <nav class="p-4 space-y-2 mt-4">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                        <i class="fa-solid fa-house w-5 text-center"></i> Nástěnka
-                    </button>
-                    <button onclick="switchTab('requests')" id="nav-requests" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                        <i class="fa-solid fa-list-check w-5 text-center"></i> Moje poptávky
-                    </button>
-                    <button onclick="switchTab('messages')" id="nav-messages" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                        <div class="relative">
-                            <i class="fa-solid fa-comment-dots w-5 text-center"></i>
-                            <span class="absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
-                        </div>
-                        Zprávy
-                    </button>
-                    <button onclick="switchTab('payments')" id="nav-payments" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
-                        <i class="fa-solid fa-shield-halved w-5 text-center"></i> Platby & Escrow
-                    </button>
-                </nav>
+                <nav class="p-4 space-y-2 mt-4" id="main-nav"></nav>
             </div>
 
             <div class="p-4 border-t border-slate-200 dark:border-slate-800">
@@ -98,11 +125,11 @@
                 </button>
                 <div class="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                     <div class="w-10 h-10 rounded-full bg-fixit-100 overflow-hidden shrink-0">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=f59e0b" alt="User">
+                        <img id="user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=f59e0b" alt="User">
                     </div>
                     <div class="text-left truncate">
-                        <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight">Jan Novák</p>
-                        <p class="text-xs text-slate-500 font-medium">Zákazník</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" id="user-name">Jan Novák</p>
+                        <p class="text-xs text-slate-500 font-medium" id="user-role-label">Zákazník</p>
                     </div>
                 </div>
             </div>
@@ -116,15 +143,152 @@
                         <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden text-xl"></i>
                         <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden text-xl"></i>
                     </button>
-                    <button onclick="switchTab('new-request')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg transition hover:scale-105 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Nová poptávka
-                    </button>
+                    <div id="header-cta-container"></div>
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-8 hide-scroll pb-32 relative">
+            <div class="flex-1 overflow-y-auto p-8 hide-scroll pb-32 relative" id="views-container">
+                </div>
+        </main>
+    </div>
 
-                <div id="view-dashboard" class="view-section fade-enter fade-enter-active">
+    <div id="modal-payment-success" class="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-payment-box">
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-2xl font-extrabold mb-2">Peníze jsou v úschově!</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Částka 1 200 Kč byla rezervována z vaší karty. Řemeslník Karel V. dostal zprávu, že může vyrazit.</p>
+            <button onclick="closePaymentModal()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-fixit-500 transition">Zpět na Nástěnku</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. PŘIHLÁŠENÍ ---
+        let currentRole = null;
+
+        function login(role, buttonElement) {
+            // Zobraz loading animaci na kliknutém tlačítku
+            const overlay = buttonElement.querySelector('.loading-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                const authScreen = document.getElementById('auth-screen');
+                const mainApp = document.getElementById('main-app');
+                
+                authScreen.style.opacity = '0';
+                setTimeout(() => {
+                    authScreen.classList.add('hidden');
+                    
+                    // Nastavení aplikace podle zvolené role
+                    initApp(role);
+                    
+                    mainApp.classList.remove('hidden');
+                    void mainApp.offsetWidth; // Reflow hack
+                    mainApp.style.opacity = '1';
+                    
+                    // Schováme loading pro případ odhlášení
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                }, 500);
+            }, 1000);
+        }
+
+        function logout() {
+            window.location.reload(); // Pro ukázku stačí reload
+        }
+
+        // --- 2. INICIALIZACE APLIKACE (Menu a Obsah) ---
+        const appStructure = {
+            customer: {
+                nav: [
+                    { id: 'c-dashboard', icon: 'fa-house', text: 'Nástěnka' },
+                    { id: 'c-requests', icon: 'fa-list-check', text: 'Moje poptávky' },
+                    { id: 'c-messages', icon: 'fa-comment-dots', text: 'Zprávy', badge: true },
+                    { id: 'c-payments', icon: 'fa-shield-halved', text: 'Platby & Escrow' },
+                    { id: 'c-new', icon: 'fa-plus', text: 'Nová poptávka', hidden: true }
+                ],
+                profile: { name: 'Jan Novák', label: 'Zákazník', seed: 'Felix' },
+                cta: `<button onclick="switchTab('c-new', 'Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg transition hover:scale-105 text-sm flex items-center gap-2"><i class="fa-solid fa-plus"></i> Nová poptávka</button>`
+            },
+            craftsman: {
+                nav: [
+                    { id: 'r-market', icon: 'fa-map-location-dot', text: 'Tržiště zakázek' },
+                    { id: 'r-jobs', icon: 'fa-hammer', text: 'Moje práce' },
+                    { id: 'r-messages', icon: 'fa-comment-dots', text: 'Zprávy' },
+                    { id: 'r-earnings', icon: 'fa-wallet', text: 'Výdělky' }
+                ],
+                profile: { name: 'Karel (Instalatér)', label: 'Řemeslník', seed: 'Karel' },
+                cta: `<div class="bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-toggle-on"></i> Jsem online</div>`
+            }
+        };
+
+        function initApp(role) {
+            currentRole = role;
+            const config = appStructure[role];
+
+            // 1. Aktualizace Profilu
+            document.getElementById('user-name').innerText = config.profile.name;
+            document.getElementById('user-role-label').innerText = config.profile.label;
+            document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${config.profile.seed}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
+            
+            // 2. Aktualizace CTA v hlavičce
+            document.getElementById('header-cta-container').innerHTML = config.cta;
+
+            // 3. Vykreslení Menu
+            const navHtml = config.nav.filter(item => !item.hidden).map(item => `
+                <button onclick="switchTab('${item.id}', '${item.text}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    <div class="relative">
+                        <i class="fa-solid ${item.icon} w-5 text-center"></i>
+                        ${item.badge ? '<span class="absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>' : ''}
+                    </div>
+                    ${item.text}
+                </button>
+            `).join('');
+            document.getElementById('main-nav').innerHTML = navHtml;
+
+            // 4. Vykreslení a přepnutí obsahu
+            document.getElementById('views-container').innerHTML = role === 'customer' ? getCustomerHTML() : getCraftsmanHTML();
+            
+            // Přepneme na první záložku podle role
+            const firstTabId = config.nav[0].id;
+            switchTab(firstTabId, config.nav[0].text);
+        }
+
+        function switchTab(tabId, title) {
+            // Skrýt všechny pohledy
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-enter-active');
+            });
+            
+            // Odoznačit všechny položky menu
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            // Zobrazit vybraný pohled
+            const activeView = document.getElementById(`view-${tabId}`);
+            if(activeView) {
+                activeView.classList.remove('hidden');
+                setTimeout(() => activeView.classList.add('fade-enter-active'), 10);
+            }
+            
+            // Zvýraznit menu
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+                activeNav.classList.remove('text-slate-600', 'dark:text-slate-400');
+            }
+
+            // Změnit nadpis
+            if(title) document.getElementById('header-title').innerText = title;
+        }
+
+        // --- 3. HTML ŠABLONY (Pro ukázku funkčnosti) ---
+        function getCustomerHTML() {
+            return `
+                <div id="view-c-dashboard" class="view-section hidden">
                     <div class="mb-10">
                         <h2 class="text-3xl font-extrabold mb-2">Vítejte doma, Jane 👋</h2>
                         <p class="text-slate-500 dark:text-slate-400">Máte jednu aktivní poptávku, která vyžaduje vaši pozornost.</p>
@@ -134,7 +298,6 @@
                         <div class="xl:col-span-2 space-y-6">
                             <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
                                 <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
-                                
                                 <div class="flex justify-between items-start mb-6">
                                     <div>
                                         <div class="flex items-center gap-3 mb-2">
@@ -166,23 +329,6 @@
                                             <button onclick="payEscrow()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3 rounded-xl font-bold shadow-md transition hover:scale-105 whitespace-nowrap">Zaplatit do úschovy</button>
                                         </div>
                                     </div>
-
-                                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-200 dark:border-slate-700">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xl font-bold">P</div>
-                                            <div>
-                                                <p class="font-extrabold">Petr S. <span class="text-yellow-500 ml-1 text-sm"><i class="fa-solid fa-star"></i> 4.7</span></p>
-                                                <p class="text-sm text-slate-500">Může dorazit: Zítra dopoledne</p>
-                                            </div>
-                                        </div>
-                                        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                                            <div class="text-right">
-                                                <p class="text-xs text-slate-500 font-bold">Cena celkem</p>
-                                                <p class="font-black text-xl text-slate-600 dark:text-slate-300">950 Kč</p>
-                                            </div>
-                                            <button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-6 py-3 rounded-xl font-bold transition hover:bg-slate-50 dark:hover:bg-slate-700">Detail</button>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <div id="paid-section" class="hidden border-t border-slate-100 dark:border-slate-700 pt-6 text-center">
@@ -190,11 +336,10 @@
                                     <h4 class="text-xl font-extrabold mb-2">Částka 1 200 Kč je v bezpečí Escrow</h4>
                                     <p class="text-slate-500 mb-6">Řemeslník Karel V. je na cestě. Až práci dokončí, potvrďte to zde.</p>
                                     <div class="flex gap-4 justify-center">
-                                        <button onclick="switchTab('messages')" class="bg-slate-100 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Napsat zprávu</button>
+                                        <button onclick="switchTab('c-messages', 'Zprávy')" class="bg-slate-100 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Napsat zprávu</button>
                                         <button class="bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition shadow-lg"><i class="fa-solid fa-check-double"></i> Potvrdit hotovou práci</button>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
 
@@ -203,76 +348,55 @@
                                 <i class="fa-solid fa-shield-halved absolute -bottom-4 -right-4 text-8xl text-fixit-500 opacity-20"></i>
                                 <h3 class="font-extrabold text-xl mb-2 relative z-10 text-fixit-500">100% Escrow Ochrana</h3>
                                 <p class="text-slate-300 text-sm leading-relaxed relative z-10 mb-4">Peníze strhneme z vaší karty, ale řemeslníkovi je pošleme až ve chvíli, kdy kliknete na "Potvrdit hotovou práci".</p>
-                                <button onclick="switchTab('payments')" class="w-full bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-xl font-bold text-sm transition">Zobrazit moje platby</button>
+                                <button onclick="switchTab('c-payments', 'Platby & Escrow')" class="w-full bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-xl font-bold text-sm transition">Zobrazit moje platby</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-requests" class="view-section hidden">
+                <div id="view-c-requests" class="view-section hidden">
                     <h2 class="text-3xl font-extrabold mb-6">Moje poptávky</h2>
-                    <div class="space-y-4">
-                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
-                            <div>
-                                <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
-                                <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
-                                <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
+                        <div>
+                            <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
+                            <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
+                            <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
                         </div>
-                        <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between opacity-70">
-                            <div>
-                                <span class="bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Dokončeno</span>
-                                <span class="font-bold text-lg line-through decoration-2 decoration-slate-300">Montáž TV na zeď</span>
-                                <p class="text-sm text-slate-500 mt-1">Dokončeno: 14. Března • Řemeslník: Tomáš K.</p>
-                            </div>
-                            <div class="text-yellow-500"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-400"></i>
                     </div>
                 </div>
 
-                <div id="view-messages" class="view-section hidden h-[calc(100vh-160px)]">
+                <div id="view-c-messages" class="view-section hidden h-[calc(100vh-160px)]">
                     <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 h-full flex overflow-hidden shadow-sm">
-                        <div class="w-1/3 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                            <div class="p-4 border-b border-slate-200 dark:border-slate-700">
-                                <h3 class="font-bold text-lg">Zprávy</h3>
-                            </div>
-                            <div class="p-2">
-                                <div class="bg-white dark:bg-slate-700 p-3 rounded-xl shadow-sm border-l-4 border-fixit-500 cursor-pointer">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <p class="font-bold text-sm">Karel V. (Instalatér)</p>
-                                        <span class="text-xs text-slate-400">10:42</span>
-                                    </div>
-                                    <p class="text-xs text-slate-500 truncate text-fixit-600 dark:text-fixit-400 font-medium">Budu tam přesně v 15:30. Mám si vzít...</p>
+                        <div class="w-1/3 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-2">
+                            <div class="bg-white dark:bg-slate-700 p-3 rounded-xl shadow-sm border-l-4 border-fixit-500 cursor-pointer">
+                                <div class="flex justify-between items-center mb-1">
+                                    <p class="font-bold text-sm">Karel V.</p>
+                                    <span class="text-xs text-slate-400">10:42</span>
                                 </div>
+                                <p class="text-xs text-slate-500 truncate text-fixit-600 dark:text-fixit-400 font-medium">Budu tam přesně v 15:30.</p>
                             </div>
                         </div>
                         <div class="flex-1 flex flex-col">
                             <div class="h-16 border-b border-slate-200 dark:border-slate-700 flex items-center px-6 gap-4 bg-white dark:bg-slate-800">
                                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karel&backgroundColor=0f172a" class="w-10 h-10 rounded-full">
-                                <div>
-                                    <p class="font-bold leading-tight">Karel V.</p>
-                                    <p class="text-xs text-green-500 font-medium">● Online</p>
-                                </div>
+                                <div><p class="font-bold leading-tight">Karel V.</p><p class="text-xs text-green-500 font-medium">● Online</p></div>
                             </div>
                             <div class="flex-1 p-6 bg-slate-50 dark:bg-slate-900/50 overflow-y-auto space-y-4">
                                 <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none w-max max-w-[70%] border border-slate-200 dark:border-slate-700 shadow-sm text-sm">
-                                    Dobrý den, děkuji za přijetí nabídky. Budu tam přesně v 15:30. Mám si vzít vlastní kýbl na tu vyteklou vodu?
+                                    Dobrý den, děkuji za přijetí nabídky. Budu tam v 15:30.
                                 </div>
                             </div>
-                            <div class="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-                                <div class="flex gap-2">
-                                    <input type="text" placeholder="Napište zprávu..." class="flex-1 bg-slate-100 dark:bg-slate-900 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fixit-500 border border-transparent dark:border-slate-700">
-                                    <button class="w-10 h-10 bg-fixit-500 text-white rounded-full flex items-center justify-center hover:bg-fixit-600 transition"><i class="fa-solid fa-paper-plane"></i></button>
-                                </div>
+                            <div class="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex gap-2">
+                                <input type="text" placeholder="Napište zprávu..." class="flex-1 bg-slate-100 dark:bg-slate-900 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fixit-500 border border-transparent dark:border-slate-700">
+                                <button class="w-10 h-10 bg-fixit-500 text-white rounded-full flex items-center justify-center hover:bg-fixit-600 transition"><i class="fa-solid fa-paper-plane"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-payments" class="view-section hidden">
+                <div id="view-c-payments" class="view-section hidden">
                     <h2 class="text-3xl font-extrabold mb-6">Platby & Escrow úschova</h2>
-                    
                     <div class="grid md:grid-cols-2 gap-6 mb-8">
                         <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
                             <i class="fa-brands fa-cc-visa absolute -right-4 -top-4 text-8xl opacity-10"></i>
@@ -280,158 +404,78 @@
                             <p class="font-mono text-xl tracking-widest mb-6">**** **** **** 4242</p>
                             <button class="text-sm font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">Změnit kartu</button>
                         </div>
-
                         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-sm">
                             <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-2">Aktuálně v úschově (Escrow)</p>
                             <p class="text-4xl font-extrabold text-fixit-500 mb-2" id="escrow-balance">0 Kč</p>
-                            <p class="text-sm text-slate-500"><i class="fa-solid fa-lock text-green-500"></i> Vaše prostředky jsou chráněny do potvrzení práce.</p>
+                            <p class="text-sm text-slate-500"><i class="fa-solid fa-lock text-green-500"></i> Prostředky jsou chráněny do potvrzení práce.</p>
                         </div>
-                    </div>
-
-                    <h3 class="font-bold text-lg mb-4">Historie transakcí</h3>
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 uppercase tracking-wider">
-                                <tr>
-                                    <th class="p-4 font-bold">Datum</th>
-                                    <th class="p-4 font-bold">Popis</th>
-                                    <th class="p-4 font-bold">Stav</th>
-                                    <th class="p-4 font-bold text-right">Částka</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-t border-slate-100 dark:border-slate-700">
-                                    <td class="p-4 text-slate-500">14. 03. 2026</td>
-                                    <td class="p-4 font-bold">Montáž TV na zeď (Tomáš K.)</td>
-                                    <td class="p-4"><span class="text-green-500 bg-green-50 dark:bg-green-500/10 px-2 py-1 rounded text-xs font-bold">Uvolněno</span></td>
-                                    <td class="p-4 text-right font-bold">- 1 500 Kč</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
-                <div id="view-new-request" class="view-section hidden max-w-3xl mx-auto">
+                <div id="view-c-new" class="view-section hidden max-w-3xl mx-auto">
                     <div class="text-center mb-10">
                         <div class="w-16 h-16 bg-fixit-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg"><i class="fa-solid fa-hard-hat"></i></div>
                         <h2 class="text-3xl font-extrabold mb-2">Asistent Bořek</h2>
                         <p class="text-slate-500">Popište mi, co se rozbilo. Připravím profi zadání.</p>
                     </div>
-
                     <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-xl">
                         <div class="space-y-6">
                             <div>
                                 <label class="font-bold text-slate-700 dark:text-slate-300 block mb-2">Co přesně potřebujete opravit?</label>
-                                <textarea rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Přestala mi svítit polovina bytu, jističe nejdou nahodit..."></textarea>
+                                <textarea rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Přestala mi svítit polovina bytu..."></textarea>
                             </div>
-                            <div>
-                                <label class="font-bold text-slate-700 dark:text-slate-300 block mb-2">Přidat fotku (volitelné)</label>
-                                <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:border-fixit-500 transition cursor-pointer bg-slate-50 dark:bg-slate-900/50">
-                                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
-                                    <p class="text-sm font-bold text-slate-500">Klikněte pro nahrání fotky</p>
-                                </div>
-                            </div>
-                            <button onclick="simulateAI()" id="btn-ai-generate" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-4 rounded-xl text-lg transition-all shadow-md">
+                            <button onclick="simulateAI()" id="btn-ai-generate" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 font-black py-4 rounded-xl text-lg transition-all shadow-md">
                                 Vygenerovat poptávku
                             </button>
                         </div>
                     </div>
                 </div>
+            `;
+        }
 
-            </div>
-        </main>
-    </div>
-
-    <div id="modal-payment-success" class="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-payment-box">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h3 class="text-2xl font-extrabold mb-2">Peníze jsou v úschově!</h3>
-            <p class="text-slate-500 mb-8 leading-relaxed">Částka 1 200 Kč byla rezervována z vaší karty. Řemeslník Karel V. dostal zprávu, že může vyrazit.</p>
-            <button onclick="closePaymentModal()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-fixit-500 transition">Zpět na Nástěnku</button>
-        </div>
-    </div>
-
-    <script>
-        // --- 1. PŘIHLÁŠENÍ (Simulace) ---
-        function login() {
-            const btn = document.getElementById('btn-login');
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Přihlašuji...';
-            
-            setTimeout(() => {
-                const authScreen = document.getElementById('auth-screen');
-                const mainApp = document.getElementById('main-app');
+        function getCraftsmanHTML() {
+            return `
+                <div id="view-r-market" class="view-section hidden">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-extrabold mb-2">Tržiště zakázek 🛠️</h2>
+                            <p class="text-slate-500 dark:text-slate-400">Brno a okolí do 15 km. Tyto poptávky čekají na vaši nabídku.</p>
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-shadow cursor-pointer group">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Elektrikář</span>
+                                <span class="text-sm font-bold text-slate-400"><i class="fa-solid fa-location-dot"></i> Královo Pole (3.2 km)</span>
+                            </div>
+                            <h4 class="text-xl font-extrabold mb-2 group-hover:text-fixit-500 transition-colors">Výměna vyhořelých zásuvek</h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6">Při zapojení rychlovarné konvice to zajiskřilo a dvě zásuvky v kuchyni nefungují.</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+                                <div><p class="text-xs text-slate-500 font-bold">Odhad AI</p><p class="font-black text-slate-900 dark:text-white">800 - 1500 Kč</p></div>
+                                <button class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-xl font-bold transition hover:scale-105 shadow-md">Dát nabídku</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 
-                authScreen.style.opacity = '0';
-                setTimeout(() => {
-                    authScreen.classList.add('hidden');
-                    mainApp.classList.remove('hidden');
-                    // Reflow hack for animation
-                    void mainApp.offsetWidth;
-                    mainApp.style.opacity = '1';
-                }, 500);
-            }, 800);
+                <div id="view-r-jobs" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Moje práce</h2></div>
+                <div id="view-r-messages" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Zprávy</h2></div>
+                <div id="view-r-earnings" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Výdělky</h2></div>
+            `;
         }
 
-        function logout() {
-            window.location.reload(); // Pro ukázku stačí reload
-        }
-
-        // --- 2. PŘEPÍNÁNÍ ZÁLOŽEK (Pohledů) ---
-        const viewTitles = {
-            'dashboard': 'Nástěnka',
-            'requests': 'Moje poptávky',
-            'messages': 'Zprávy',
-            'payments': 'Platby & Escrow',
-            'new-request': 'Nová poptávka'
-        };
-
-        function switchTab(tabId) {
-            // Skrýt všechny pohledy
-            document.querySelectorAll('.view-section').forEach(el => {
-                el.classList.add('hidden');
-                el.classList.remove('fade-enter-active');
-            });
-            
-            // Odoznačit všechny položky menu
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('active');
-                el.classList.add('text-slate-600', 'dark:text-slate-400');
-            });
-
-            // Zobrazit vybraný pohled
-            const activeView = document.getElementById(`view-${tabId}`);
-            activeView.classList.remove('hidden');
-            setTimeout(() => activeView.classList.add('fade-enter-active'), 10); // Animace
-            
-            // Zvýraznit menu (pokud neklikáme na novou poptávku z headeru)
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.add('active');
-                activeNav.classList.remove('text-slate-600', 'dark:text-slate-400');
-            }
-
-            // Změnit nadpis
-            document.getElementById('header-title').innerText = viewTitles[tabId];
-        }
-
-        // --- 3. SIMULACE PLATBY (ESCROW) ---
+        // --- 4. FUNKCE ZÁKAZNICKÉHO PORTÁLU ---
         function payEscrow() {
-            // Otevřít modál
             const modal = document.getElementById('modal-payment-success');
             const box = document.getElementById('modal-payment-box');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             box.classList.remove('scale-90');
             box.classList.add('scale-100');
 
-            // Změnit UI na Nástěnce
             document.getElementById('offers-section').classList.add('hidden');
             document.getElementById('paid-section').classList.remove('hidden');
             document.getElementById('status-badge').innerText = "Oprava probíhá";
             document.getElementById('status-badge').className = "bg-fixit-100 text-fixit-600 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest";
-            
-            // Přidat peníze do záložky Platby
             document.getElementById('escrow-balance').innerText = "1 200 Kč";
         }
 
@@ -443,35 +487,34 @@
             box.classList.add('scale-90');
         }
 
-        // --- 4. SIMULACE AI (Nová poptávka) ---
         function simulateAI() {
             const btn = document.getElementById('btn-ai-generate');
             btn.innerHTML = '<i class="fa-solid fa-microchip fa-spin"></i> Bořek přemýšlí...';
-            
             setTimeout(() => {
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Poptávka zveřejněna!';
                 btn.classList.replace('bg-slate-900', 'bg-green-500');
                 btn.classList.replace('hover:bg-fixit-500', 'hover:bg-green-600');
-                
-                setTimeout(() => {
-                    switchTab('dashboard'); // Návrat na nástěnku
-                }, 1500);
+                setTimeout(() => { switchTab('c-dashboard', 'Nástěnka'); }, 1500);
             }, 2000);
         }
 
-        // --- 5. DARK MODE ---
+        // --- DARK MODE ---
         const themeToggleBtn = document.getElementById('theme-toggle');
         const updateIcons = () => {
             const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden', isDark);
-            document.getElementById('theme-toggle-light-icon').classList.toggle('hidden', !isDark);
+            if(document.getElementById('theme-toggle-dark-icon')) {
+                document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden', isDark);
+                document.getElementById('theme-toggle-light-icon').classList.toggle('hidden', !isDark);
+            }
         };
         updateIcons();
-        themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            updateIcons();
-        });
+        if(themeToggleBtn){
+            themeToggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                updateIcons();
+            });
+        }
     </script>
 </body>
 </html>
