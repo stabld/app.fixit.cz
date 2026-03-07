@@ -45,6 +45,11 @@
         
         .nav-item.active { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
         .dark .nav-item.active { background-color: rgba(245, 158, 11, 0.2); }
+        
+        /* Styly pro Bořkův chat */
+        .poptavka-bubble-user { background-color:#f59e0b; color:white; border-radius:18px 18px 2px 18px; padding:12px 20px; max-width:80%; align-self:flex-end; box-shadow:0 4px 6px rgba(245,158,11,0.2); }
+        .poptavka-bubble-ai { background-color:#f1f5f9; color:#0f172a; border-radius:18px 18px 18px 2px; padding:12px 20px; max-width:80%; align-self:flex-start; border:1px solid #e2e8f0; }
+        .dark .poptavka-bubble-ai { background-color:#1e293b; color:#f8fafc; border-color:#334155; }
     </style>
     
     <script>
@@ -160,7 +165,6 @@
                             </button>
                         </form>
                     </div>
-                    
                 </div>
             </div>
         </div>
@@ -218,16 +222,6 @@
         </main>
     </div>
 
-    <div id="modal-payment-success" class="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-payment-box">
-            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30"><i class="fa-solid fa-check"></i></div>
-            <h3 class="text-2xl font-extrabold mb-2">Peníze jsou v úschově!</h3>
-            <p class="text-slate-500 mb-8 leading-relaxed">Částka byla rezervována z vaší karty. Řemeslník dostal zprávu, že může vyrazit.</p>
-            <button onclick="window.closePaymentModal()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-fixit-500 transition">Zpět na Nástěnku</button>
-        </div>
-    </div>
-
-
     <script>
         // ==========================================
         // 1. SUPABASE INICIALIZACE (Vlož své údaje!)
@@ -237,9 +231,7 @@
         
         let supabaseClient = null;
         try {
-            if (window.supabase) {
-                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-            }
+            if (window.supabase) supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         } catch (e) { console.error("Chyba Supabase:", e); }
 
         // ==========================================
@@ -280,34 +272,26 @@
 
             if (tab === 'login') {
                 slider.style.transform = 'translateX(0)';
-                btnLogin.classList.add('text-slate-900', 'dark:text-white');
-                btnLogin.classList.remove('text-slate-500');
-                btnRegister.classList.add('text-slate-500');
-                btnRegister.classList.remove('text-slate-900', 'dark:text-white');
-                formLogin.classList.remove('hidden');
-                formRegister.classList.add('hidden');
+                btnLogin.classList.add('text-slate-900', 'dark:text-white'); btnLogin.classList.remove('text-slate-500');
+                btnRegister.classList.add('text-slate-500'); btnRegister.classList.remove('text-slate-900', 'dark:text-white');
+                formLogin.classList.remove('hidden'); formRegister.classList.add('hidden');
             } else {
                 slider.style.transform = 'translateX(100%)';
-                btnRegister.classList.add('text-slate-900', 'dark:text-white');
-                btnRegister.classList.remove('text-slate-500');
-                btnLogin.classList.add('text-slate-500');
-                btnLogin.classList.remove('text-slate-900', 'dark:text-white');
-                formRegister.classList.remove('hidden');
-                formLogin.classList.add('hidden');
+                btnRegister.classList.add('text-slate-900', 'dark:text-white'); btnRegister.classList.remove('text-slate-500');
+                btnLogin.classList.add('text-slate-500'); btnLogin.classList.remove('text-slate-900', 'dark:text-white');
+                formRegister.classList.remove('hidden'); formLogin.classList.add('hidden');
             }
         };
 
         window.showError = function(msg) {
             const box = document.getElementById('auth-error');
-            box.innerText = msg;
-            box.classList.remove('hidden');
+            box.innerText = msg; box.classList.remove('hidden');
             document.getElementById('auth-success').classList.add('hidden');
         };
 
         window.showSuccess = function(msg) {
             const box = document.getElementById('auth-success');
-            box.innerText = msg;
-            box.classList.remove('hidden');
+            box.innerText = msg; box.classList.remove('hidden');
             document.getElementById('auth-error').classList.add('hidden');
         };
 
@@ -320,7 +304,6 @@
             e.preventDefault();
             window.clearMessages();
             if (!supabaseClient) return window.showError("Nepodařilo se připojit k databázi.");
-
             const btn = document.getElementById('btn-submit-register');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vytvářím účet...';
@@ -343,7 +326,6 @@
             e.preventDefault();
             window.clearMessages();
             if (!supabaseClient) return window.showError("Nepodařilo se připojit k databázi.");
-
             const btn = document.getElementById('btn-submit-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Přihlašuji...';
@@ -358,21 +340,16 @@
 
                 window.showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
                 
-                // Získání dat z databáze
                 const userRole = data.user.user_metadata?.role || 'customer';
                 const userName = data.user.user_metadata?.full_name || 'Uživatel';
                 
                 setTimeout(() => {
                     const authScreen = document.getElementById('auth-screen');
                     const mainApp = document.getElementById('main-app');
-                    
                     authScreen.style.opacity = '0';
                     setTimeout(() => {
                         authScreen.classList.add('hidden');
-                        
-                        // Inicializace prázdného prostředí
                         window.initApp(userRole, userName);
-                        
                         mainApp.classList.remove('hidden');
                         void mainApp.offsetWidth;
                         mainApp.style.opacity = '1';
@@ -389,7 +366,7 @@
         };
 
         // ==========================================
-        // 3. LOGIKA PRÁZDNÉ APLIKACE (EMPTY STATES)
+        // 3. LOGIKA PRÁZDNÉ APLIKACE & BOŘEK AI
         // ==========================================
         const appStructure = {
             customer: {
@@ -401,7 +378,6 @@
                     { id: 'c-new', icon: 'fa-plus', text: 'Nová poptávka', hidden: true }
                 ],
                 roleLabel: 'Zákazník',
-                seed: 'Felix',
                 cta: `<button onclick="window.switchAppTab('c-new', 'Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg transition hover:scale-105 text-sm flex items-center gap-2"><i class="fa-solid fa-plus"></i> Nová poptávka</button>`
             },
             craftsman: {
@@ -412,22 +388,17 @@
                     { id: 'r-earnings', icon: 'fa-wallet', text: 'Výdělky' }
                 ],
                 roleLabel: 'Řemeslník',
-                seed: 'Karel',
                 cta: `<div class="bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-toggle-on"></i> Jsem online</div>`
             }
         };
 
         window.initApp = function(role, name) {
             const config = appStructure[role];
-
-            // Údaje o uživateli
             document.getElementById('user-name').innerText = name;
             document.getElementById('user-role-label').innerText = config.roleLabel;
             document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/\s+/g, '')}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
-            
             document.getElementById('header-cta-container').innerHTML = config.cta;
 
-            // Navigace
             const navHtml = config.nav.filter(item => !item.hidden).map(item => `
                 <button onclick="window.switchAppTab('${item.id}', '${item.text}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
                     <i class="fa-solid ${item.icon} w-5 text-center"></i>
@@ -436,37 +407,23 @@
             `).join('');
             document.getElementById('main-nav').innerHTML = navHtml;
 
-            // Vykreslení HTML panelů
             document.getElementById('views-container').innerHTML = role === 'customer' ? window.getCustomerHTML(name) : window.getCraftsmanHTML();
-            
-            // Otevřít první panel
             window.switchAppTab(config.nav[0].id, config.nav[0].text);
         };
 
         window.switchAppTab = function(tabId, title) {
-            document.querySelectorAll('.view-section').forEach(el => {
-                el.classList.add('hidden'); el.classList.remove('fade-enter-active');
-            });
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('active', 'text-slate-900', 'dark:text-white');
-                el.classList.add('text-slate-600', 'dark:text-slate-400');
-            });
+            document.querySelectorAll('.view-section').forEach(el => { el.classList.add('hidden'); el.classList.remove('fade-enter-active'); });
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active', 'text-slate-900', 'dark:text-white'); el.classList.add('text-slate-600', 'dark:text-slate-400'); });
 
             const activeView = document.getElementById(`view-${tabId}`);
-            if(activeView) {
-                activeView.classList.remove('hidden');
-                setTimeout(() => activeView.classList.add('fade-enter-active'), 10);
-            }
+            if(activeView) { activeView.classList.remove('hidden'); setTimeout(() => activeView.classList.add('fade-enter-active'), 10); }
             
             const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.add('active', 'text-slate-900', 'dark:text-white');
-                activeNav.classList.remove('text-slate-600', 'dark:text-slate-400');
-            }
+            if (activeNav) { activeNav.classList.add('active', 'text-slate-900', 'dark:text-white'); activeNav.classList.remove('text-slate-600', 'dark:text-slate-400'); }
             if(title) document.getElementById('header-title').innerText = title;
         };
 
-        // --- PRÁZDNÉ HTML PRO ZÁKAZNÍKA ---
+        // --- HTML ŠABLONY ---
         window.getCustomerHTML = function(name) {
             let firstName = name.split(' ')[0] || name;
             return `
@@ -476,11 +433,9 @@
                         <p class="text-slate-500 dark:text-slate-400">Tady se objeví vaše aktivní poptávky, jakmile nějakou vytvoříte.</p>
                     </div>
                     <div class="bg-white dark:bg-slate-800 rounded-3xl p-12 border border-slate-200 dark:border-slate-700 shadow-sm text-center max-w-3xl mx-auto">
-                        <div class="w-20 h-20 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
-                            <i class="fa-solid fa-clipboard-list"></i>
-                        </div>
+                        <div class="w-20 h-20 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-6"><i class="fa-solid fa-clipboard-list"></i></div>
                         <h3 class="text-2xl font-extrabold mb-2">Zatím nemáte žádnou poptávku</h3>
-                        <p class="text-slate-500 mb-8">Potřebujete s něčím pomoct? Náš AI asistent Bořek je připraven vytvořit profi zadání.</p>
+                        <p class="text-slate-500 mb-8">Náš AI asistent Bořek je připraven vytvořit pro vás profesionální zadání.</p>
                         <button onclick="window.switchAppTab('c-new', 'Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-xl font-bold transition shadow-lg hover:scale-105">Vytvořit novou poptávku</button>
                     </div>
                 </div>
@@ -491,7 +446,6 @@
                         <div id="empty-requests-msg" class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl text-slate-500">
                             <i class="fa-solid fa-folder-open text-4xl mb-4 text-slate-300 dark:text-slate-600"></i>
                             <p class="font-bold">Zatím zde nic není.</p>
-                            <p class="text-sm">Vaše historie poptávek se zobrazí zde.</p>
                         </div>
                     </div>
                 </div>
@@ -514,125 +468,257 @@
                             <button class="text-sm font-bold bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-lg transition border border-white/20">Přidat platební metodu</button>
                         </div>
                         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-sm">
-                            <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-2">Aktuálně v úschově (Escrow)</p>
-                            <p class="text-4xl font-extrabold text-fixit-500 mb-2" id="escrow-balance">0 Kč</p>
-                            <p class="text-sm text-slate-500"><i class="fa-solid fa-lock text-green-500"></i> Prostředky jsou chráněny do potvrzení práce.</p>
+                            <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-2">Aktuálně v úschově</p>
+                            <p class="text-4xl font-extrabold text-fixit-500 mb-2">0 Kč</p>
                         </div>
-                    </div>
-                    <h3 class="font-bold text-lg mb-4">Historie transakcí</h3>
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
-                        Zatím neproběhly žádné transakce.
                     </div>
                 </div>
 
-                <div id="view-c-new" class="view-section hidden max-w-3xl mx-auto">
-                    <div class="text-center mb-10">
-                        <div class="w-16 h-16 bg-fixit-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg"><i class="fa-solid fa-hard-hat"></i></div>
-                        <h2 class="text-3xl font-extrabold mb-2">Asistent Bořek</h2>
-                        <p class="text-slate-500">Popište mi, co se rozbilo. Připravím profi zadání a hned ho zveřejním.</p>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-xl">
-                        <div class="space-y-6">
+                <div id="view-c-new" class="view-section hidden max-w-4xl mx-auto">
+                    <div class="bg-white dark:bg-slate-800 p-8 md:p-12 rounded-[3rem] shadow-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-80 h-80 bg-fixit-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+                        <div class="mb-10 flex items-center gap-6 relative z-10">
+                            <div class="w-16 h-16 rounded-full bg-fixit-500 flex items-center justify-center text-white shadow-inner flex-shrink-0"><i class="fa-solid fa-hard-hat text-2xl"></i></div>
                             <div>
-                                <label class="font-bold text-slate-700 dark:text-slate-300 block mb-2">Co přesně potřebujete opravit?</label>
-                                <textarea id="new-request-input" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Zasekla se mi dvířka od myčky..."></textarea>
+                                <h3 class="text-2xl font-extrabold mb-1 text-slate-900 dark:text-white">Asistent Bořek</h3>
+                                <p class="text-fixit-600 dark:text-fixit-500 text-sm font-bold uppercase tracking-widest">Příprava zakázky</p>
                             </div>
-                            <button onclick="window.simulateAI()" id="btn-ai-generate" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 font-black py-4 rounded-xl text-lg transition-all shadow-md">
-                                Vygenerovat a zveřejnit poptávku
+                        </div>
+                        
+                        <div id="poptavka-initial-form" class="space-y-6 relative z-10">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="flex flex-col gap-3">
+                                    <label class="font-bold text-slate-700 dark:text-slate-300">Co přesně se pokazilo?</label>
+                                    <textarea id="poptavka-input" rows="5" class="w-full h-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-5 px-6 text-slate-900 dark:text-white text-lg leading-relaxed focus:ring-2 focus:ring-fixit-500 outline-none transition shadow-sm resize-none" placeholder="Př: Potřebuju opravit skříňku v kuchyni, utrhla se dvířka..."></textarea>
+                                </div>
+                                <div class="flex flex-col gap-3">
+                                    <label class="font-bold text-slate-700 dark:text-slate-300">Přiložte fotku (volitelné)</label>
+                                    <div class="relative group h-full min-h-[140px]">
+                                        <input type="file" id="poptavka-photo" accept="image/*" onchange="window.handlePhotoUpload(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div id="poptavka-preview-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 transition shadow-sm overflow-hidden relative">
+                                            <i class="fa-solid fa-camera text-4xl mb-3 text-slate-400"></i>
+                                            <p class="text-lg text-slate-500 dark:text-slate-400 text-center leading-loose font-medium px-4">Nahrát fotku závady</p>
+                                            <img id="poptavka-photo-preview" class="hidden absolute inset-0 w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="window.startAIAnalysis()" id="poptavka-btn" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-6 rounded-2xl text-xl transition-all shadow-xl mt-4">
+                                Analyzovat problém
                             </button>
+                        </div>
+
+                        <div id="poptavka-chat-box" class="hidden flex flex-col gap-6 relative z-10">
+                            <div id="poptavka-chat-messages" class="flex flex-col gap-4 max-h-[500px] overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-inner"></div>
+                            <div id="poptavka-reply-area" class="flex gap-4 hidden mt-2">
+                                <input type="text" id="poptavka-reply-input" onkeypress="if(event.key === 'Enter') window.replyAI()" class="flex-grow bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full pl-6 pr-4 py-4 focus:ring-2 focus:ring-fixit-500 outline-none text-lg shadow-sm" placeholder="Odpovězte asistentovi...">
+                                <button onclick="window.replyAI()" id="poptavka-reply-btn" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-full font-bold shadow-md hover:scale-105 transition">Odeslat</button>
+                            </div>
+                        </div>
+
+                        <div id="poptavka-loading" class="hidden mt-12 text-center text-slate-500 relative z-10">
+                            <i class="fa-solid fa-microchip fa-spin text-4xl text-fixit-500 mb-6"></i>
+                            <p class="font-bold text-xl">Bořek analyzuje a tvoří zadání...</p>
+                        </div>
+
+                        <div id="poptavka-result" class="hidden mt-12 pt-12 border-t border-slate-200 dark:border-slate-700 relative z-10">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div class="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl shadow-sm"><i class="fa-solid fa-check"></i></div>
+                                <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white">Dokonalá poptávka je na světě!</h3>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
+                                <div class="flex flex-wrap gap-4 mb-6">
+                                    <span id="pop-kategorie" class="bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 px-4 py-2 rounded-full font-bold text-sm uppercase tracking-widest">Kategorie</span>
+                                    <span id="pop-nalehavost" class="bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 px-4 py-2 rounded-full font-bold text-sm uppercase tracking-widest">Naléhavost</span>
+                                    <span id="pop-cena" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full font-bold text-sm uppercase tracking-widest border border-slate-200 dark:border-slate-700">Cena</span>
+                                </div>
+                                <h4 id="pop-nazev" contenteditable="true" class="text-3xl font-extrabold mb-4 focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-xl px-2 py-1 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition">...</h4>
+                                <h5 class="font-bold text-lg text-slate-500 mb-3 uppercase tracking-widest">Detailní popis pro řemeslníka</h5>
+                                <p id="pop-popis" contenteditable="true" class="text-lg text-slate-700 dark:text-slate-300 leading-loose whitespace-pre-line focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-xl px-2 py-1 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition">...</p>
+                                
+                                <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 text-center">
+                                    <button onclick="window.publishAIRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white px-10 py-5 rounded-2xl font-bold text-xl transition-transform hover:scale-105 shadow-xl">Publikovat poptávku na Fixit</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         };
 
-        // --- PRÁZDNÉ HTML PRO ŘEMESLNÍKA ---
         window.getCraftsmanHTML = function() {
             return `
                 <div id="view-r-market" class="view-section hidden">
-                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-                        <div>
-                            <h2 class="text-3xl font-extrabold mb-2">Tržiště zakázek 🛠️</h2>
-                            <p class="text-slate-500 dark:text-slate-400">Brno a okolí do 15 km.</p>
-                        </div>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-12 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
-                        <div class="w-20 h-20 bg-slate-50 dark:bg-slate-700 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-6">
-                            <i class="fa-solid fa-mug-hot"></i>
-                        </div>
+                    <h2 class="text-3xl font-extrabold mb-6">Tržiště zakázek 🛠️</h2>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-12 border border-slate-200 dark:border-slate-700 text-center">
                         <h3 class="text-2xl font-extrabold mb-2">Žádné nové zakázky</h3>
-                        <p class="text-slate-500">Momentálně ve vašem okolí nikdo nic nepotřebuje. Dáme vám vědět, jakmile se objeví nová poptávka.</p>
                     </div>
                 </div>
-                <div id="view-r-jobs" class="view-section hidden">
-                    <h2 class="text-3xl font-extrabold mb-6">Moje práce</h2>
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
-                        Zatím nemáte přiřazené žádné zakázky.
-                    </div>
-                </div>
-                <div id="view-r-messages" class="view-section hidden">
-                    <h2 class="text-3xl font-extrabold mb-6">Zprávy</h2>
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
-                        Schránka je prázdná.
-                    </div>
-                </div>
-                <div id="view-r-earnings" class="view-section hidden">
-                    <h2 class="text-3xl font-extrabold mb-6">Výdělky</h2>
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center text-slate-500">
-                        Zatím neevidujeme žádné výdělky.
-                    </div>
-                </div>
+                <div id="view-r-jobs" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Moje práce</h2></div>
+                <div id="view-r-messages" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Zprávy</h2></div>
+                <div id="view-r-earnings" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Výdělky</h2></div>
             `;
         };
 
-        // --- SIMULACE VYTVOŘENÍ NOVÉ POPTÁVKY ---
-        window.simulateAI = function() {
-            const input = document.getElementById('new-request-input');
-            const text = input.value.trim();
-            if (!text) { alert("Prosím, popište nejprve svou závadu."); input.focus(); return; }
+        // ==========================================
+        // 4. BOŘEK AI: LOGIKA CHATU
+        // ==========================================
+        window.poptavkaHistoryText = "";
+        window.currentBase64Image = null;
+        window.currentMimeType = null;
 
-            const btn = document.getElementById('btn-ai-generate');
-            const originalBtnHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-microchip fa-spin"></i> Bořek analyzuje a tvoří zadání...';
-            btn.disabled = true;
+        window.handlePhotoUpload = function(input) {
+            const file = input.files[0];
+            if (file) {
+                window.currentMimeType = file.type;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const preview = document.getElementById('poptavka-photo-preview');
+                    const zone = document.getElementById('poptavka-preview-zone');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    window.currentBase64Image = e.target.result.split(',')[1];
+                    zone.querySelector('i').classList.add('hidden');
+                    zone.querySelector('p').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.appendPoptavkaChat = function(role, text) {
+            const chatMessages = document.getElementById('poptavka-chat-messages');
+            const msg = document.createElement('div');
+            if (role === 'user') {
+                msg.className = 'poptavka-bubble-user text-lg leading-relaxed shadow-sm font-medium';
+                msg.innerText = text;
+            } else {
+                msg.className = 'poptavka-bubble-ai text-lg leading-relaxed shadow-sm flex items-start gap-4';
+                msg.innerHTML = `<div class="w-10 h-10 rounded-full bg-fixit-500 flex items-center justify-center text-white shrink-0 mt-1"><i class="fa-solid fa-hard-hat"></i></div><div>${text}</div>`;
+            }
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+
+        // Simulace Gemini API (stejná logika jako na webu)
+        window.mockGeminiAPI = async function() {
+            await new Promise(r => setTimeout(r, 1500));
+            // Pokud uživatel napsal jen jednu zprávu, Bořek se na něco doptá
+            if (window.poptavkaHistoryText.split('\n').length <= 1) {
+                return { status: "question", message: "Rozumím. Abych mohl připravit co nejpřesnější zadání pro řemeslníky, můžete mi ještě upřesnit, jak dlouho už ten problém trvá a jestli jste se to zkoušeli opravit sami?" };
+            } 
+            // Pokud už odpověděl, Bořek to uzavře a vygeneruje JSON
+            else {
+                return { 
+                    status: "done", 
+                    nazev: "Oprava specifikované závady", 
+                    kategorie: "ÚDRŽBA A OPRAVY", 
+                    popis: "Zákazník hlásí následující problém:\n" + window.poptavkaHistoryText, 
+                    nalehavost: "Střední", 
+                    odhad_ceny: "1 000 - 2 500 Kč" 
+                };
+            }
+        };
+
+        window.processPoptavka = async function(text) {
+            const loading = document.getElementById('poptavka-loading');
+            const replyArea = document.getElementById('poptavka-reply-area');
+            const resultArea = document.getElementById('poptavka-result');
             
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Poptávka zveřejněna!';
-                btn.classList.replace('bg-slate-900', 'bg-green-500');
-                btn.classList.replace('hover:bg-fixit-500', 'hover:bg-green-600');
+            loading.classList.remove('hidden');
+            replyArea.classList.add('hidden');
+            
+            try {
+                // Zde se normálně volá reálné API, teď použijeme naši simulaci z řádků výše
+                const data = await window.mockGeminiAPI();
                 
-                let generatedTitle = text.length > 35 ? text.substring(0, 35) + '...' : text;
-                generatedTitle = generatedTitle.charAt(0).toUpperCase() + generatedTitle.slice(1);
-
-                const newRequestHTML = `
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-fixit-500 shadow-md flex items-center justify-between cursor-pointer transition animate-pulse">
-                        <div>
-                            <span class="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Hledáme profíka</span>
-                            <span class="font-bold text-lg">${generatedTitle}</span>
-                            <p class="text-sm text-slate-500 mt-1">Vytvořeno: Právě teď • Čeká na nabídky</p>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-fixit-500"></i>
-                    </div>
-                `;
+                loading.classList.add('hidden');
                 
-                const requestsList = document.getElementById('my-requests-list');
-                const emptyMsg = document.getElementById('empty-requests-msg');
-                
-                if (requestsList) {
-                    if (emptyMsg) emptyMsg.style.display = 'none'; // Skryje prázdný stav
-                    requestsList.insertAdjacentHTML('afterbegin', newRequestHTML);
-                    setTimeout(() => { requestsList.firstElementChild.classList.remove('animate-pulse'); }, 2000);
+                if (data.status === "question") {
+                    window.appendPoptavkaChat('ai', data.message);
+                    replyArea.classList.remove('hidden');
+                    document.getElementById('poptavka-reply-input').focus();
+                } else if (data.status === "done") {
+                    document.getElementById('pop-nazev').innerText = data.nazev;
+                    document.getElementById('pop-kategorie').innerText = data.kategorie;
+                    document.getElementById('pop-popis').innerText = data.popis;
+                    document.getElementById('pop-nalehavost').innerText = data.nalehavost;
+                    document.getElementById('pop-cena').innerText = data.odhad_ceny;
+                    
+                    resultArea.classList.remove('hidden');
+                    replyArea.classList.add('hidden');
                 }
+            } catch (e) {
+                loading.classList.add('hidden');
+                alert("Chyba spojení s Bořkem. Zkuste to znovu.");
+                replyArea.classList.remove('hidden');
+            }
+        };
 
-                setTimeout(() => {
-                    input.value = '';
-                    btn.innerHTML = originalBtnHtml;
-                    btn.classList.replace('bg-green-500', 'bg-slate-900');
-                    btn.classList.replace('hover:bg-green-600', 'hover:bg-fixit-500');
-                    btn.disabled = false;
-                    window.switchAppTab('c-requests', 'Moje poptávky'); 
-                }, 1500);
-            }, 2000);
+        window.startAIAnalysis = function() {
+            const input = document.getElementById('poptavka-input');
+            const text = input.value.trim();
+            if (!text && !window.currentBase64Image) { alert("Prosím, popište závadu nebo nahrajte fotku."); input.focus(); return; }
+
+            document.getElementById('poptavka-initial-form').classList.add('hidden');
+            document.getElementById('poptavka-chat-box').classList.remove('hidden');
+            
+            window.poptavkaHistoryText = text || "Posílám fotografii k analýze.";
+            window.appendPoptavkaChat('user', window.poptavkaHistoryText);
+            
+            window.processPoptavka(window.poptavkaHistoryText);
+        };
+
+        window.replyAI = function() {
+            const input = document.getElementById('poptavka-reply-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            window.appendPoptavkaChat('user', text);
+            window.poptavkaHistoryText += `\nOdpověď: ${text}`;
+            input.value = '';
+            
+            window.processPoptavka(window.poptavkaHistoryText);
+        };
+
+        window.publishAIRequest = function() {
+            const finalTitle = document.getElementById('pop-nazev').innerText;
+            const finalCat = document.getElementById('pop-kategorie').innerText;
+            
+            const newRequestHTML = `
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-fixit-500 shadow-md flex items-center justify-between cursor-pointer transition animate-pulse">
+                    <div>
+                        <span class="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Hledáme profíka</span>
+                        <span class="font-bold text-lg">${finalTitle}</span>
+                        <p class="text-sm text-slate-500 mt-1">${finalCat} • Vytvořeno: Právě teď • Čeká na nabídky</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-fixit-500"></i>
+                </div>
+            `;
+            
+            const requestsList = document.getElementById('my-requests-list');
+            const emptyMsg = document.getElementById('empty-requests-msg');
+            
+            if (requestsList) {
+                if (emptyMsg) emptyMsg.style.display = 'none';
+                requestsList.insertAdjacentHTML('afterbegin', newRequestHTML);
+                setTimeout(() => { requestsList.firstElementChild.classList.remove('animate-pulse'); }, 2000);
+            }
+
+            // Reset AI formuláře pro případ další poptávky
+            window.poptavkaHistoryText = "";
+            window.currentBase64Image = null;
+            document.getElementById('poptavka-input').value = '';
+            document.getElementById('poptavka-chat-messages').innerHTML = '';
+            document.getElementById('poptavka-photo-preview').classList.add('hidden');
+            document.getElementById('poptavka-preview-zone').querySelector('i').classList.remove('hidden');
+            document.getElementById('poptavka-preview-zone').querySelector('p').classList.remove('hidden');
+            
+            document.getElementById('poptavka-result').classList.add('hidden');
+            document.getElementById('poptavka-chat-box').classList.add('hidden');
+            document.getElementById('poptavka-initial-form').classList.remove('hidden');
+
+            window.switchAppTab('c-requests', 'Moje poptávky'); 
         };
 
         // DARK MODE
