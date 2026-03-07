@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixit App | Vstup</title>
+    <title>Fixit App | Klientský a Řemeslnický portál</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -30,10 +30,21 @@
     <style>
         body { transition: background-color 0.3s ease, color 0.3s ease; }
         
-        /* Animace pro plynulé přechody mezi pohledy */
+        .glass-panel { background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dark .glass-panel { background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animace */
         .view-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
         .view-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; z-index: -1; }
         .view-active { opacity: 1; transform: translateY(0); position: relative; z-index: 10; }
+        
+        .fade-enter { opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .fade-enter-active { opacity: 1; }
+        
+        .nav-item.active { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .dark .nav-item.active { background-color: rgba(245, 158, 11, 0.2); }
     </style>
     
     <script>
@@ -42,127 +53,186 @@
         } else { document.documentElement.classList.remove('dark'); }
     </script>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white h-screen overflow-hidden relative">
 
-    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-700">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-    <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10 overflow-hidden">
-        
-        <div class="flex justify-center items-center gap-3 mb-8">
-            <div class="w-14 h-14 relative flex items-center justify-center">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
-                    <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
-                    <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
-                    <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
-                </svg>
-            </div>
-            <span class="font-extrabold text-4xl tracking-tighter text-slate-900 dark:text-white">Fixit</span>
-        </div>
-
-        <div class="relative">
-            <div id="view-role-select" class="view-transition view-active">
-                <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Vítejte v aplikaci</h2>
-                <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
-                
-                <div class="grid md:grid-cols-2 gap-6">
-                    <button onclick="window.goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
-                        <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm">
-                            <i class="fa-solid fa-house-chimney-window"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptávající</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Potřebuji opravit něco doma a hledám ověřeného profíka.</p>
-                        </div>
-                    </button>
-
-                    <button onclick="window.goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
-                        <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm">
-                            <i class="fa-solid fa-toolbox"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako řemeslník</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profík a chci získat přístup k novým zakázkám v okolí.</p>
-                        </div>
-                    </button>
+        <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10 overflow-hidden">
+            
+            <div class="flex justify-center items-center gap-3 mb-8">
+                <div class="w-14 h-14 relative flex items-center justify-center">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
+                        <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
+                        <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
+                        <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
+                    </svg>
                 </div>
+                <span class="font-extrabold text-4xl tracking-tighter text-slate-900 dark:text-white">Fixit</span>
             </div>
 
-            <div id="view-auth-form" class="view-transition view-hidden max-w-md mx-auto">
-                
-                <button onclick="window.goBackToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 transition mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> Zpět na výběr
-                </button>
-
-                <div class="bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/30 rounded-xl p-4 mb-6 flex items-center justify-center gap-3 text-fixit-700 dark:text-fixit-400 font-bold">
-                    <i id="selected-role-icon" class="fa-solid fa-house"></i>
-                    <span id="selected-role-text">Přihlašujete se jako Zákazník</span>
-                </div>
-
-                <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-8">
-                    <button onclick="window.switchTab('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
-                    <button onclick="window.switchTab('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-500">Registrace</button>
-                    <div id="auth-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300"></div>
-                </div>
-
-                <div id="auth-error" class="hidden mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold text-center"></div>
-                <div id="auth-success" class="hidden mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold text-center"></div>
-
-                <div id="form-login">
-                    <form onsubmit="window.handleLogin(event)">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
-                                <input type="email" id="log-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
+            <div class="relative">
+                <div id="view-role-select" class="view-transition view-active">
+                    <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Vítejte v aplikaci</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <button onclick="window.goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                            <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm">
+                                <i class="fa-solid fa-house-chimney-window"></i>
                             </div>
                             <div>
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">Heslo</label>
-                                    <a href="#" class="text-xs text-fixit-600 dark:text-fixit-500 font-bold hover:underline">Zapomenuté heslo?</a>
+                                <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptávající</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Potřebuji opravit něco doma a hledám ověřeného profíka.</p>
+                            </div>
+                        </button>
+                        <button onclick="window.goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                            <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm">
+                                <i class="fa-solid fa-toolbox"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako řemeslník</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profík a chci získat přístup k novým zakázkám v okolí.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="view-auth-form" class="view-transition view-hidden max-w-md mx-auto">
+                    <button onclick="window.goBackToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 transition mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Zpět na výběr
+                    </button>
+
+                    <div class="bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/30 rounded-xl p-4 mb-6 flex items-center justify-center gap-3 text-fixit-700 dark:text-fixit-400 font-bold">
+                        <i id="selected-role-icon" class="fa-solid fa-house"></i>
+                        <span id="selected-role-text">Přihlašujete se jako Zákazník</span>
+                    </div>
+
+                    <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-8">
+                        <button onclick="window.switchAuthTab('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
+                        <button onclick="window.switchAuthTab('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-500">Registrace</button>
+                        <div id="auth-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300"></div>
+                    </div>
+
+                    <div id="auth-error" class="hidden mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold text-center"></div>
+                    <div id="auth-success" class="hidden mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold text-center"></div>
+
+                    <div id="form-login">
+                        <form onsubmit="window.handleLogin(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
+                                    <input type="email" id="log-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
                                 </div>
-                                <input type="password" id="log-password" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">Heslo</label>
+                                        <a href="#" class="text-xs text-fixit-600 dark:text-fixit-500 font-bold hover:underline">Zapomenuté heslo?</a>
+                                    </div>
+                                    <input type="password" id="log-password" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
+                                </div>
                             </div>
-                        </div>
-                        <button type="submit" id="btn-submit-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
-                            Přihlásit se
-                        </button>
-                    </form>
-                </div>
+                            <button type="submit" id="btn-submit-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
+                                Přihlásit se
+                            </button>
+                        </form>
+                    </div>
 
-                <div id="form-register" class="hidden">
-                    <form onsubmit="window.handleRegister(event)">
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Jméno a příjmení / Název firmy</label>
-                                <input type="text" id="reg-name" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="Jan Novák">
+                    <div id="form-register" class="hidden">
+                        <form onsubmit="window.handleRegister(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Jméno a příjmení / Název firmy</label>
+                                    <input type="text" id="reg-name" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="Jan Novák">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
+                                    <input type="email" id="reg-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Heslo (min. 6 znaků)</label>
+                                    <input type="password" id="reg-password" required minlength="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
-                                <input type="email" id="reg-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Heslo (min. 6 znaků)</label>
-                                <input type="password" id="reg-password" required minlength="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
-                            </div>
-                        </div>
-                        <button type="submit" id="btn-submit-register" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
-                            Vytvořit účet
-                        </button>
-                    </form>
+                            <button type="submit" id="btn-submit-register" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
+                                Vytvořit účet
+                            </button>
+                        </form>
+                    </div>
+                    
                 </div>
-                
             </div>
         </div>
     </div>
 
-    <button id="theme-toggle" class="fixed bottom-4 right-4 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 z-50 hover:scale-110 transition">
-        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
-        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
-    </button>
+
+    <div id="main-app" class="flex h-screen w-full hidden opacity-0 transition-opacity duration-500">
+        
+        <aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-shrink-0 z-50">
+            <div>
+                <div class="h-20 flex items-center px-8 border-b border-slate-200 dark:border-slate-800 cursor-pointer">
+                    <div class="w-10 h-10 relative flex items-center justify-center mr-3">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
+                            <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
+                            <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
+                            <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
+                        </svg>
+                    </div>
+                    <span class="font-extrabold text-2xl tracking-tighter dark:text-white">Fixit</span>
+                    <span class="ml-2 px-2 py-0.5 bg-fixit-500/10 text-fixit-500 text-[10px] font-black uppercase tracking-widest rounded-full">App</span>
+                </div>
+
+                <nav class="p-4 space-y-2 mt-4" id="main-nav"></nav>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+                <button onclick="window.logout()" class="w-full mb-4 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se
+                </button>
+                <div class="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                    <div class="w-10 h-10 rounded-full bg-fixit-100 overflow-hidden shrink-0">
+                        <img id="user-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=f59e0b" alt="User">
+                    </div>
+                    <div class="text-left truncate">
+                        <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" id="user-name">Jan Novák</p>
+                        <p class="text-xs text-slate-500 font-medium" id="user-role-label">Zákazník</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-slate-50 dark:bg-fixit-dark">
+            <header class="h-20 glass-panel flex items-center justify-between px-8 z-40 sticky top-0">
+                <h1 class="text-2xl font-extrabold" id="header-title">Nástěnka</h1>
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle" class="w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">
+                        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden text-xl"></i>
+                        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden text-xl"></i>
+                    </button>
+                    <div id="header-cta-container"></div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-8 hide-scroll pb-32 relative" id="views-container"></div>
+        </main>
+    </div>
+
+    <div id="modal-payment-success" class="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-2xl transform scale-90 transition-transform duration-300" id="modal-payment-box">
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-lg shadow-green-500/30">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-2xl font-extrabold mb-2">Peníze jsou v úschově!</h3>
+            <p class="text-slate-500 mb-8 leading-relaxed">Částka 1 200 Kč byla rezervována z vaší karty. Řemeslník Karel V. dostal zprávu, že může vyrazit.</p>
+            <button onclick="window.closePaymentModal()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-fixit-500 transition">Zpět na Nástěnku</button>
+        </div>
+    </div>
+
 
     <script>
         // ==========================================
-        // BEZPEČNÁ INICIALIZACE SUPABASE
+        // 1. SUPABASE INICIALIZACE (Vlož své údaje!)
         // ==========================================
         const supabaseUrl = 'https://iyvvwsnhezjrjrkscbyc.supabase.co'; 
         const supabaseKey = 'sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc';
@@ -171,24 +241,18 @@
         try {
             if (window.supabase) {
                 supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-            } else {
-                console.error("Supabase script se nenačetl.");
             }
-        } catch (e) {
-            console.error("Chyba při inicializaci Supabase:", e);
-        }
+        } catch (e) { console.error("Chyba Supabase:", e); }
 
         // ==========================================
-        // LOGIKA UI PŘECHODŮ (Vše napojené na window)
+        // 2. AUTH LOGIKA (Přihlašování / Vstup)
         // ==========================================
         window.activeRole = 'customer'; 
 
         window.goToAuth = function(role) {
             window.activeRole = role; 
-
             const iconEl = document.getElementById('selected-role-icon');
             const textEl = document.getElementById('selected-role-text');
-            
             if(role === 'customer') {
                 iconEl.className = 'fa-solid fa-house-chimney-window';
                 textEl.innerText = 'Pokračujete jako Zákazník';
@@ -196,12 +260,10 @@
                 iconEl.className = 'fa-solid fa-toolbox';
                 textEl.innerText = 'Pokračujete jako Řemeslník';
             }
-
             document.getElementById('view-role-select').classList.replace('view-active', 'view-hidden');
             document.getElementById('view-auth-form').classList.replace('view-hidden', 'view-active');
-            
             window.clearMessages();
-            window.switchTab('login');
+            window.switchAuthTab('login');
         };
 
         window.goBackToRoles = function() {
@@ -210,7 +272,7 @@
             window.clearMessages();
         };
 
-        window.switchTab = function(tab) {
+        window.switchAuthTab = function(tab) {
             window.clearMessages();
             const slider = document.getElementById('auth-slider');
             const btnLogin = document.getElementById('btn-tab-login');
@@ -256,109 +318,422 @@
             document.getElementById('auth-success').classList.add('hidden');
         };
 
-        // ==========================================
-        // KOMUNIKACE S DATABÁZÍ SUPABASE
-        // ==========================================
         window.handleRegister = async function(e) {
             e.preventDefault();
             window.clearMessages();
-            
-            if (!supabaseClient) {
-                window.showError("Nepodařilo se připojit k databázi.");
-                return;
-            }
+            if (!supabaseClient) return window.showError("Nepodařilo se připojit k databázi.");
 
             const btn = document.getElementById('btn-submit-register');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vytvářím účet...';
             btn.disabled = true;
 
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const name = document.getElementById('reg-name').value;
-
             try {
                 const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: {
-                            full_name: name,
-                            role: window.activeRole
-                        }
-                    }
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-password').value,
+                    options: { data: { full_name: document.getElementById('reg-name').value, role: window.activeRole } }
                 });
-
                 if (error) throw error;
-
                 window.showSuccess("Registrace byla úspěšná! Nyní se přihlaste.");
-                setTimeout(() => { window.switchTab('login'); }, 2000);
-
-            } catch (err) {
-                window.showError("Chyba při registraci: " + err.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+                setTimeout(() => { window.switchAuthTab('login'); }, 2000);
+            } catch (err) { window.showError("Chyba při registraci: " + err.message); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
         };
 
         window.handleLogin = async function(e) {
             e.preventDefault();
             window.clearMessages();
-
-            if (!supabaseClient) {
-                window.showError("Nepodařilo se připojit k databázi.");
-                return;
-            }
+            if (!supabaseClient) return window.showError("Nepodařilo se připojit k databázi.");
 
             const btn = document.getElementById('btn-submit-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Přihlašuji...';
             btn.disabled = true;
 
-            const email = document.getElementById('log-email').value;
-            const password = document.getElementById('log-password').value;
-
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password,
+                    email: document.getElementById('log-email').value,
+                    password: document.getElementById('log-password').value,
                 });
-
                 if (error) throw error;
 
                 window.showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
                 
-                // Můžeš si vypsat roli uživatele do konzole pro kontrolu
-                const userRole = data.user.user_metadata.role || 'Neznámá role';
-                console.log("Přihlášen jako:", userRole);
+                // === SPOUŠTĚNÍ APLIKACE PO PŘIHLÁŠENÍ ===
+                const userRole = data.user.user_metadata?.role || 'customer';
+                const userName = data.user.user_metadata?.full_name || 'Uživatel';
                 
-                // Zde proběhne přesměrování (nebo spuštění aplikace)
-                // např. window.location.href = '/dashboard.html';
+                setTimeout(() => {
+                    const authScreen = document.getElementById('auth-screen');
+                    const mainApp = document.getElementById('main-app');
+                    
+                    authScreen.style.opacity = '0'; // Zmizení přihlašování
+                    setTimeout(() => {
+                        authScreen.classList.add('hidden');
+                        
+                        // Inicializujeme aplikaci s daty z databáze
+                        window.initApp(userRole, userName);
+                        
+                        mainApp.classList.remove('hidden');
+                        void mainApp.offsetWidth; // Reflow hack
+                        mainApp.style.opacity = '1'; // Zobrazení aplikace
+                    }, 500);
+                }, 1000);
 
-            } catch (err) {
-                window.showError("Špatný e-mail nebo heslo.");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            } catch (err) { window.showError("Špatný e-mail nebo heslo."); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        };
+
+        window.logout = async function() {
+            if(supabaseClient) await supabaseClient.auth.signOut();
+            window.location.reload(); 
+        };
+
+        // ==========================================
+        // 3. LOGIKA APLIKACE (Nástěnka, Poptávky...)
+        // ==========================================
+        const appStructure = {
+            customer: {
+                nav: [
+                    { id: 'c-dashboard', icon: 'fa-house', text: 'Nástěnka' },
+                    { id: 'c-requests', icon: 'fa-list-check', text: 'Moje poptávky' },
+                    { id: 'c-messages', icon: 'fa-comment-dots', text: 'Zprávy', badge: true },
+                    { id: 'c-payments', icon: 'fa-shield-halved', text: 'Platby & Escrow' },
+                    { id: 'c-new', icon: 'fa-plus', text: 'Nová poptávka', hidden: true }
+                ],
+                roleLabel: 'Zákazník',
+                seed: 'Felix',
+                cta: `<button onclick="window.switchAppTab('c-new', 'Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg transition hover:scale-105 text-sm flex items-center gap-2"><i class="fa-solid fa-plus"></i> Nová poptávka</button>`
+            },
+            craftsman: {
+                nav: [
+                    { id: 'r-market', icon: 'fa-map-location-dot', text: 'Tržiště zakázek' },
+                    { id: 'r-jobs', icon: 'fa-hammer', text: 'Moje práce' },
+                    { id: 'r-messages', icon: 'fa-comment-dots', text: 'Zprávy' },
+                    { id: 'r-earnings', icon: 'fa-wallet', text: 'Výdělky' }
+                ],
+                roleLabel: 'Řemeslník',
+                seed: 'Karel',
+                cta: `<div class="bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-toggle-on"></i> Jsem online</div>`
             }
         };
 
-        // ==========================================
-        // DARK MODE TOGGLE
-        // ==========================================
+        window.initApp = function(role, name) {
+            const config = appStructure[role];
+
+            // Nastavení profilu z databáze
+            document.getElementById('user-name').innerText = name;
+            document.getElementById('user-role-label').innerText = config.roleLabel;
+            document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${config.seed}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
+            
+            document.getElementById('header-cta-container').innerHTML = config.cta;
+
+            // Vygenerování levého menu
+            const navHtml = config.nav.filter(item => !item.hidden).map(item => `
+                <button onclick="window.switchAppTab('${item.id}', '${item.text}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    <div class="relative">
+                        <i class="fa-solid ${item.icon} w-5 text-center"></i>
+                        ${item.badge ? '<span class="absolute -top-1 -right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>' : ''}
+                    </div>
+                    ${item.text}
+                </button>
+            `).join('');
+            document.getElementById('main-nav').innerHTML = navHtml;
+
+            // Vykreslení HTML kódu Nástěnek
+            document.getElementById('views-container').innerHTML = role === 'customer' ? window.getCustomerHTML(name) : window.getCraftsmanHTML();
+            
+            // Přepneme na úvodní záložku
+            window.switchAppTab(config.nav[0].id, config.nav[0].text);
+        };
+
+        window.switchAppTab = function(tabId, title) {
+            document.querySelectorAll('.view-section').forEach(el => {
+                el.classList.add('hidden'); el.classList.remove('fade-enter-active');
+            });
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active', 'text-slate-900', 'dark:text-white');
+                el.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            const activeView = document.getElementById(`view-${tabId}`);
+            if(activeView) {
+                activeView.classList.remove('hidden');
+                setTimeout(() => activeView.classList.add('fade-enter-active'), 10);
+            }
+            
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.add('active', 'text-slate-900', 'dark:text-white');
+                activeNav.classList.remove('text-slate-600', 'dark:text-slate-400');
+            }
+            if(title) document.getElementById('header-title').innerText = title;
+        };
+
+        // HTML PRO ZÁKAZNÍKA
+        window.getCustomerHTML = function(name) {
+            let firstName = name.split(' ')[0] || name;
+            return `
+                <div id="view-c-dashboard" class="view-section hidden">
+                    <div class="mb-10">
+                        <h2 class="text-3xl font-extrabold mb-2">Vítejte doma, ${firstName} 👋</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Máte jednu aktivní poptávku, která vyžaduje vaši pozornost.</p>
+                    </div>
+
+                    <div class="grid xl:grid-cols-3 gap-8">
+                        <div class="xl:col-span-2 space-y-6">
+                            <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
+                                <div class="flex justify-between items-start mb-6">
+                                    <div>
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="text-fixit-500 font-bold text-sm uppercase tracking-widest">Instalatérství</span>
+                                            <span id="status-badge" class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Vyberte nabídku</span>
+                                        </div>
+                                        <h4 class="text-2xl font-extrabold">Oprava protékajícího dřezu</h4>
+                                    </div>
+                                    <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=200&h=200" class="w-16 h-16 rounded-xl object-cover border border-slate-100">
+                                </div>
+                                <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">Voda kape ze sifonu pod kuchyňskou linkou. Zkoušel jsem to dotáhnout, ale nepomohlo to. Potřebuji přetěsnit nebo vyměnit sifon.</p>
+                                
+                                <div id="offers-section" class="border-t border-slate-100 dark:border-slate-700 pt-6">
+                                    <h5 class="font-bold text-sm text-slate-500 uppercase tracking-widest mb-4">Obdržené nabídky (2)</h5>
+                                    <div class="bg-fixit-50 dark:bg-fixit-500/10 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-3 border border-fixit-500">
+                                        <div class="flex items-center gap-4 w-full sm:w-auto">
+                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karel&backgroundColor=0f172a" class="w-12 h-12 rounded-full border-2 border-white">
+                                            <div>
+                                                <p class="font-extrabold flex items-center gap-2">Karel V. <span class="bg-white dark:bg-slate-800 text-yellow-500 px-2 py-0.5 rounded-md text-xs"><i class="fa-solid fa-star"></i> 4.9</span></p>
+                                                <p class="text-sm text-slate-500 dark:text-slate-400">Může dorazit: <strong class="text-fixit-600 dark:text-fixit-400">Dnes v 15:30</strong></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                            <div class="text-right">
+                                                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Cena celkem</p>
+                                                <p class="font-black text-xl">1 200 Kč</p>
+                                            </div>
+                                            <button onclick="window.payEscrow()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3 rounded-xl font-bold shadow-md transition hover:scale-105 whitespace-nowrap">Zaplatit do úschovy</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="paid-section" class="hidden border-t border-slate-100 dark:border-slate-700 pt-6 text-center">
+                                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-check"></i></div>
+                                    <h4 class="text-xl font-extrabold mb-2">Částka 1 200 Kč je v bezpečí Escrow</h4>
+                                    <p class="text-slate-500 mb-6">Řemeslník Karel V. je na cestě. Až práci dokončí, potvrďte to zde.</p>
+                                    <div class="flex gap-4 justify-center">
+                                        <button onclick="window.switchAppTab('c-messages', 'Zprávy')" class="bg-slate-100 dark:bg-slate-800 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">Napsat zprávu</button>
+                                        <button class="bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition shadow-lg"><i class="fa-solid fa-check-double"></i> Potvrdit hotovou práci</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-fixit-dark text-white p-8 rounded-3xl relative overflow-hidden shadow-xl">
+                                <i class="fa-solid fa-shield-halved absolute -bottom-4 -right-4 text-8xl text-fixit-500 opacity-20"></i>
+                                <h3 class="font-extrabold text-xl mb-2 relative z-10 text-fixit-500">100% Escrow Ochrana</h3>
+                                <p class="text-slate-300 text-sm leading-relaxed relative z-10 mb-4">Peníze strhneme z vaší karty, ale řemeslníkovi je pošleme až ve chvíli, kdy kliknete na "Potvrdit hotovou práci".</p>
+                                <button onclick="window.switchAppTab('c-payments', 'Platby & Escrow')" class="w-full bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-xl font-bold text-sm transition">Zobrazit moje platby</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-c-requests" class="view-section hidden">
+                    <h2 class="text-3xl font-extrabold mb-6">Moje poptávky</h2>
+                    <div id="my-requests-list" class="space-y-4">
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
+                            <div>
+                                <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
+                                <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
+                                <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-c-messages" class="view-section hidden h-[calc(100vh-160px)]">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 h-full flex overflow-hidden shadow-sm">
+                        <div class="w-1/3 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-2">
+                            <div class="bg-white dark:bg-slate-700 p-3 rounded-xl shadow-sm border-l-4 border-fixit-500 cursor-pointer">
+                                <div class="flex justify-between items-center mb-1">
+                                    <p class="font-bold text-sm">Karel V.</p><span class="text-xs text-slate-400">10:42</span>
+                                </div>
+                                <p class="text-xs text-slate-500 truncate text-fixit-600 dark:text-fixit-400 font-medium">Budu tam přesně v 15:30.</p>
+                            </div>
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <div class="h-16 border-b border-slate-200 dark:border-slate-700 flex items-center px-6 gap-4 bg-white dark:bg-slate-800">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Karel&backgroundColor=0f172a" class="w-10 h-10 rounded-full">
+                                <div><p class="font-bold leading-tight">Karel V.</p><p class="text-xs text-green-500 font-medium">● Online</p></div>
+                            </div>
+                            <div class="flex-1 p-6 bg-slate-50 dark:bg-slate-900/50 overflow-y-auto space-y-4">
+                                <div class="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none w-max max-w-[70%] border border-slate-200 dark:border-slate-700 shadow-sm text-sm">
+                                    Dobrý den, děkuji za přijetí nabídky. Budu tam v 15:30.
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex gap-2">
+                                <input type="text" placeholder="Napište zprávu..." class="flex-1 bg-slate-100 dark:bg-slate-900 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-fixit-500 border border-transparent dark:border-slate-700">
+                                <button class="w-10 h-10 bg-fixit-500 text-white rounded-full flex items-center justify-center hover:bg-fixit-600 transition"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-c-payments" class="view-section hidden">
+                    <h2 class="text-3xl font-extrabold mb-6">Platby & Escrow úschova</h2>
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                            <i class="fa-brands fa-cc-visa absolute -right-4 -top-4 text-8xl opacity-10"></i>
+                            <p class="text-slate-400 font-bold tracking-widest uppercase text-xs mb-2">Moje platební karta</p>
+                            <p class="font-mono text-xl tracking-widest mb-6">**** **** **** 4242</p>
+                            <button class="text-sm font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">Změnit kartu</button>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-sm">
+                            <p class="text-slate-500 font-bold tracking-widest uppercase text-xs mb-2">Aktuálně v úschově (Escrow)</p>
+                            <p class="text-4xl font-extrabold text-fixit-500 mb-2" id="escrow-balance">0 Kč</p>
+                            <p class="text-sm text-slate-500"><i class="fa-solid fa-lock text-green-500"></i> Prostředky jsou chráněny do potvrzení práce.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-c-new" class="view-section hidden max-w-3xl mx-auto">
+                    <div class="text-center mb-10">
+                        <div class="w-16 h-16 bg-fixit-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg"><i class="fa-solid fa-hard-hat"></i></div>
+                        <h2 class="text-3xl font-extrabold mb-2">Asistent Bořek</h2>
+                        <p class="text-slate-500">Popište mi, co se rozbilo. Připravím profi zadání a hned ho zveřejním.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-xl">
+                        <div class="space-y-6">
+                            <div>
+                                <label class="font-bold text-slate-700 dark:text-slate-300 block mb-2">Co přesně potřebujete opravit?</label>
+                                <textarea id="new-request-input" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Zasekla se mi dvířka od myčky..."></textarea>
+                            </div>
+                            <button onclick="window.simulateAI()" id="btn-ai-generate" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 font-black py-4 rounded-xl text-lg transition-all shadow-md">
+                                Vygenerovat a zveřejnit poptávku
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        window.getCraftsmanHTML = function() {
+            return `
+                <div id="view-r-market" class="view-section hidden">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-extrabold mb-2">Tržiště zakázek 🛠️</h2>
+                            <p class="text-slate-500 dark:text-slate-400">Brno a okolí do 15 km.</p>
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-xl transition-shadow cursor-pointer group">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">Elektrikář</span>
+                                <span class="text-sm font-bold text-slate-400"><i class="fa-solid fa-location-dot"></i> Královo Pole (3.2 km)</span>
+                            </div>
+                            <h4 class="text-xl font-extrabold mb-2 group-hover:text-fixit-500 transition-colors">Výměna vyhořelých zásuvek</h4>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6">Při zapojení rychlovarné konvice to zajiskřilo a dvě zásuvky v kuchyni nefungují.</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
+                                <div><p class="text-xs text-slate-500 font-bold">Odhad AI</p><p class="font-black text-slate-900 dark:text-white">800 - 1500 Kč</p></div>
+                                <button class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-xl font-bold transition hover:scale-105 shadow-md">Dát nabídku</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="view-r-jobs" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Moje práce</h2></div>
+                <div id="view-r-messages" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Zprávy</h2></div>
+                <div id="view-r-earnings" class="view-section hidden"><h2 class="text-3xl font-extrabold mb-6">Výdělky</h2></div>
+            `;
+        };
+
+        window.payEscrow = function() {
+            const modal = document.getElementById('modal-payment-success');
+            const box = document.getElementById('modal-payment-box');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-90');
+            box.classList.add('scale-100');
+
+            document.getElementById('offers-section').classList.add('hidden');
+            document.getElementById('paid-section').classList.remove('hidden');
+            document.getElementById('status-badge').innerText = "Oprava probíhá";
+            document.getElementById('status-badge').className = "bg-fixit-100 text-fixit-600 dark:bg-fixit-500/20 dark:text-fixit-400 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest";
+            document.getElementById('escrow-balance').innerText = "1 200 Kč";
+        };
+
+        window.closePaymentModal = function() {
+            const modal = document.getElementById('modal-payment-success');
+            const box = document.getElementById('modal-payment-box');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-90');
+        };
+
+        window.simulateAI = function() {
+            const input = document.getElementById('new-request-input');
+            const text = input.value.trim();
+            if (!text) { alert("Prosím, popište nejprve svou závadu."); input.focus(); return; }
+
+            const btn = document.getElementById('btn-ai-generate');
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-microchip fa-spin"></i> Bořek analyzuje a tvoří zadání...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Poptávka zveřejněna!';
+                btn.classList.replace('bg-slate-900', 'bg-green-500');
+                btn.classList.replace('hover:bg-fixit-500', 'hover:bg-green-600');
+                
+                let generatedTitle = text.length > 35 ? text.substring(0, 35) + '...' : text;
+                generatedTitle = generatedTitle.charAt(0).toUpperCase() + generatedTitle.slice(1);
+
+                const newRequestHTML = `
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-fixit-500 shadow-md flex items-center justify-between cursor-pointer transition animate-pulse">
+                        <div>
+                            <span class="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Hledáme profíka</span>
+                            <span class="font-bold text-lg">${generatedTitle}</span>
+                            <p class="text-sm text-slate-500 mt-1">Vytvořeno: Právě teď • Čeká na nabídky</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-fixit-500"></i>
+                    </div>
+                `;
+                
+                const requestsList = document.getElementById('my-requests-list');
+                if (requestsList) {
+                    requestsList.insertAdjacentHTML('afterbegin', newRequestHTML);
+                    setTimeout(() => { requestsList.firstElementChild.classList.remove('animate-pulse'); }, 2000);
+                }
+
+                setTimeout(() => {
+                    input.value = '';
+                    btn.innerHTML = originalBtnHtml;
+                    btn.classList.replace('bg-green-500', 'bg-slate-900');
+                    btn.classList.replace('hover:bg-green-600', 'hover:bg-fixit-500');
+                    btn.disabled = false;
+                    window.switchAppTab('c-requests', 'Moje poptávky'); 
+                }, 1500);
+            }, 2000);
+        };
+
+        // DARK MODE
         const themeToggleBtn = document.getElementById('theme-toggle');
         const updateIcons = () => {
             const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden', isDark);
-            document.getElementById('theme-toggle-light-icon').classList.toggle('hidden', !isDark);
+            if(document.getElementById('theme-toggle-dark-icon')) {
+                document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden', isDark);
+                document.getElementById('theme-toggle-light-icon').classList.toggle('hidden', !isDark);
+            }
         };
         updateIcons();
-        themeToggleBtn.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            updateIcons();
-        });
+        if(themeToggleBtn){
+            themeToggleBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                updateIcons();
+            });
+        }
     </script>
 </body>
 </html>
