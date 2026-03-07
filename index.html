@@ -95,7 +95,7 @@
             </div>
             
             <div class="mt-8 text-center">
-                <a href="#" class="text-sm font-bold text-slate-400 hover:text-fixit-500 transition">Zpět na hlavní web</a>
+                <a href="/" class="text-sm font-bold text-slate-400 hover:text-fixit-500 transition">Zpět na hlavní web</a>
             </div>
         </div>
     </div>
@@ -104,7 +104,7 @@
         
         <aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-shrink-0 z-50">
             <div>
-                <div class="h-20 flex items-center px-8 border-b border-slate-200 dark:border-slate-800">
+                <div class="h-20 flex items-center px-8 border-b border-slate-200 dark:border-slate-800 cursor-pointer">
                     <div class="w-10 h-10 relative flex items-center justify-center mr-3">
                         <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
                             <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
@@ -285,7 +285,7 @@
             if(title) document.getElementById('header-title').innerText = title;
         }
 
-        // --- 3. HTML ŠABLONY (Pro ukázku funkčnosti) ---
+        // --- 3. HTML ŠABLONY ---
         function getCustomerHTML() {
             return `
                 <div id="view-c-dashboard" class="view-section hidden">
@@ -329,6 +329,23 @@
                                             <button onclick="payEscrow()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3 rounded-xl font-bold shadow-md transition hover:scale-105 whitespace-nowrap">Zaplatit do úschovy</button>
                                         </div>
                                     </div>
+
+                                    <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-200 dark:border-slate-700">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xl font-bold">P</div>
+                                            <div>
+                                                <p class="font-extrabold">Petr S. <span class="text-yellow-500 ml-1 text-sm"><i class="fa-solid fa-star"></i> 4.7</span></p>
+                                                <p class="text-sm text-slate-500">Může dorazit: Zítra dopoledne</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                                            <div class="text-right">
+                                                <p class="text-xs text-slate-500 font-bold">Cena celkem</p>
+                                                <p class="font-black text-xl text-slate-600 dark:text-slate-300">950 Kč</p>
+                                            </div>
+                                            <button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 px-6 py-3 rounded-xl font-bold transition hover:bg-slate-50 dark:hover:bg-slate-700">Detail</button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div id="paid-section" class="hidden border-t border-slate-100 dark:border-slate-700 pt-6 text-center">
@@ -356,13 +373,23 @@
 
                 <div id="view-c-requests" class="view-section hidden">
                     <h2 class="text-3xl font-extrabold mb-6">Moje poptávky</h2>
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
-                        <div>
-                            <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
-                            <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
-                            <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
+                    <div id="my-requests-list" class="space-y-4">
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between cursor-pointer hover:shadow-md transition">
+                            <div>
+                                <span class="bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Aktivní</span>
+                                <span class="font-bold text-lg">Oprava protékajícího dřezu</span>
+                                <p class="text-sm text-slate-500 mt-1">Vytvořeno: Dnes • 2 nabídky</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-400"></i>
                         </div>
-                        <i class="fa-solid fa-chevron-right text-slate-400"></i>
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between opacity-70">
+                            <div>
+                                <span class="bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Dokončeno</span>
+                                <span class="font-bold text-lg line-through decoration-2 decoration-slate-300">Montáž TV na zeď</span>
+                                <p class="text-sm text-slate-500 mt-1">Dokončeno: 14. Března • Řemeslník: Tomáš K.</p>
+                            </div>
+                            <div class="text-yellow-500"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        </div>
                     </div>
                 </div>
 
@@ -416,16 +443,16 @@
                     <div class="text-center mb-10">
                         <div class="w-16 h-16 bg-fixit-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4 shadow-lg"><i class="fa-solid fa-hard-hat"></i></div>
                         <h2 class="text-3xl font-extrabold mb-2">Asistent Bořek</h2>
-                        <p class="text-slate-500">Popište mi, co se rozbilo. Připravím profi zadání.</p>
+                        <p class="text-slate-500">Popište mi, co se rozbilo. Připravím profi zadání a hned ho zveřejním.</p>
                     </div>
                     <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 shadow-xl">
                         <div class="space-y-6">
                             <div>
                                 <label class="font-bold text-slate-700 dark:text-slate-300 block mb-2">Co přesně potřebujete opravit?</label>
-                                <textarea rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Přestala mi svítit polovina bytu..."></textarea>
+                                <textarea id="new-request-input" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Např.: Zasekla se mi dvířka od myčky a nejdou otevřít..."></textarea>
                             </div>
                             <button onclick="simulateAI()" id="btn-ai-generate" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 font-black py-4 rounded-xl text-lg transition-all shadow-md">
-                                Vygenerovat poptávku
+                                Vygenerovat a zveřejnit poptávku
                             </button>
                         </div>
                     </div>
@@ -488,13 +515,59 @@
         }
 
         function simulateAI() {
+            const input = document.getElementById('new-request-input');
+            const text = input.value.trim();
+            
+            if (!text) {
+                alert("Prosím, popište nejprve svou závadu.");
+                input.focus();
+                return;
+            }
+
             const btn = document.getElementById('btn-ai-generate');
-            btn.innerHTML = '<i class="fa-solid fa-microchip fa-spin"></i> Bořek přemýšlí...';
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-microchip fa-spin"></i> Bořek analyzuje a tvoří zadání...';
+            btn.disabled = true;
+            
             setTimeout(() => {
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Poptávka zveřejněna!';
                 btn.classList.replace('bg-slate-900', 'bg-green-500');
                 btn.classList.replace('hover:bg-fixit-500', 'hover:bg-green-600');
-                setTimeout(() => { switchTab('c-dashboard', 'Nástěnka'); }, 1500);
+                
+                // Vytvoření názvu z textu uživatele (prvních 35 znaků)
+                let generatedTitle = text.length > 35 ? text.substring(0, 35) + '...' : text;
+                generatedTitle = generatedTitle.charAt(0).toUpperCase() + generatedTitle.slice(1);
+
+                // Dynamické přidání poptávky do seznamu "Moje poptávky"
+                const newRequestHTML = `
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-fixit-500 shadow-md flex items-center justify-between cursor-pointer transition animate-pulse">
+                        <div>
+                            <span class="bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold uppercase mr-2">Hledáme profíka</span>
+                            <span class="font-bold text-lg">${generatedTitle}</span>
+                            <p class="text-sm text-slate-500 mt-1">Vytvořeno: Právě teď • Čeká na nabídky</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-fixit-500"></i>
+                    </div>
+                `;
+                
+                const requestsList = document.getElementById('my-requests-list');
+                if (requestsList) {
+                    requestsList.insertAdjacentHTML('afterbegin', newRequestHTML);
+                    // Zrušení pulse efektu po chvíli
+                    setTimeout(() => { requestsList.firstElementChild.classList.remove('animate-pulse'); }, 2000);
+                }
+
+                setTimeout(() => {
+                    // Reset formuláře
+                    input.value = '';
+                    btn.innerHTML = originalBtnHtml;
+                    btn.classList.replace('bg-green-500', 'bg-slate-900');
+                    btn.classList.replace('hover:bg-green-600', 'hover:bg-fixit-500');
+                    btn.disabled = false;
+
+                    // Přesměrování na "Moje poptávky"
+                    switchTab('c-requests', 'Moje poptávky'); 
+                }, 1500);
             }, 2000);
         }
 
