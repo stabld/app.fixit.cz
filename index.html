@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixit | Přihlášení (Napojeno na DB)</title>
+    <title>Fixit App | Vstup</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,10 @@
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
-                        fixit: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706', 700: '#b45309', dark: '#020617', slate: '#0f172a' }
+                        fixit: { 
+                            50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 
+                            600: '#d97706', 700: '#b45309', dark: '#020617', slate: '#0f172a'
+                        }
                     }
                 }
             }
@@ -26,139 +29,205 @@
     
     <style>
         body { transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        /* Animace pro plynulé přechody mezi pohledy */
+        .view-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
+        .view-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; }
+        .view-active { opacity: 1; transform: translateY(0); position: relative; }
     </style>
+    
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else { document.documentElement.classList.remove('dark'); }
+    </script>
 </head>
 <body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative z-10">
+    <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10 overflow-hidden">
         
-        <div class="bg-slate-100 dark:bg-slate-800/50 p-2 flex relative border-b border-slate-200 dark:border-slate-800">
-            <button onclick="switchAuthView('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-2xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
-            <button onclick="switchAuthView('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-2xl transition-all z-10 text-slate-500">Registrace</button>
-            <div id="auth-slider" class="absolute top-2 left-2 w-[calc(50%-8px)] h-[calc(100%-16px)] bg-white dark:bg-slate-700 rounded-2xl shadow-sm transition-transform duration-300"></div>
+        <div class="flex justify-center items-center gap-3 mb-8">
+            <div class="w-14 h-14 relative flex items-center justify-center">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
+                    <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
+                    <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
+                    <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
+                </svg>
+            </div>
+            <span class="font-extrabold text-4xl tracking-tighter text-slate-900 dark:text-white">Fixit</span>
         </div>
 
-        <div class="p-8">
-            <div class="flex justify-center mb-8">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 relative flex items-center justify-center">
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none">
-                            <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/>
-                            <circle cx="50" cy="48" r="16" class="fill-white dark:fill-slate-900"/>
-                            <path d="M40 58 L30 68 L45 64 Z" class="fill-white dark:fill-slate-900"/>
-                        </svg>
-                    </div>
-                    <span class="font-extrabold text-3xl tracking-tighter dark:text-white">Fixit</span>
+        <div class="relative">
+            <div id="view-role-select" class="view-transition view-active">
+                <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Vítejte v aplikaci</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <button onclick="goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                        <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm">
+                            <i class="fa-solid fa-house-chimney-window"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptávající</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Potřebuji opravit něco doma a hledám ověřeného profíka.</p>
+                        </div>
+                    </button>
+
+                    <button onclick="goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 dark:hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center relative overflow-hidden">
+                        <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm">
+                            <i class="fa-solid fa-toolbox"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako řemeslník</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profík a chci získat přístup k novým zakázkám v okolí.</p>
+                        </div>
+                    </button>
                 </div>
             </div>
 
-            <div id="auth-error" class="hidden mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold text-center">
-                Chyba
-            </div>
+            <div id="view-auth-form" class="view-transition view-hidden max-w-md mx-auto">
+                
+                <button onclick="goBackToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 transition mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Zpět na výběr
+                </button>
 
-            <div id="auth-success" class="hidden mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold text-center">
-                Úspěch!
-            </div>
+                <div class="bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/30 rounded-xl p-4 mb-6 flex items-center justify-center gap-3 text-fixit-700 dark:text-fixit-400 font-bold">
+                    <i id="selected-role-icon" class="fa-solid fa-house"></i>
+                    <span id="selected-role-text">Přihlašujete se jako Zákazník</span>
+                </div>
 
-            <div id="form-login">
-                <h2 class="text-2xl font-extrabold text-center mb-6">Vítejte zpět 👋</h2>
-                <form onsubmit="handleLogin(event)">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
-                            <input type="email" id="log-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">Heslo</label>
-                                <a href="#" class="text-xs text-fixit-600 dark:text-fixit-500 font-bold hover:underline">Zapomenuté heslo?</a>
+                <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-8">
+                    <button onclick="switchTab('login')" id="btn-tab-login" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-900 dark:text-white">Přihlášení</button>
+                    <button onclick="switchTab('register')" id="btn-tab-register" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 text-slate-500">Registrace</button>
+                    <div id="auth-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300"></div>
+                </div>
+
+                <div id="auth-error" class="hidden mb-4 p-4 bg-red-50 dark:bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-bold text-center"></div>
+                <div id="auth-success" class="hidden mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-xl text-sm font-bold text-center"></div>
+
+                <div id="form-login">
+                    <form onsubmit="handleLogin(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
+                                <input type="email" id="log-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
                             </div>
-                            <input type="password" id="log-password" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button type="submit" id="btn-submit-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
-                        Přihlásit se
-                    </button>
-                </form>
-            </div>
-
-            <div id="form-register" class="hidden">
-                <h2 class="text-2xl font-extrabold text-center mb-6">Vytvořit účet ✨</h2>
-                <form onsubmit="handleRegister(event)">
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-3 text-center">Jsem zde jako:</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div onclick="selectRole('customer')" id="role-customer" class="cursor-pointer border-2 border-fixit-500 bg-fixit-50 dark:bg-fixit-500/10 rounded-xl p-4 text-center transition-all">
-                                <i class="fa-solid fa-house-chimney-window text-2xl text-fixit-500 mb-2"></i>
-                                <p class="font-bold text-sm text-slate-900 dark:text-white leading-tight">Hledám<br>řemeslníka</p>
-                            </div>
-                            <div onclick="selectRole('craftsman')" id="role-craftsman" class="cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-fixit-500/50 rounded-xl p-4 text-center transition-all opacity-60 hover:opacity-100">
-                                <i class="fa-solid fa-toolbox text-2xl text-slate-400 mb-2"></i>
-                                <p class="font-bold text-sm text-slate-900 dark:text-white leading-tight">Jsem<br>řemeslník</p>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">Heslo</label>
+                                    <a href="#" class="text-xs text-fixit-600 dark:text-fixit-500 font-bold hover:underline">Zapomenuté heslo?</a>
+                                </div>
+                                <input type="password" id="log-password" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
                             </div>
                         </div>
-                        <input type="hidden" id="selected-role" value="customer">
-                    </div>
+                        <button type="submit" id="btn-submit-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
+                            Přihlásit se
+                        </button>
+                    </form>
+                </div>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Jméno a příjmení</label>
-                            <input type="text" id="reg-name" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="Jan Novák">
+                <div id="form-register" class="hidden">
+                    <form onsubmit="handleRegister(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Jméno a příjmení / Název firmy</label>
+                                <input type="text" id="reg-name" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="Jan Novák">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
+                                <input type="email" id="reg-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Heslo (min. 6 znaků)</label>
+                                <input type="password" id="reg-password" required minlength="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">E-mail</label>
-                            <input type="email" id="reg-email" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="vas@email.cz">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-600 dark:text-slate-400 mb-2">Heslo (min. 6 znaků)</label>
-                            <input type="password" id="reg-password" required minlength="6" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none transition" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button type="submit" id="btn-submit-register" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
-                        Vytvořit účet
-                    </button>
-                </form>
+                        <button type="submit" id="btn-submit-register" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-4 rounded-xl mt-6 transition shadow-lg hover:scale-[1.02]">
+                            Vytvořit účet
+                        </button>
+                    </form>
+                </div>
+                
             </div>
         </div>
     </div>
 
+    <button id="theme-toggle" class="fixed bottom-4 right-4 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 z-50 hover:scale-110 transition">
+        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
+        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
+    </button>
+
     <script>
         // ==========================================
-        // NASTAVENÍ SUPABASE (TADY VLOŽ SVÉ ÚDAJE!)
+        // NASTAVENÍ SUPABASE
         // ==========================================
         const supabaseUrl = 'https://iyvvwsnhezjrjrkscbyc.supabase.co'; 
         const supabaseKey = 'sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc';
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ==========================================
-        // LOGIKA UI
-        // ==========================================
-        function switchAuthView(view) {
-            document.getElementById('auth-error').classList.add('hidden');
-            document.getElementById('auth-success').classList.add('hidden');
+        // Proměnná pro uložení role (customer / craftsman), kterou uživatel naklikl na rozcestníku
+        let activeRole = 'customer'; 
 
+        // ==========================================
+        // LOGIKA UI PŘECHODŮ
+        // ==========================================
+        
+        // Přejít z rozcestníku na formulář
+        function goToAuth(role) {
+            activeRole = role; // Uložíme si vybranou roli do paměti
+
+            // Změna textu v informačním panelu nad formulářem
+            const iconEl = document.getElementById('selected-role-icon');
+            const textEl = document.getElementById('selected-role-text');
+            
+            if(role === 'customer') {
+                iconEl.className = 'fa-solid fa-house-chimney-window';
+                textEl.innerText = 'Pokračujete jako Zákazník';
+            } else {
+                iconEl.className = 'fa-solid fa-toolbox';
+                textEl.innerText = 'Pokračujete jako Řemeslník';
+            }
+
+            // Přepnutí views (skryjeme rozcestník, ukážeme formuláře)
+            document.getElementById('view-role-select').classList.replace('view-active', 'view-hidden');
+            document.getElementById('view-auth-form').classList.replace('view-hidden', 'view-active');
+            
+            // Vymažeme případné staré chyby a resetneme na "Login" tab
+            clearMessages();
+            switchTab('login');
+        }
+
+        // Tlačítko Zpět (na rozcestník)
+        function goBackToRoles() {
+            document.getElementById('view-auth-form').classList.replace('view-active', 'view-hidden');
+            document.getElementById('view-role-select').classList.replace('view-hidden', 'view-active');
+            clearMessages();
+        }
+
+        // Přepínač Login / Register
+        function switchTab(tab) {
+            clearMessages();
             const slider = document.getElementById('auth-slider');
             const btnLogin = document.getElementById('btn-tab-login');
             const btnRegister = document.getElementById('btn-tab-register');
             const formLogin = document.getElementById('form-login');
             const formRegister = document.getElementById('form-register');
 
-            if (view === 'login') {
+            if (tab === 'login') {
                 slider.style.transform = 'translateX(0)';
-                btnLogin.classList.remove('text-slate-500');
                 btnLogin.classList.add('text-slate-900', 'dark:text-white');
+                btnLogin.classList.remove('text-slate-500');
                 btnRegister.classList.add('text-slate-500');
                 btnRegister.classList.remove('text-slate-900', 'dark:text-white');
                 formLogin.classList.remove('hidden');
                 formRegister.classList.add('hidden');
             } else {
                 slider.style.transform = 'translateX(100%)';
-                btnRegister.classList.remove('text-slate-500');
                 btnRegister.classList.add('text-slate-900', 'dark:text-white');
+                btnRegister.classList.remove('text-slate-500');
                 btnLogin.classList.add('text-slate-500');
                 btnLogin.classList.remove('text-slate-900', 'dark:text-white');
                 formRegister.classList.remove('hidden');
@@ -166,45 +235,36 @@
             }
         }
 
-        function selectRole(role) {
-            document.getElementById('selected-role').value = role;
-            const boxCustomer = document.getElementById('role-customer');
-            const boxCraftsman = document.getElementById('role-craftsman');
-
-            if (role === 'customer') {
-                boxCustomer.className = "cursor-pointer border-2 border-fixit-500 bg-fixit-50 dark:bg-fixit-500/10 rounded-xl p-4 text-center transition-all";
-                boxCustomer.querySelector('i').className = "fa-solid fa-house-chimney-window text-2xl text-fixit-500 mb-2";
-                boxCraftsman.className = "cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-fixit-500/50 rounded-xl p-4 text-center transition-all opacity-60 hover:opacity-100";
-                boxCraftsman.querySelector('i').className = "fa-solid fa-toolbox text-2xl text-slate-400 mb-2";
-            } else {
-                boxCraftsman.className = "cursor-pointer border-2 border-fixit-500 bg-fixit-50 dark:bg-fixit-500/10 rounded-xl p-4 text-center transition-all";
-                boxCraftsman.querySelector('i').className = "fa-solid fa-toolbox text-2xl text-fixit-500 mb-2";
-                boxCustomer.className = "cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-fixit-500/50 rounded-xl p-4 text-center transition-all opacity-60 hover:opacity-100";
-                boxCustomer.querySelector('i').className = "fa-solid fa-house-chimney-window text-2xl text-slate-400 mb-2";
-            }
-        }
-
+        // ==========================================
+        // POMOCNÉ FUNKCE PRO ZPRÁVY
+        // ==========================================
         function showError(msg) {
-            const errorBox = document.getElementById('auth-error');
-            errorBox.innerText = msg;
-            errorBox.classList.remove('hidden');
+            const box = document.getElementById('auth-error');
+            box.innerText = msg;
+            box.classList.remove('hidden');
             document.getElementById('auth-success').classList.add('hidden');
         }
 
         function showSuccess(msg) {
-            const successBox = document.getElementById('auth-success');
-            successBox.innerText = msg;
-            successBox.classList.remove('hidden');
+            const box = document.getElementById('auth-success');
+            box.innerText = msg;
+            box.classList.remove('hidden');
             document.getElementById('auth-error').classList.add('hidden');
+        }
+
+        function clearMessages() {
+            document.getElementById('auth-error').classList.add('hidden');
+            document.getElementById('auth-success').classList.add('hidden');
         }
 
         // ==========================================
         // KOMUNIKACE S DATABÁZÍ SUPABASE
         // ==========================================
 
-        // 1. REGISTRACE
+        // REGISTRACE
         async function handleRegister(e) {
             e.preventDefault();
+            clearMessages();
             const btn = document.getElementById('btn-submit-register');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vytvářím účet...';
@@ -213,16 +273,15 @@
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
             const name = document.getElementById('reg-name').value;
-            const role = document.getElementById('selected-role').value;
 
-            // Zápis do Supabase
+            // Odeslání do Supabase vč. metadat (jméno a vybraná role)
             const { data, error } = await supabase.auth.signUp({
                 email: email,
                 password: password,
                 options: {
                     data: {
                         full_name: name,
-                        role: role
+                        role: activeRole // Zde posíláme roli (customer/craftsman)
                     }
                 }
             });
@@ -234,13 +293,14 @@
                 showError("Chyba při registraci: " + error.message);
             } else {
                 showSuccess("Registrace byla úspěšná! Nyní se můžete přihlásit.");
-                setTimeout(() => { switchAuthView('login'); }, 2000); // Přepne na okno přihlášení
+                setTimeout(() => { switchTab('login'); }, 2000); // Po chvíli ho to hodí na přihlášení
             }
         }
 
-        // 2. PŘIHLÁŠENÍ
+        // PŘIHLÁŠENÍ
         async function handleLogin(e) {
             e.preventDefault();
+            clearMessages();
             const btn = document.getElementById('btn-submit-login');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Přihlašuji...';
@@ -249,7 +309,7 @@
             const email = document.getElementById('log-email').value;
             const password = document.getElementById('log-password').value;
 
-            // Zápis do Supabase
+            // Odeslání přihlašovacích údajů do Supabase
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
@@ -261,11 +321,33 @@
             if (error) {
                 showError("Špatný e-mail nebo heslo.");
             } else {
-                showSuccess("Úspěšně přihlášeno!");
-                console.log("Uživatel přihlášen:", data.user);
-                // ZDE POZDĚJI PŘIDÁME PŘESMĚROVÁNÍ DO APLIKACE
+                // Přihlášení úspěšné
+                showSuccess("Úspěšně přihlášeno! Spouštím aplikaci...");
+                
+                // Můžeme si vyčíst roli z uživatelských dat
+                const userRole = data.user.user_metadata.role;
+                console.log("Přihlášen jako:", userRole, data.user);
+                
+                // ZDE BUDE POZDĚJI PŘESMĚROVÁNÍ NA NÁSTĚNKU
+                // např. window.location.href = '/dashboard.html';
             }
         }
+
+        // ==========================================
+        // DARK MODE TOGGLE (PRO TESTOVÁNÍ)
+        // ==========================================
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const updateIcons = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-toggle-dark-icon').classList.toggle('hidden', isDark);
+            document.getElementById('theme-toggle-light-icon').classList.toggle('hidden', !isDark);
+        };
+        updateIcons();
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
     </script>
 </body>
 </html>
