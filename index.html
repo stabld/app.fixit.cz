@@ -165,6 +165,20 @@
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
         <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-2"></div>
     </nav>
+
+    <!-- MODAL: NABÍDKY PRO POPTÁVKU -->
+    <div id="offers-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <h3 class="font-extrabold dark:text-white">Nabídky řemeslníků</h3>
+                    <p class="text-sm text-slate-500" id="offers-modal-title"></p>
+                </div>
+                <button onclick="closeOffersModal()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div id="offers-modal-list" class="flex-1 overflow-y-auto p-6 space-y-4 hide-scroll"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -180,20 +194,19 @@ let APP_USER = null;
 let STATE = { requests: [], messages: [], payments: [], craftJobs: [], craftEarnings: 0 };
 
 // ========== AUTH ==========
-function goToAuth(role) {
-    APP_ROLE = role;
+window.goToAuth = function(role) {
     document.getElementById('role-icon').className = role === 'customer' ? 'fa-solid fa-house' : 'fa-solid fa-toolbox';
     document.getElementById('role-text').innerText = role === 'customer' ? 'Zákazník' : 'Řemeslník';
     document.getElementById('view-role-select').classList.add('hidden');
     document.getElementById('view-auth-form').classList.remove('hidden');
     switchTab('login'); clearMsg();
 }
-function backToRoles() {
+window.backToRoles = function() {
     document.getElementById('view-auth-form').classList.add('hidden');
     document.getElementById('view-role-select').classList.remove('hidden');
     clearMsg();
 }
-function switchTab(t) {
+window.switchTab = function(t) {
     clearMsg();
     const slider = document.getElementById('tab-slider');
     document.getElementById('btn-login').classList.toggle('text-slate-500', t !== 'login');
@@ -207,7 +220,7 @@ function showErr(m) { const e = document.getElementById('auth-error'); e.innerTe
 function showOk(m) { const e = document.getElementById('auth-ok'); e.innerText = m; e.classList.remove('hidden'); document.getElementById('auth-error').classList.add('hidden'); }
 function clearMsg() { document.getElementById('auth-error').classList.add('hidden'); document.getElementById('auth-ok').classList.add('hidden'); }
 
-async function doRegister() {
+window.doRegister = async function() {
     if (!sb) return showErr("Chyba připojení k databázi.");
     const btn = document.getElementById('btn-do-reg');
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Vytvářím...'; btn.disabled = true;
@@ -224,7 +237,7 @@ async function doRegister() {
     finally { btn.innerHTML = 'Vytvořit účet'; btn.disabled = false; }
 }
 
-async function doLogin() {
+window.doLogin = async function() {
     if (!sb) return showErr("Chyba připojení k databázi.");
     const btn = document.getElementById('btn-do-login');
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Přihlašuji...'; btn.disabled = true;
@@ -243,10 +256,10 @@ async function doLogin() {
     finally { btn.innerHTML = 'Přihlásit se'; btn.disabled = false; }
 }
 
-async function doLogout() { if(sb) await sb.auth.signOut(); window.location.reload(); }
+window.doLogout = async function() { if(sb) await sb.auth.signOut(); window.location.reload(); }
 
 // ========== APP LAUNCH ==========
-function launchApp(role, name) {
+window.launchApp = function(role, name) {
     document.getElementById('auth-screen').style.opacity = '0';
     document.getElementById('auth-screen').style.transition = 'opacity 0.4s';
     setTimeout(() => {
@@ -259,7 +272,7 @@ function launchApp(role, name) {
     }, 400);
 }
 
-function initApp(role, name) {
+window.initApp = function(role, name) {
     document.getElementById('user-name').innerText = name;
     document.getElementById('user-role-lbl').innerText = role === 'customer' ? 'Zákazník' : 'Řemeslník';
     document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}&backgroundColor=${role === 'customer' ? 'f59e0b' : '0f172a'}`;
@@ -276,6 +289,18 @@ function initApp(role, name) {
 
     if (role === 'customer') initCustomer(name);
     else initCraftsman(name);
+
+    // Načti data z DB po přihlášení
+    setTimeout(async () => {
+        if (role === 'customer') {
+            await loadCustomerRequestsFromDB();
+            await loadCustomerConversations();
+        } else {
+            await loadCraftsmanJobsFromDB();
+            await loadCraftsmanConversations();
+            await loadMarketFromDB();
+        }
+    }, 500);
 }
 
 // ========== CUSTOMER APP ==========
@@ -614,7 +639,7 @@ function buildNav(items, role) {
     document.getElementById('bottom-nav-items').innerHTML = bottomHTML;
 }
 
-function goTab(id, title) {
+window.goTab = function(id, title) {
     document.querySelectorAll('.view-section, [id^="view-"]').forEach(el => {
         if(el.id && el.id.startsWith('view-')) { el.classList.add('hidden'); el.classList.remove('fade-up'); }
     });
@@ -631,6 +656,11 @@ function goTab(id, title) {
     if(botBtn) { botBtn.classList.remove('text-slate-400'); botBtn.classList.add('text-fixit-500'); }
 
     if(title) document.getElementById('page-title').innerText = title;
+
+    // Načti konverzace při přepnutí na zprávy
+    if(id === 'messages') loadCustomerConversations();
+    if(id === 'c-messages') loadCraftsmanConversations();
+    if(id === 'market') loadMarketFromDB();
 }
 
 // ========== AI POPTÁVKA ==========
@@ -638,7 +668,7 @@ let poptHistoryText = '';
 let poptBase64 = null;
 let poptMime = null;
 
-function handlePhoto(input) {
+window.handlePhoto = function(input) {
     const file = input.files[0];
     if (!file) return;
     poptMime = file.type;
@@ -707,7 +737,7 @@ ODPOVÍDEJ PŘESNĚ V TOMTO JSON FORMÁTU BEZ DALŠÍHO TEXTU:
     } catch(err) { loading.classList.add('hidden'); replyArea.classList.remove('hidden'); if(err.message !== 'Local env') alert('Chyba API: ' + err.message); }
 }
 
-function startAI() {
+window.startAI = function() {
     const txt = document.getElementById('popt-input').value.trim();
     if(!txt && !poptBase64) { alert('Popište závadu nebo nahrajte fotku.'); return; }
     document.getElementById('popt-form').classList.add('hidden');
@@ -717,7 +747,7 @@ function startAI() {
     processPopt(poptHistoryText);
 }
 
-function replyAI() {
+window.replyAI = function() {
     const inp = document.getElementById('popt-reply');
     const txt = inp.value.trim();
     if(!txt) return;
@@ -727,12 +757,27 @@ function replyAI() {
     processPopt(poptHistoryText);
 }
 
-function publishRequest() {
+window.publishRequest = async function() {
     const title = document.getElementById('r-nazev').innerText;
     const kat = document.getElementById('r-kat').innerText;
     const popis = document.getElementById('r-popis').innerText;
-    const now = new Date().toLocaleTimeString('cs', {hour:'2-digit',minute:'2-digit'});
+    const nal = document.getElementById('r-nal').innerText;
+    const cena = document.getElementById('r-cena').innerText;
 
+    // Ulož do Supabase
+    if (sb && APP_USER) {
+        try {
+            const { error } = await sb.from('requests').insert({
+                customer_id: APP_USER.id,
+                customer_name: document.getElementById('user-name').innerText,
+                title, category: kat, description: popis,
+                urgency: nal, price_estimate: cena, status: 'waiting'
+            });
+            if (error) console.error('Chyba uložení poptávky:', error);
+        } catch(e) { console.error(e); }
+    }
+
+    const now = new Date().toLocaleTimeString('cs', {hour:'2-digit',minute:'2-digit'});
     STATE.requests.unshift({ title, kat, popis, time: now, status: 'waiting' });
     refreshRequestsList();
     refreshDashboard();
@@ -750,7 +795,7 @@ function publishRequest() {
     document.getElementById('popt-form').classList.remove('hidden');
 
     goTab('requests', 'Moje poptávky');
-    setTimeout(() => { const first = document.querySelector('#requests-list .req-card'); if(first) first.classList.add('ring-2','ring-fixit-500'); setTimeout(() => first && first.classList.remove('ring-2','ring-fixit-500'), 2000); }, 100);
+    setTimeout(() => { const first = document.querySelector('#requests-list .req-card'); if(first) { first.classList.add('ring-2','ring-fixit-500'); setTimeout(() => first.classList.remove('ring-2','ring-fixit-500'), 2000); } }, 100);
 }
 
 function refreshRequestsList() {
@@ -774,14 +819,14 @@ function refreshRequestsList() {
             <p class="text-sm text-slate-500 mb-3">${req.kat} • ${req.time}</p>
             <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">${req.popis}</p>
             <div class="flex gap-2 mt-4">
-                <button class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button>
+                <button onclick="loadOffersForRequest(${req.sbId || 0}, '${(req.title||'').replace(/'/g,'\\'')}') " class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button>
                 <button onclick="markDone(${i})" class="text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-green-500 hover:text-green-600 transition">Označit hotovo</button>
             </div>`;
         list.insertBefore(div, list.querySelector('#empty-req'));
     });
 }
 
-function markDone(i) {
+window.markDone = function(i) {
     STATE.requests[i].status = 'done';
     refreshRequestsList();
     refreshDashboard();
@@ -804,69 +849,280 @@ function refreshDashboard() {
     }
 }
 
-// ========== ZPRÁVY ==========
-let activeChatId = null;
-let conversations = {};
+// ========== ZPRÁVY (Supabase realtime) ==========
+let activeChatId = null; // conversation_id = request_id
+let msgSubscription = null;
 
-function sendMsg() {
-    const inp = document.getElementById('msg-input');
-    const txt = inp.value.trim();
-    if(!txt || !activeChatId) return;
-    if(!conversations[activeChatId]) conversations[activeChatId] = [];
-    conversations[activeChatId].push({ from:'me', text:txt, time: new Date().toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}) });
-    inp.value = '';
-    renderChat('chat-msgs', activeChatId);
-    // Auto reply simulation
-    setTimeout(() => {
-        conversations[activeChatId].push({ from:'other', text:'Díky za zprávu! Brzy se ozvu.', time: new Date().toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}) });
-        renderChat('chat-msgs', activeChatId);
-    }, 1200);
+window.openConversation = async function(requestId, partnerName, partnerSeed) {
+    activeChatId = String(requestId);
+    const nameEl = document.getElementById('chat-partner-name') || document.getElementById('chat-partner-name-c');
+    const avatarEl = document.getElementById('chat-partner-avatar') || document.getElementById('chat-partner-avatar-c');
+    if(nameEl) nameEl.innerText = partnerName;
+    if(avatarEl) avatarEl.style.backgroundImage = `url(https://api.dicebear.com/7.x/avataaars/svg?seed=${partnerSeed})`;
+
+    // Označit konverzaci jako aktivní
+    document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-fixit-50','dark:bg-fixit-500/10','border-fixit-500'));
+    const activeConv = document.getElementById('conv-' + requestId);
+    if(activeConv) activeConv.classList.add('bg-fixit-50','dark:bg-fixit-500/10','border-fixit-500');
+
+    await loadMessages(requestId);
+    subscribeMessages(requestId);
 }
 
-function sendMsgC() {
-    const inp = document.getElementById('msg-input-c');
-    if(inp) { const ev = { target: inp }; }
-    sendMsg();
-}
-
-function renderChat(containerId, chatId) {
-    const box = document.getElementById(containerId);
-    if(!box || !conversations[chatId]) return;
-    box.innerHTML = conversations[chatId].map(m => `
-        <div class="flex ${m.from==='me'?'justify-end':'justify-start'}">
-            <div class="max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${m.from==='me'?'bg-fixit-500 text-white':'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white'}">
-                <p>${m.text}</p><p class="text-[10px] opacity-60 mt-1 ${m.from==='me'?'text-right':''}">${m.time}</p>
-            </div>
-        </div>
-    `).join('');
+async function loadMessages(requestId) {
+    const boxId = APP_ROLE === 'customer' ? 'chat-msgs' : 'chat-msgs-c';
+    const box = document.getElementById(boxId);
+    if(!box) return;
+    box.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">Načítám zprávy...</div>';
+    if(!sb) { box.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">Nepřipojeno k databázi.</div>'; return; }
+    const { data, error } = await sb.from('messages').select('*').eq('conversation_id', String(requestId)).order('created_at', { ascending: true });
+    if(error) { box.innerHTML = '<div class="text-center text-red-400 text-sm py-4">Chyba načítání zpráv.</div>'; return; }
+    box.innerHTML = '';
+    if(data.length === 0) { box.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">Zatím žádné zprávy. Napište první!</div>'; return; }
+    data.forEach(m => renderMessage(m, boxId));
     box.scrollTop = box.scrollHeight;
 }
 
-// ========== CRAFTSMAN ACTIONS ==========
-function applyJob(btn, title) {
-    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Nabídka odeslána!';
-    btn.className = btn.className.replace('bg-fixit-500 hover:bg-fixit-600', 'bg-green-500');
+function renderMessage(m, boxId) {
+    const box = document.getElementById(boxId);
+    if(!box) return;
+    const isMe = m.sender_id === APP_USER?.id;
+    const time = new Date(m.created_at).toLocaleTimeString('cs', {hour:'2-digit',minute:'2-digit'});
+    // Remove empty state if present
+    const empty = box.querySelector('.text-center');
+    if(empty) empty.remove();
+    const d = document.createElement('div');
+    d.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+    d.innerHTML = `<div class="max-w-[70%]">
+        ${!isMe ? `<p class="text-[10px] font-bold text-slate-400 mb-1 ml-1">${m.sender_name || 'Uživatel'}</p>` : ''}
+        <div class="px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-fixit-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white'}">
+            <p>${m.text}</p>
+            <p class="text-[10px] opacity-60 mt-1 ${isMe ? 'text-right' : ''}">${time}</p>
+        </div>
+    </div>`;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+}
+
+function subscribeMessages(requestId) {
+    if(msgSubscription) { try { sb.removeChannel(msgSubscription); } catch(e) {} }
+    if(!sb) return;
+    const boxId = APP_ROLE === 'customer' ? 'chat-msgs' : 'chat-msgs-c';
+    msgSubscription = sb.channel('msgs-' + requestId)
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`conversation_id=eq.${requestId}` },
+            payload => { if(payload.new.sender_id !== APP_USER?.id) renderMessage(payload.new, boxId); }
+        ).subscribe();
+}
+
+window.sendMsg = async function() {
+    const inp = document.getElementById('msg-input');
+    const txt = inp?.value?.trim();
+    if(!txt) return;
+    if(!activeChatId) { alert('Vyberte konverzaci.'); return; }
+    inp.value = '';
+    const msgData = { conversation_id: activeChatId, sender_id: APP_USER?.id, sender_name: document.getElementById('user-name').innerText, text: txt };
+    // Optimistické zobrazení
+    const boxId = APP_ROLE === 'customer' ? 'chat-msgs' : 'chat-msgs-c';
+    renderMessage({ ...msgData, created_at: new Date().toISOString() }, boxId);
+    if(sb) { const { error } = await sb.from('messages').insert(msgData); if(error) console.error('Chyba odeslání:', error); }
+}
+
+window.sendMsgC = async function() {
+    const inp = document.getElementById('msg-input-c');
+    if(!inp) return;
+    const txt = inp.value.trim();
+    if(!txt) return;
+    if(!activeChatId) { alert('Vyberte konverzaci.'); return; }
+    inp.value = '';
+    const msgData = { conversation_id: activeChatId, sender_id: APP_USER?.id, sender_name: document.getElementById('user-name').innerText, text: txt };
+    renderMessage({ ...msgData, created_at: new Date().toISOString() }, 'chat-msgs-c');
+    if(sb) { const { error } = await sb.from('messages').insert(msgData); if(error) console.error('Chyba odeslání:', error); }
+}
+
+// Načti konverzace zákazníka (jeho poptávky kde jsou zprávy)
+window.loadCustomerConversations = async function() {
+    const list = document.getElementById('conv-list');
+    if(!list || !sb || !APP_USER) return;
+    const { data: reqs } = await sb.from('requests').select('*').eq('customer_id', APP_USER.id).order('created_at', { ascending: false });
+    if(!reqs || reqs.length === 0) { list.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">Žádné konverzace.<br>Vytvořte poptávku!</div>'; return; }
+    list.innerHTML = reqs.map(r => `
+        <div id="conv-${r.id}" onclick="openConversation(${r.id}, 'Řemeslník', 'craftsman${r.id}')" class="conv-item p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 border-l-2 border-l-transparent transition">
+            <p class="font-bold text-sm dark:text-white truncate">${r.title}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${r.category} • <span class="text-fixit-500">${r.status === 'waiting' ? 'Hledáme profíka' : r.status === 'active' ? 'Probíhá' : 'Hotovo'}</span></p>
+        </div>
+    `).join('');
+}
+
+// Načti konverzace řemeslníka (poptávky kde podal nabídku)
+window.loadCraftsmanConversations = async function() {
+    const list = document.getElementById('conv-list-c');
+    if(!list || !sb || !APP_USER) return;
+    const { data: offers } = await sb.from('offers').select('*, requests(*)').eq('craftsman_id', APP_USER.id).order('created_at', { ascending: false });
+    if(!offers || offers.length === 0) { list.innerHTML = '<div class="p-4 text-center text-sm text-slate-400">Žádné konverzace.<br>Podejte nabídku!</div>'; return; }
+    list.innerHTML = offers.map(o => `
+        <div id="conv-${o.request_id}" onclick="openConversation(${o.request_id}, '${o.requests?.customer_name || 'Zákazník'}', 'customer${o.request_id}')" class="conv-item p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 border-l-2 border-l-transparent transition">
+            <p class="font-bold text-sm dark:text-white truncate">${o.requests?.title || 'Poptávka'}</p>
+            <p class="text-xs text-slate-400 mt-0.5">${o.requests?.category || ''} • ${o.requests?.customer_name || 'Zákazník'}</p>
+        </div>
+    `).join('');
+}
+
+// ========== NABÍDKY ŘEMESLNÍKA ==========
+window.applyJob = async function(btn, title, requestId) {
+    if(!sb || !APP_USER) { alert('Musíte být přihlášeni.'); return; }
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Odesílám...';
     btn.disabled = true;
-    STATE.craftJobs.push({ title, status:'pending', time: new Date().toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}) });
-    const cnt = document.getElementById('jobs-active-count');
-    if(cnt) cnt.innerText = STATE.craftJobs.length;
-    // Add to jobs list
-    const jobsList = document.getElementById('my-jobs-list');
-    if(jobsList) {
-        const empty = jobsList.querySelector('.text-center');
-        if(empty) empty.remove();
-        const d = document.createElement('div');
-        d.className = 'bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 fade-up';
-        d.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div><h4 class="font-bold dark:text-white text-sm">${title}</h4><p class="text-xs text-slate-500 mt-0.5">Nabídka odeslána</p></div>
-                <span class="status-badge status-waiting">Čekám</span>
-            </div>`;
-        jobsList.prepend(d);
+    try {
+        const { error } = await sb.from('offers').insert({
+            request_id: requestId,
+            craftsman_id: APP_USER.id,
+            craftsman_name: document.getElementById('user-name').innerText,
+            message: `Mám zájem o zakázku: ${title}`,
+            price: 'Dohodou',
+            status: 'pending'
+        });
+        if(error) throw error;
+        btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Nabídka odeslána!';
+        btn.className = btn.className.replace('bg-fixit-500 hover:bg-fixit-600','bg-green-500');
+        // Přidej do mých prací
+        STATE.craftJobs.push({ title, requestId, status:'pending', time: new Date().toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}) });
+        refreshCraftsmanJobs();
+        // Nastav activeChatId a otevři zprávy
+        activeChatId = String(requestId);
+    } catch(e) {
+        btn.innerHTML = 'Podat nabídku';
+        btn.disabled = false;
+        alert('Chyba: ' + e.message);
     }
 }
 
-function filterMarket(kat) {
+// Načti nabídky pro zákazníkovu poptávku
+window.loadOffersForRequest = async function(requestId, requestTitle) {
+    if(!sb) return;
+    const { data: offers } = await sb.from('offers').select('*').eq('request_id', requestId).order('created_at', { ascending: false });
+    const modal = document.getElementById('offers-modal');
+    const modalTitle = document.getElementById('offers-modal-title');
+    const modalList = document.getElementById('offers-modal-list');
+    if(!modal || !modalList) return;
+    modalTitle.innerText = requestTitle;
+    if(!offers || offers.length === 0) {
+        modalList.innerHTML = '<div class="text-center text-slate-400 py-8"><i class="fa-solid fa-inbox text-3xl mb-3"></i><p>Zatím žádné nabídky od řemeslníků.</p></div>';
+    } else {
+        modalList.innerHTML = offers.map(o => `
+            <div class="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(o.craftsman_name)}&backgroundColor=0f172a" class="w-10 h-10 rounded-full bg-slate-200">
+                    <div><p class="font-bold dark:text-white">${o.craftsman_name}</p><p class="text-xs text-slate-500">${new Date(o.created_at).toLocaleDateString('cs')}</p></div>
+                    <span class="ml-auto font-bold text-fixit-500">${o.price}</span>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">${o.message}</p>
+                <button onclick="acceptOffer(${o.id}, ${requestId}, '${o.craftsman_name}', ${o.craftsman_id ? `'${o.craftsman_id}'` : 'null'}); closeOffersModal();" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-2.5 rounded-xl font-bold text-sm transition">Přijmout nabídku & Zahájit chat</button>
+            </div>
+        `).join('');
+    }
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.add('opacity-100');
+}
+
+window.acceptOffer = async function(offerId, requestId, craftsmanName, craftsmanId) {
+    if(!sb) return;
+    // Aktualizuj status nabídky a poptávky
+    await sb.from('offers').update({ status: 'accepted' }).eq('id', offerId);
+    await sb.from('requests').update({ status: 'active' }).eq('id', requestId);
+    // Aktualizuj lokální stav
+    const req = STATE.requests.find(r => r.sbId === requestId);
+    if(req) req.status = 'active';
+    refreshRequestsList();
+    refreshDashboard();
+    // Otevři chat
+    activeChatId = String(requestId);
+    goTab('messages', 'Zprávy');
+    setTimeout(() => { openConversation(requestId, craftsmanName, 'craftsman' + requestId); }, 300);
+}
+
+window.closeOffersModal = function() {
+    const modal = document.getElementById('offers-modal');
+    if(modal) { modal.classList.add('hidden'); modal.classList.remove('opacity-100'); }
+}
+
+function refreshCraftsmanJobs() {
+    const cnt = document.getElementById('jobs-active-count');
+    if(cnt) cnt.innerText = STATE.craftJobs.length;
+    const list = document.getElementById('my-jobs-list');
+    if(!list) return;
+    const empty = list.querySelector('.text-center');
+    if(empty) empty.remove();
+    list.innerHTML = '';
+    STATE.craftJobs.forEach(job => {
+        const d = document.createElement('div');
+        d.className = 'bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 fade-up';
+        d.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <div><h4 class="font-bold dark:text-white text-sm">${job.title}</h4><p class="text-xs text-slate-500 mt-0.5">${job.time}</p></div>
+                <span class="status-badge status-waiting">Čekám na odpověď</span>
+            </div>
+            <button onclick="activeChatId='${job.requestId}'; goTab('c-messages','Zprávy'); setTimeout(()=>openConversation('${job.requestId}','Zákazník','customer${job.requestId}'),300);" class="text-xs font-bold text-fixit-500 hover:underline">Napsat zákazníkovi →</button>`;
+        list.appendChild(d);
+    });
+}
+
+// Načti nabídky řemeslníka ze Supabase po přihlášení
+async function loadCraftsmanJobsFromDB() {
+    if(!sb || !APP_USER) return;
+    const { data } = await sb.from('offers').select('*, requests(title, category)').eq('craftsman_id', APP_USER.id);
+    if(data && data.length > 0) {
+        STATE.craftJobs = data.map(o => ({ title: o.requests?.title || 'Zakázka', requestId: o.request_id, status: o.status, time: new Date(o.created_at).toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}) }));
+        refreshCraftsmanJobs();
+    }
+}
+
+// Načti poptávky zákazníka ze Supabase po přihlášení
+async function loadCustomerRequestsFromDB() {
+    if(!sb || !APP_USER) return;
+    const { data } = await sb.from('requests').select('*').eq('customer_id', APP_USER.id).order('created_at', { ascending: false });
+    if(data && data.length > 0) {
+        STATE.requests = data.map(r => ({ sbId: r.id, title: r.title, kat: r.category, popis: r.description, time: new Date(r.created_at).toLocaleTimeString('cs',{hour:'2-digit',minute:'2-digit'}), status: r.status }));
+        refreshRequestsList();
+        refreshDashboard();
+    }
+}
+
+// Načti poptávky na tržišti (všechny waiting)
+async function loadMarketFromDB() {
+    const list = document.getElementById('market-list');
+    if(!list || !sb) return;
+    const { data } = await sb.from('requests').select('*').eq('status','waiting').order('created_at', { ascending: false });
+    if(!data || data.length === 0) return; // ponech ukázková data
+    const iconMap = { 'Instalatérství':'fa-faucet-drip','Elektrikář':'fa-bolt','Malíř':'fa-paint-roller','Tesař':'fa-door-open','Zámečník':'fa-lock','default':'fa-screwdriver-wrench' };
+    list.innerHTML = data.map((r,i) => {
+        const ico = iconMap[r.category] || iconMap.default;
+        return `
+        <div class="market-item bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 hover:border-fixit-500 hover:shadow-lg transition cursor-pointer fade-up" data-kat="${r.category || 'other'}" style="animation-delay:${i*60}ms">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-fixit-50 dark:bg-fixit-500/20 text-fixit-500 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${ico}"></i></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <h4 class="font-extrabold dark:text-white leading-tight">${r.title}</h4>
+                        <span class="status-badge ${r.urgency === 'Vysoká' ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : 'status-waiting'} shrink-0">${r.urgency || 'Střední'}</span>
+                    </div>
+                    <div class="flex flex-wrap gap-3 text-xs text-slate-500 mb-4">
+                        <span><i class="fa-solid fa-tag mr-1"></i>${r.category || 'Ostatní'}</span>
+                        <span><i class="fa-solid fa-user mr-1"></i>${r.customer_name || 'Zákazník'}</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-coins mr-1 text-fixit-500"></i>${r.price_estimate || 'Dohodou'}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">${r.description || ''}</p>
+                    <div class="flex gap-2">
+                        <button onclick="applyJob(this, '${r.title.replace(/'/g,'\\'')}', ${r.id})" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-2.5 rounded-xl font-bold text-sm transition shadow hover:scale-[1.02]">Podat nabídku</button>
+                        <button class="w-10 h-10 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 transition"><i class="fa-regular fa-bookmark"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+window.filterMarket = function(kat) {
     document.querySelectorAll('.filter-btn').forEach(b => { b.className = b.className.replace('bg-fixit-500 text-white shadow','bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'); });
     event.target.className = event.target.className.replace('bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300','bg-fixit-500 text-white shadow');
     document.querySelectorAll('.market-item').forEach(item => {
