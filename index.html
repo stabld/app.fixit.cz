@@ -186,6 +186,7 @@ let STATE = { requests: [], messages: [], payments: [], craftJobs: [], craftEarn
 
 // ========== AUTH ==========
 window.goToAuth = function(role) {
+    APP_ROLE = role;
     document.getElementById('role-icon').className = role === 'customer' ? 'fa-solid fa-house' : 'fa-solid fa-toolbox';
     document.getElementById('role-text').innerText = role === 'customer' ? 'Zákazník' : 'Řemeslník';
     document.getElementById('view-role-select').classList.add('hidden');
@@ -240,8 +241,11 @@ window.doLogin = async function() {
         if (error) throw error;
         showOk("Přihlášeno! Spouštím aplikaci...");
         APP_USER = data.user;
-        const role = data.user.user_metadata?.role || APP_ROLE;
+        
+        // OPRAVENÝ ŘÁDEK: Natvrdo použijeme zvolenou roli, ignorujeme stará data v DB
+        const role = APP_ROLE; 
         const name = data.user.user_metadata?.full_name || 'Uživatel';
+        
         setTimeout(() => launchApp(role, name), 900);
     } catch(e) { showErr("Špatný e-mail nebo heslo."); }
     finally { btn.innerHTML = 'Přihlásit se'; btn.disabled = false; }
