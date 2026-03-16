@@ -242,7 +242,7 @@ window.doLogin = async function() {
         showOk("Přihlášeno! Spouštím aplikaci...");
         APP_USER = data.user;
         
-        // OPRAVENÝ ŘÁDEK: Natvrdo použijeme zvolenou roli, ignorujeme stará data v DB
+        // Natvrdo použijeme zvolenou roli, ignorujeme stará data v DB
         const role = APP_ROLE; 
         const name = data.user.user_metadata?.full_name || 'Uživatel';
         
@@ -488,7 +488,10 @@ function craftsmanHTML(name) {
             <button onclick="filterMarket('Zámečník')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Zámečník</button>
         </div>
         <div id="market-list" class="space-y-4">
-            ${generateMarketItems()}
+            <div class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-fixit-500 mb-4"></i>
+                <p class="font-bold text-slate-500">Načítám poptávky...</p>
+            </div>
         </div>
     </div>
 
@@ -564,40 +567,6 @@ function craftsmanHTML(name) {
         </div>
     </div>
     `;
-}
-
-function generateMarketItems() {
-    const items = [
-        { kat:'Instalatérství', tit:'Oprava kohoutku v koupelně – kapání', cena:'800–1 500 Kč', nal:'Střední', cas:'15 min', brno:'Brno-střed', ico:'fa-faucet-drip' },
-        { kat:'Elektrikář', tit:'Nefunkční zásuvky v obývacím pokoji', cena:'500–1 200 Kč', nal:'Nízká', cas:'45 min', brno:'Brno-Žabovřesky', ico:'fa-bolt' },
-        { kat:'Malíř', tit:'Vymalování pokoje 15m² – bílá barva', cena:'2 000–3 500 Kč', nal:'Nízká', cas:'2 hod', brno:'Brno-Bystrc', ico:'fa-paint-roller' },
-        { kat:'Tesař', tit:'Oprava dřevěných dveří – nenaléhají', cena:'600–1 000 Kč', nal:'Nízká', cas:'1 hod', brno:'Brno-Líšeň', ico:'fa-door-open' },
-        { kat:'Instalatérství', tit:'Ucpaný odpad v kuchyni', cena:'400–800 Kč', nal:'Vysoká', cas:'30 min', brno:'Brno-Královo Pole', ico:'fa-sink' },
-        { kat:'Zámečník', tit:'Výměna zámkové vložky – bezpečnostní', cena:'1 200–2 000 Kč', nal:'Střední', cas:'1 hod', brno:'Brno-Kohoutovice', ico:'fa-lock' },
-    ];
-    return items.map((item, i) => `
-        <div class="market-item bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 hover:border-fixit-500 hover:shadow-lg transition cursor-pointer fade-up" data-kat="${item.kat}" style="animation-delay:${i*60}ms">
-            <div class="flex items-start gap-4">
-                <div class="w-12 h-12 bg-fixit-50 dark:bg-fixit-500/20 text-fixit-500 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${item.ico}"></i></div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                        <h4 class="font-extrabold dark:text-white leading-tight">${item.tit}</h4>
-                        <span class="status-badge ${item.nal === 'Vysoká' ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' : item.nal === 'Střední' ? 'status-waiting' : 'status-done'} shrink-0">${item.nal}</span>
-                    </div>
-                    <div class="flex flex-wrap gap-3 text-xs text-slate-500 mb-4">
-                        <span><i class="fa-solid fa-tag mr-1"></i>${item.kat}</span>
-                        <span><i class="fa-solid fa-location-dot mr-1 text-fixit-500"></i>${item.brno}</span>
-                        <span><i class="fa-solid fa-clock mr-1"></i>Přidáno ${item.cas} zpět</span>
-                        <span class="font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-coins mr-1 text-fixit-500"></i>${item.cena}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="applyJob(this, '${item.tit.replace(/'/g,'\\\'')}')" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-2.5 rounded-xl font-bold text-sm transition shadow hover:scale-[1.02]">Podat nabídku</button>
-                        <button class="w-10 h-10 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 transition"><i class="fa-regular fa-bookmark"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
 }
 
 // ========== NAV ==========
@@ -1071,8 +1040,22 @@ async function loadCustomerRequestsFromDB() {
 async function loadMarketFromDB() {
     const list = document.getElementById('market-list');
     if(!list || !sb) return;
-    const { data } = await sb.from('requests').select('*').eq('status','waiting').order('created_at', { ascending: false });
-    if(!data || data.length === 0) return; // ponech ukázková data
+    
+    // Načtení dat ze Supabase
+    const { data, error } = await sb.from('requests').select('*').eq('status','waiting').order('created_at', { ascending: false });
+    
+    // Pokud nejsou žádná data, ukaž prázdný stav
+    if(error || !data || data.length === 0) { 
+        list.innerHTML = `
+            <div class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+                <i class="fa-solid fa-inbox text-4xl text-slate-300 dark:text-slate-600 mb-4"></i>
+                <p class="font-bold text-slate-500">Zatím zde nejsou žádné nové poptávky.</p>
+                <p class="text-sm text-slate-400 mt-1">Zkuste to znovu později.</p>
+            </div>`;
+        return; 
+    }
+    
+    // Pokud data jsou, vykresli reálné karty
     const iconMap = { 'Instalatérství':'fa-faucet-drip','Elektrikář':'fa-bolt','Malíř':'fa-paint-roller','Tesař':'fa-door-open','Zámečník':'fa-lock','default':'fa-screwdriver-wrench' };
     list.innerHTML = data.map((r,i) => {
         const ico = iconMap[r.category] || iconMap.default;
