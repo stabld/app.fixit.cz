@@ -73,8 +73,8 @@
                 <i id="role-icon" class="fa-solid fa-house"></i><span id="role-text">Zákazník</span>
             </div>
             <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-6">
-                <button onclick="switchTab('login')" id="btn-login" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 dark:text-white">Přihlášení</button>
-                <button onclick="switchTab('register')" id="btn-reg" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 text-slate-500">Registrace</button>
+                <button onclick="switchTab('login')" id="btn-login" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 dark:text-white transition-colors">Přihlášení</button>
+                <button onclick="switchTab('register')" id="btn-reg" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 text-slate-500 transition-colors">Registrace</button>
                 <div id="tab-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300"></div>
             </div>
             <div id="auth-error" class="hidden mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 text-red-600 rounded-xl text-sm font-bold text-center"></div>
@@ -332,18 +332,27 @@ window.publishRequest = async function() {
     const nal = document.getElementById("r-nal").innerText;
     const cena = document.getElementById("r-cena").innerText;
     
-    // Získání dat z doplňujícího formuláře
-    const location = document.getElementById("f-location").value.trim();
+    const street = document.getElementById("f-street").value.trim();
+    const city = document.getElementById("f-city").value.trim();
+    const phone = document.getElementById("f-phone").value.trim();
     const timeframe = document.getElementById("f-timeframe").value;
+    const property = document.getElementById("f-property").value;
+    const parking = document.getElementById("f-parking").value;
 
-    if (!location) {
-        alert("Prosím, vyplňte lokalitu, abychom mohli najít řemeslníka ve vašem okolí.");
-        document.getElementById("f-location").focus();
+    if (!street || !city || !phone) {
+        alert("Prosím, vyplňte ulici, město a telefonní číslo, aby se s vámi mohl řemeslník spojit.");
         return;
     }
 
-    // Přidání lokality a termínu k popisu
-    const finalPopis = `Lokalita: ${location}\nPreferovaný termín: ${timeframe}\n\n${popis}`;
+    const detailInfo = [
+        `📍 Adresa: ${street}, ${city}`,
+        `📞 Telefon: ${phone}`,
+        `📅 Termín: ${timeframe}`,
+        `🏠 Typ objektu: ${property}`,
+        `🚗 Parkování: ${parking}`
+    ].join('\n');
+
+    const finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
 
     let sbId = null;
 
@@ -359,18 +368,23 @@ window.publishRequest = async function() {
         }
         catch(e) { console.error(e); }
     }
+    
     const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
     STATE.requests.unshift({ sbId: sbId, title, kat, popis: finalPopis, time: now, status: "waiting" });
-    refreshRequestsList(); refreshDashboard();
+    refreshRequestsList(); 
+    refreshDashboard();
+    
     poptHistoryText = ""; poptBase64 = null; poptMime = null;
     document.getElementById("popt-input").value = "";
-    document.getElementById("f-location").value = "";
+    document.getElementById("f-street").value = "";
+    document.getElementById("f-city").value = "";
+    document.getElementById("f-phone").value = "";
+    
     document.getElementById("popt-chat-msgs").innerHTML = "";
     document.getElementById("photo-preview").classList.add("hidden");
     document.getElementById("photo-zone").querySelector("i").classList.remove("hidden");
     document.getElementById("photo-zone").querySelector("p").classList.remove("hidden");
     
-    // Reset vizuálních částí poptávky
     ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id => document.getElementById(id)?.classList.add("hidden"));
     document.getElementById("btn-show-finalize").classList.remove("hidden");
     document.getElementById("popt-form").classList.remove("hidden");
@@ -525,21 +539,53 @@ function customerHTML(name) {
                     <button id="btn-show-finalize" onclick="showFinalizeForm()" class="w-full mt-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Pokračovat k detailům</button>
                     
                     <div id="popt-finalize" class="hidden mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
-                        <h4 class="font-extrabold dark:text-white mb-4">Doplňující informace</h4>
-                        <div class="grid md:grid-cols-2 gap-4 mb-6">
-                             <div>
-                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Lokalita (Město / PSČ) *</label>
-                                 <input type="text" id="f-location" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno">
-                             </div>
-                             <div>
-                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Kdy potřebujete opravu?</label>
-                                 <select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
-                                     <option>Co nejdříve (Havarijní stav)</option>
-                                     <option>Během několika dnů</option>
-                                     <option>Nespěchá (během měsíce)</option>
-                                 </select>
-                             </div>
+                        <h4 class="text-lg font-extrabold dark:text-white mb-4">Doplňující údaje pro řemeslníka</h4>
+                        
+                        <div class="grid md:grid-cols-3 gap-4 mb-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ulice a číslo popisné *</label>
+                                <input type="text" id="f-street" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Masarykova 15">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Město *</label>
+                                <input type="text" id="f-city" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno">
+                            </div>
                         </div>
+
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Telefonní číslo *</label>
+                                <input type="tel" id="f-phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Termín a dostupnost</label>
+                                <select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                    <option value="Havarijní stav (Co nejdříve)">Havarijní stav (Co nejdříve)</option>
+                                    <option value="Během několika dnů">Během několika dnů</option>
+                                    <option value="Nespěchá (do měsíce)">Nespěchá (do měsíce)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Typ nemovitosti</label>
+                                <select id="f-property" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                    <option value="Byt">Byt</option>
+                                    <option value="Rodinný dům">Rodinný dům</option>
+                                    <option value="Komerční prostor">Komerční prostor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Možnost parkování</label>
+                                <select id="f-parking" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                    <option value="Bezproblémové (vlastní pozemek / volná ulice)">Bezproblémové (vlastní / volná ulice)</option>
+                                    <option value="Placené zóny / modré zóny">Placené zóny / modré zóny</option>
+                                    <option value="Velmi špatné parkování">Velmi špatné parkování</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <button onclick="publishRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Zveřejnit poptávku na Fixit</button>
                     </div>
                 </div>
@@ -646,16 +692,13 @@ function refreshRequestsList() {
     
     const empty = document.getElementById("empty-req");
     
-    // 1. NEJPRVE VYMAŽEME VŠECHNY KARTY Z OBRAZOVKY
     list.querySelectorAll(".req-card").forEach(c => c.remove());
 
-    // 2. POKUD UŽ NEJSOU ŽÁDNÉ POPTÁVKY, UKÁŽEME PRÁZDNÝ BLOK A SKONČÍME
     if (STATE.requests.length === 0) { 
         if(empty) empty.classList.remove("hidden"); 
         return; 
     }
     
-    // 3. JINAK SCHOVÁME PRÁZDNÝ BLOK A VYKRESLÍME AKTUÁLNÍ POPTÁVKY
     if (empty) empty.classList.add("hidden");
     
     STATE.requests.forEach((req, i) => {
