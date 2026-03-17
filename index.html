@@ -354,6 +354,8 @@ window.publishRequest = async function() {
 
     const finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
 
+    const currentPhoto = poptBase64;
+    const currentMime = poptMime;
     let sbId = null;
 
     if (sb && APP_USER) {
@@ -370,7 +372,7 @@ window.publishRequest = async function() {
     }
     
     const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-    STATE.requests.unshift({ sbId: sbId, title, kat, popis: finalPopis, time: now, status: "waiting" });
+    STATE.requests.unshift({ sbId: sbId, title, kat, popis: finalPopis, time: now, status: "waiting", photo: currentPhoto, mime: currentMime });
     refreshRequestsList(); 
     refreshDashboard();
     
@@ -706,6 +708,10 @@ function refreshRequestsList() {
         const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
         const div = document.createElement("div");
         div.className = "req-card bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-fixit-500 hover:shadow-md transition fade-up relative group";
+        
+        // Zobrazení fotky, pokud existuje (z lokální paměti)
+        const photoHtml = req.photo ? `<div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900"><img src="data:${req.mime||'image/jpeg'};base64,${req.photo}" class="w-full h-full object-cover"></div>` : '';
+
         div.innerHTML = `
             <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onclick="deleteRequest(${i}, ${req.sbId || 'null'})" class="text-slate-400 hover:text-red-500 transition" title="Smazat poptávku"><i class="fa-solid fa-trash-can"></i></button>
@@ -715,7 +721,12 @@ function refreshRequestsList() {
                 <span class="status-badge ${badgeMap[req.status]} shrink-0">${statusMap[req.status]}</span>
             </div>
             <p class="text-sm text-slate-500 mb-3">${req.kat} • ${req.time}</p>
-            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">${req.popis}</p>
+            
+            <div class="flex gap-4 mb-4">
+                ${photoHtml}
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-4 flex-1">${req.popis}</p>
+            </div>
+            
             <div class="flex gap-2 mt-4">
                 <button onclick="loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button>
                 <button onclick="markDone(${i})" class="text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-green-500 hover:text-green-600 transition">Označit hotovo</button>
