@@ -170,6 +170,7 @@ window.switchTab = function(t) {
     clearMsg();
     document.getElementById("tab-slider").style.transform = t === "register" ? "translateX(100%)" : "translateX(0)";
     document.getElementById("btn-login").classList.toggle("text-slate-500", t !== "login");
+    document.getElementById("btn-login").classList.toggle("dark:text-white", t === "login");
     document.getElementById("btn-reg").classList.toggle("text-slate-500", t !== "register");
     document.getElementById("form-login").classList.toggle("hidden", t !== "login");
     document.getElementById("form-reg").classList.toggle("hidden", t !== "register");
@@ -200,8 +201,9 @@ window.doLogin = async function() {
         if (error) throw error;
         showOk("Přihlášeno! Spouštím aplikaci...");
         APP_USER = data.user;
+        const role = APP_ROLE;
         const name = data.user.user_metadata?.full_name || "Uživatel";
-        setTimeout(() => launchApp(APP_ROLE, name), 900);
+        setTimeout(() => launchApp(role, name), 900);
     } catch(e) { showErr("Špatný e-mail nebo heslo."); }
     finally { btn.innerHTML = "Přihlásit se"; btn.disabled = false; }
 }
@@ -235,7 +237,6 @@ window.initApp = function(role, name) {
 }
 
 window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
-    // URL adresu '/api/gemini' možná ještě upravíme podle toho, co zjistíš z minulého webu
     const res = await fetch('/api/gemini', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
@@ -358,7 +359,6 @@ window.deleteRequest = async function(index, sbId) {
     if (sbId && sb) {
         try {
             await sb.from("requests").delete().eq("id", sbId);
-            // Smažeme také případné nabídky a zprávy (ideálně by mělo být nastaveno ON DELETE CASCADE v databázi, ale pro jistotu)
             await sb.from("offers").delete().eq("request_id", sbId);
             await sb.from("messages").delete().eq("conversation_id", String(sbId));
         } catch(e) { console.error("Chyba při mazání z DB:", e); }
@@ -593,11 +593,23 @@ window.goTab = function(id, title) {
 }
 
 function refreshRequestsList() {
-    const list = document.getElementById("requests-list"); if (!list) return;
+    const list = document.getElementById("requests-list"); 
+    if (!list) return;
+    
     const empty = document.getElementById("empty-req");
-    if (STATE.requests.length === 0) { if(empty) empty.classList.remove("hidden"); return; }
-    if (empty) empty.classList.add("hidden");
+    
+    // 1. NEJPRVE VYMAŽEME VŠECHNY KARTY Z OBRAZOVKY
     list.querySelectorAll(".req-card").forEach(c => c.remove());
+
+    // 2. POKUD UŽ NEJSOU ŽÁDNÉ POPTÁVKY, UKÁŽEME PRÁZDNÝ BLOK A SKONČÍME
+    if (STATE.requests.length === 0) { 
+        if(empty) empty.classList.remove("hidden"); 
+        return; 
+    }
+    
+    // 3. JINAK SCHOVÁME PRÁZDNÝ BLOK A VYKRESLÍME AKTUÁLNÍ POPTÁVKY
+    if (empty) empty.classList.add("hidden");
+    
     STATE.requests.forEach((req, i) => {
         const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
         const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
