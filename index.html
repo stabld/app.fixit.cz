@@ -25,15 +25,15 @@
         .poptavka-bubble-user { background:#f59e0b; color:white; border-radius:18px 18px 2px 18px; padding:12px 20px; max-width:80%; align-self:flex-end; }
         .poptavka-bubble-ai { background:#f1f5f9; color:#0f172a; border-radius:18px 18px 18px 2px; padding:12px 20px; max-width:80%; align-self:flex-start; border:1px solid #e2e8f0; }
         .dark .poptavka-bubble-ai { background:#1e293b; color:#f8fafc; border-color:#334155; }
-        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+        .status-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .status-waiting { background:#fef3c7; color:#b45309; }
         .status-active { background:#dcfce7; color:#166534; }
         .status-done { background:#f1f5f9; color:#475569; }
-        .dark .status-waiting { background:rgba(245,158,11,0.2); color:#fbbf24; }
-        .dark .status-active { background:rgba(34,197,94,0.2); color:#4ade80; }
-        .dark .status-done { background:rgba(100,116,139,0.2); color:#94a3b8; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-        .fade-up { animation: fadeUp 0.35s ease forwards; }
+        .dark .status-waiting { background:rgba(245,158,11,0.2); color:#fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .dark .status-active { background:rgba(34,197,94,0.2); color:#4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .dark .status-done { background:rgba(100,116,139,0.2); color:#94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        .fade-up { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @media (max-width: 1023px) { #sidebar { display: none; } #mobile-bottom-nav { display: flex; } #main-content { padding-bottom: 80px; } }
         @media (min-width: 1024px) { #mobile-bottom-nav { display: none; } }
     </style>
@@ -44,6 +44,20 @@
     </script>
 </head>
 <body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white h-screen overflow-hidden">
+
+<div id="page-loader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0f172a] transition-all duration-700 ease-in-out">
+    <div class="relative w-24 h-24 flex items-center justify-center mb-6">
+        <div class="absolute inset-0 border-4 border-slate-200 dark:border-slate-800 rounded-[2rem] opacity-50"></div>
+        <div class="absolute inset-0 border-4 border-fixit-500 rounded-[2rem] border-t-transparent animate-spin"></div>
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" class="animate-pulse"><path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/><circle cx="50" cy="48" r="16" fill="white"/><path d="M40 58 L30 68 L45 64 Z" fill="white"/></svg>
+    </div>
+    <h2 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-3">Fixit</h2>
+    <div class="flex items-center gap-2">
+        <div class="w-2.5 h-2.5 bg-fixit-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+        <div class="w-2.5 h-2.5 bg-fixit-500 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
+        <div class="w-2.5 h-2.5 bg-fixit-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+    </div>
+</div>
 
 <div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4">
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
@@ -127,7 +141,7 @@
                 <div id="header-cta"></div>
             </div>
         </header>
-        <div id="main-content" class="flex-1 overflow-y-auto p-6 hide-scroll"></div>
+        <div id="main-content" class="flex-1 overflow-y-auto p-6 hide-scroll max-w-6xl mx-auto w-full"></div>
     </main>
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
         <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-2"></div>
@@ -144,6 +158,20 @@
 </div>
 
 <script>
+// --- PAGE LOADER ANIMATION LOGIC ---
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const loader = document.getElementById('page-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.transform = 'scale(1.05)';
+            loader.style.pointerEvents = 'none';
+            setTimeout(() => loader.remove(), 700);
+        }
+    }, 1000); 
+});
+
+// --- SUPABASE INICIALIZACE ---
 const SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
 const SB_KEY = "sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc";
 let sb = null;
@@ -153,6 +181,106 @@ let APP_ROLE = "customer";
 let APP_USER = null;
 let STATE = { requests: [], craftJobs: [] };
 
+// --- FUNKCE PRO VYKRESLENÍ KRÁSNÝCH KARET (PARSOVÁNÍ TEXTU) ---
+function createBeautifulCard(req, isMarket, i) {
+    const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
+    const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
+    
+    let mainDesc = req.popis || "";
+    let detailsHtml = "";
+    
+    if (mainDesc.includes("---")) {
+        const parts = mainDesc.split("---");
+        mainDesc = parts[0].trim();
+        let rawDetails = parts[1].replace("📋 DOPLŇUJÍCÍ INFORMACE:", "").trim();
+        
+        const detailItems = rawDetails.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+        if (detailItems.length > 0) {
+            detailsHtml = `
+            <div class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-700/50">
+                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Doplňující informace</p>
+                <div class="flex flex-wrap gap-2">
+                    ${detailItems.map(item => `<div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">${item}</div>`).join('')}
+                </div>
+            </div>`;
+        }
+    }
+
+    const photoHtml = req.photo ? `
+        <div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer">
+            <img src="data:${req.mime||'image/jpeg'};base64,${req.photo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+        </div>` : '';
+
+    if (!isMarket) {
+        return `
+        <div class="req-card relative bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group fade-up overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full ${req.status === 'done' ? 'bg-slate-300 dark:bg-slate-700' : 'bg-fixit-500'}"></div>
+            
+            <div class="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <button onclick="deleteRequest(${i}, ${req.sbId || 'null'})" class="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm" title="Smazat poptávku"><i class="fa-solid fa-trash-can text-sm"></i></button>
+            </div>
+            
+            <div class="pl-2">
+                <div class="flex items-center gap-3 mb-3 pr-10">
+                    <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wide"><i class="fa-solid fa-tag mr-1.5 opacity-70"></i>${req.kat}</span>
+                    <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wide"><i class="fa-regular fa-clock mr-1.5 opacity-70"></i>${req.time}</span>
+                </div>
+
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <h4 class="text-xl md:text-2xl font-extrabold dark:text-white leading-tight">${req.title}</h4>
+                    <span class="status-badge ${badgeMap[req.status]} shrink-0">${statusMap[req.status]}</span>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-5 mb-2">
+                    ${photoHtml}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">${mainDesc}</p>
+                    </div>
+                </div>
+
+                ${detailsHtml}
+
+                <div class="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
+                    <button onclick="loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-md">Zobrazit nabídky řemeslníků</button>
+                    <button onclick="markDone(${i})" class="px-6 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-check mr-2"></i>Označit hotovo</button>
+                </div>
+            </div>
+        </div>`;
+    } else {
+        const iconMap = { "Instalatérství":"fa-faucet-drip","Elektrikář":"fa-bolt","Malíř":"fa-paint-roller","Tesař":"fa-door-open","Zámečník":"fa-lock","default":"fa-screwdriver-wrench" };
+        return `
+        <div class="market-item bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 hover:border-fixit-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer fade-up overflow-hidden relative group" data-kat="${req.category||"other"}" style="animation-delay:${i*60}ms">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-fixit-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="pl-2">
+                <div class="flex items-start gap-5">
+                    <div class="w-14 h-14 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-inner border border-fixit-100 dark:border-fixit-500/20"><i class="fa-solid ${iconMap[req.category]||iconMap.default}"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <h4 class="text-xl font-extrabold dark:text-white leading-tight">${req.title}</h4>
+                            <span class="status-badge ${req.urgency==="Vysoká"?"bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400":"status-waiting"} shrink-0">${req.urgency||"Střední"}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-4">
+                            <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-tag mr-1.5 opacity-70"></i>${req.category||"Ostatní"}</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-user mr-1.5 opacity-70"></i>${req.customer_name||"Zákazník"}</span>
+                            <span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-2 py-1 rounded"><i class="fa-solid fa-coins mr-1.5"></i>${req.price_estimate||"Dohodou"}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">${mainDesc}</p>
+                        
+                        ${detailsHtml}
+                        
+                        <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
+                            <button onclick="applyJob(this,'${(req.title||'').replace(/'/g,"\\'")}',${req.id})" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Podat nabídku řemeslníka</button>
+                            <button class="w-12 h-12 border-2 border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 hover:bg-fixit-50 dark:hover:bg-fixit-500/10 transition-colors"><i class="fa-regular fa-bookmark"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+}
+
+// --- AUTH FUNKCE ---
 window.goToAuth = function(role) {
     APP_ROLE = role;
     document.getElementById("role-icon").className = role === "customer" ? "fa-solid fa-house" : "fa-solid fa-toolbox";
@@ -180,7 +308,7 @@ function showOk(m) { const e = document.getElementById("auth-ok"); e.innerText =
 function clearMsg() { document.getElementById("auth-error").classList.add("hidden"); document.getElementById("auth-ok").classList.add("hidden"); }
 
 window.doRegister = async function() {
-    if (!sb) return showErr("Chyba připojení.");
+    if (!sb) return showErr("Chyba připojení k databázi.");
     const btn = document.getElementById("btn-do-reg");
     btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Vytvářím..."; btn.disabled = true;
     try {
@@ -193,7 +321,7 @@ window.doRegister = async function() {
 }
 
 window.doLogin = async function() {
-    if (!sb) return showErr("Chyba připojení.");
+    if (!sb) return showErr("Chyba připojení k databázi.");
     const btn = document.getElementById("btn-do-login");
     btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Přihlašuji..."; btn.disabled = true;
     try {
@@ -236,13 +364,13 @@ window.initApp = function(role, name) {
     }, 500);
 }
 
+// --- AI FUNKCE ---
 window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
     const res = await fetch('/api/gemini', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ parts, systemPrompt, useJson }) 
     });
-    
     const data = await res.json();
     if(!res.ok) throw new Error(data.error || 'API chyba');
     return data.text;
@@ -395,7 +523,6 @@ window.publishRequest = async function() {
 
 window.deleteRequest = async function(index, sbId) {
     if(!confirm("Opravdu chcete tuto poptávku smazat?")) return;
-
     if (sbId && sb) {
         try {
             await sb.from("requests").delete().eq("id", sbId);
@@ -403,7 +530,6 @@ window.deleteRequest = async function(index, sbId) {
             await sb.from("messages").delete().eq("conversation_id", String(sbId));
         } catch(e) { console.error("Chyba při mazání z DB:", e); }
     }
-
     STATE.requests.splice(index, 1);
     refreshRequestsList();
     refreshDashboard();
@@ -411,7 +537,7 @@ window.deleteRequest = async function(index, sbId) {
 
 function initCustomer(name) {
     buildNav([{id:"dash",icon:"fa-house",label:"Nástěnka"},{id:"requests",icon:"fa-list-check",label:"Moje poptávky"},{id:"messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"payments",icon:"fa-shield-halved",label:"Platby & Escrow"}]);
-    document.getElementById("header-cta").innerHTML = "<button onclick=\"goTab(\'new\',\'Nová poptávka\')\" class=\"bg-fixit-500 hover:bg-fixit-600 text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow transition\"><i class=\"fa-solid fa-plus\"></i> Nová poptávka</button>";
+    document.getElementById("header-cta").innerHTML = "<button onclick=\"goTab(\'new\',\'Nová poptávka\')\" class=\"bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105\"><i class=\"fa-solid fa-plus\"></i> Nová poptávka</button>";
     document.getElementById("main-content").innerHTML = customerHTML(name);
     goTab("dash", "Nástěnka");
 }
@@ -420,167 +546,189 @@ function customerHTML(name) {
     const first = name.split(" ")[0];
     return `
     <div id="view-dash" class="hidden fade-up">
-        <div class="mb-8"><h2 class="text-2xl font-extrabold mb-1 dark:text-white">Vítejte, ${first} 👋</h2><p class="text-slate-500">Přehled vašich aktivit na platformě Fixit.</p></div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Aktivní</p><p class="text-3xl font-extrabold text-fixit-500" id="stat-active">0</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Celkem</p><p class="text-3xl font-extrabold dark:text-white" id="stat-total">0</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Zprávy</p><p class="text-3xl font-extrabold dark:text-white" id="stat-msgs">0</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">V Escrow</p><p class="text-3xl font-extrabold dark:text-white" id="stat-escrow">0 Kč</p></div>
+        <div class="mb-10"><h2 class="text-3xl font-extrabold mb-2 dark:text-white">Vítejte, ${first} 👋</h2><p class="text-slate-500 text-lg">Přehled vašich aktivit na platformě Fixit.</p></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Aktivní</p><p class="text-4xl font-black text-fixit-500" id="stat-active">0</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Celkem</p><p class="text-4xl font-black dark:text-white" id="stat-total">0</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Zprávy</p><p class="text-4xl font-black dark:text-white" id="stat-msgs">0</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">V Escrow</p><p class="text-4xl font-black dark:text-white" id="stat-escrow">0 Kč</p></div>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            <h3 class="font-extrabold mb-4 dark:text-white">Poslední poptávky</h3>
-            <div id="dash-requests-list"><p class="text-slate-400 text-sm text-center py-6">Zatím žádné poptávky. <button onclick="goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p></div>
+        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-8">
+            <h3 class="text-xl font-extrabold mb-6 dark:text-white">Poslední poptávky</h3>
+            <div id="dash-requests-list"><p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p></div>
         </div>
     </div>
+    
     <div id="view-requests" class="hidden fade-up">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-extrabold dark:text-white">Moje poptávky</h2>
-            <button onclick="goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 shadow"><i class="fa-solid fa-plus"></i> Nová</button>
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-extrabold dark:text-white">Moje poptávky</h2>
+            <button onclick="goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová</button>
         </div>
-        <div id="requests-list" class="space-y-3">
-            <div id="empty-req" class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-                <i class="fa-solid fa-folder-open text-4xl text-slate-300 dark:text-slate-600 mb-4"></i>
-                <p class="font-bold text-slate-500">Zatím zde nic není.</p>
-                <button onclick="goTab('new','Nová poptávka')" class="mt-4 text-fixit-500 font-bold hover:underline text-sm">Vytvořit první →</button>
+        <div id="requests-list" class="space-y-5">
+            <div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl">
+                <i class="fa-solid fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i>
+                <p class="font-bold text-slate-500 text-lg">Zatím zde nic není.</p>
+                <button onclick="goTab('new','Nová poptávka')" class="mt-4 text-fixit-500 font-bold hover:underline text-sm">Vytvořit první poptávku →</button>
             </div>
         </div>
     </div>
-    <div id="view-messages" class="hidden fade-up max-w-4xl">
-        <h2 class="text-2xl font-extrabold mb-6 dark:text-white">Zprávy</h2>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden" style="height:500px;display:flex;">
-            <div class="w-72 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
-                <div id="conv-list" class="flex-1 overflow-y-auto hide-scroll"><div class="p-6 text-center text-sm text-slate-400">Žádné konverzace</div></div>
+
+    <div id="view-messages" class="hidden fade-up">
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
+        <div class="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" style="height:600px;display:flex;">
+            <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col bg-slate-50/50 dark:bg-transparent">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
+                <div id="conv-list" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Žádné konverzace</div></div>
             </div>
-            <div class="flex-1 flex flex-col">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
-                    <div id="chat-partner-avatar" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center shrink-0"></div>
-                    <p class="font-bold text-sm dark:text-white" id="chat-partner-name">Vyberte konverzaci</p>
+            <div class="flex-1 flex flex-col relative">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-4 bg-white/50 dark:bg-transparent backdrop-blur-md z-10">
+                    <div id="chat-partner-avatar" class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center shrink-0 shadow-inner"></div>
+                    <p class="font-extrabold dark:text-white" id="chat-partner-name">Vyberte konverzaci</p>
                 </div>
-                <div id="chat-msgs" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3"></div>
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-3">
-                    <input type="text" id="msg-input" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')sendMsg()" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
-                    <button onclick="sendMsg()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+                <div id="chat-msgs" class="flex-1 overflow-y-auto hide-scroll p-6 flex flex-col gap-4"></div>
+                <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex gap-3 bg-slate-50 dark:bg-transparent">
+                    <input type="text" id="msg-input" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')sendMsg()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm">
+                    <button onclick="sendMsg()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition shrink-0 shadow-md hover:scale-105"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
     </div>
-    <div id="view-payments" class="hidden fade-up max-w-3xl">
-        <h2 class="text-2xl font-extrabold mb-6 dark:text-white">Platby & Escrow</h2>
-        <div class="bg-gradient-to-br from-fixit-500 to-fixit-600 rounded-2xl p-6 mb-6 text-white shadow-xl">
-            <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Peníze v úschově</p>
-            <p class="text-4xl font-extrabold mb-4">0 Kč</p>
-            <p class="text-sm opacity-80">Blokováno do potvrzení dokončení opravy.</p>
+    
+    <div id="view-payments" class="hidden fade-up max-w-4xl">
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Platby & Escrow</h2>
+        <div class="bg-gradient-to-br from-fixit-500 to-fixit-600 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 text-white/10 text-9xl"><i class="fa-solid fa-shield-halved"></i></div>
+            <p class="text-xs font-black uppercase tracking-widest opacity-80 mb-2 relative z-10">Peníze v bezpečné úschově</p>
+            <p class="text-5xl font-black mb-4 relative z-10">0 Kč</p>
+            <p class="text-sm opacity-90 relative z-10">Peníze jsou zablokovány u Fixit do vašeho potvrzení o dokončení opravy.</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 text-center text-sm text-slate-400 py-8">Žádné platby.</div>
+        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné platby.</div>
     </div>
-    <div id="view-new" class="hidden fade-up max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-72 h-72 bg-fixit-500/10 rounded-full blur-[80px] pointer-events-none"></div>
-            <div class="mb-8 flex items-center gap-5 relative z-10">
-                <div class="w-14 h-14 rounded-full bg-fixit-500 flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-hard-hat text-xl"></i></div>
-                <div><h3 class="text-xl font-extrabold dark:text-white">Asistent Bořek</h3><p class="text-fixit-600 dark:text-fixit-500 text-xs font-bold uppercase tracking-widest">Příprava zakázky</p></div>
+    
+    <div id="view-new" class="hidden fade-up max-w-5xl mx-auto">
+        <div class="bg-white dark:bg-[#0f172a] p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+            <div class="absolute top-[-20%] right-[-10%] w-96 h-96 bg-fixit-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+            
+            <div class="mb-10 flex items-center gap-5 relative z-10 border-b border-slate-100 dark:border-slate-800 pb-6">
+                <div class="w-16 h-16 rounded-2xl bg-fixit-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-fixit-500/30"><i class="fa-solid fa-hard-hat text-2xl"></i></div>
+                <div>
+                    <h3 class="text-2xl font-extrabold dark:text-white leading-tight">Asistent Bořek</h3>
+                    <p class="text-fixit-600 dark:text-fixit-500 text-[11px] font-black uppercase tracking-widest mt-1">Příprava zakázky s umělou inteligencí</p>
+                </div>
             </div>
             
-            <div id="popt-form" class="space-y-5 relative z-10">
-                <div class="grid md:grid-cols-2 gap-5">
+            <div id="popt-form" class="space-y-6 relative z-10">
+                <div class="grid md:grid-cols-2 gap-6">
                     <div class="flex flex-col">
-                        <label class="font-bold text-sm text-slate-600 dark:text-slate-300 mb-2 block">Co se pokazilo?</label>
-                        <textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[160px]" placeholder="Př: Praskla trubka pod dřezem..."></textarea>
+                        <label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Co se pokazilo?</label>
+                        <textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[180px] shadow-inner" placeholder="Opište svůj problém co nejpodrobněji. Např: Praskla trubka pod dřezem v kuchyni..."></textarea>
                     </div>
                     <div class="flex flex-col">
-                        <label class="font-bold text-sm text-slate-600 dark:text-slate-300 mb-2 block">Fotka závady (volitelné)</label>
-                        <div class="relative flex-1 min-h-[160px] group">
-                            <input type="file" accept="image/*" onchange="handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 transition overflow-hidden relative">
-                                <i class="fa-solid fa-camera text-3xl mb-2 text-slate-400"></i>
-                                <p class="text-sm text-slate-500">Nahrát fotku</p>
+                        <label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotka závady (volitelné, ale doporučeno)</label>
+                        <div class="relative flex-1 min-h-[180px] group">
+                            <input type="file" accept="image/*" onchange="handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+                            <div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 group-hover:bg-fixit-50 dark:group-hover:bg-fixit-500/10 transition-all overflow-hidden relative z-10 shadow-inner">
+                                <i class="fa-solid fa-camera text-4xl mb-3 text-slate-300 dark:text-slate-500 group-hover:text-fixit-500 transition-colors"></i>
+                                <p class="text-sm font-bold text-slate-500 group-hover:text-fixit-600 transition-colors">Klikněte pro nahrání fotky</p>
                                 <img id="photo-preview" class="hidden absolute inset-0 w-full h-full object-cover">
                             </div>
                         </div>
                     </div>
                 </div>
-                <button onclick="startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl">Analyzovat problém</button>
+                <button onclick="startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl hover:-translate-y-1">Analyzovat problém s Bořkem</button>
             </div>
 
-            <div id="popt-chat" class="hidden flex flex-col gap-5 relative z-10">
-                <div id="popt-chat-msgs" class="flex flex-col gap-3 max-h-96 overflow-y-auto p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hide-scroll"></div>
+            <div id="popt-chat" class="hidden flex flex-col gap-6 relative z-10">
+                <div id="popt-chat-msgs" class="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 hide-scroll shadow-inner"></div>
                 <div id="popt-reply-area" class="hidden flex gap-3">
-                    <input type="text" id="popt-reply" onkeypress="if(event.key==='Enter')replyAI()" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full pl-5 pr-4 py-3.5 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Odpovězte Bořkovi...">
-                    <button onclick="replyAI()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3.5 rounded-full font-bold transition hover:scale-105 shadow">Odeslat</button>
+                    <input type="text" id="popt-reply" onkeypress="if(event.key==='Enter')replyAI()" class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Odpovězte Bořkovi na jeho dotaz...">
+                    <button onclick="replyAI()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-bold transition hover:scale-105 shadow-lg"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
             
-            <div id="popt-loading" class="hidden mt-10 text-center relative z-10">
-                <i class="fa-solid fa-microchip fa-spin text-4xl text-fixit-500 mb-4"></i>
-                <p class="font-bold text-slate-500">Bořek analyzuje data...</p>
+            <div id="popt-loading" class="hidden mt-12 text-center relative z-10 py-10">
+                <div class="relative w-20 h-20 mx-auto mb-6">
+                    <div class="absolute inset-0 border-4 border-slate-100 dark:border-slate-800 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-fixit-500 rounded-full border-t-transparent animate-spin"></div>
+                    <i class="fa-solid fa-microchip absolute inset-0 m-auto flex items-center justify-center text-2xl text-fixit-500"></i>
+                </div>
+                <p class="font-extrabold text-slate-600 dark:text-slate-300 text-lg">Bořek analyzuje data...</p>
+                <p class="text-slate-400 text-sm mt-2">Vytváříme profi zadání pro řemeslníky.</p>
             </div>
             
-            <div id="popt-result" class="hidden mt-10 pt-10 border-t border-slate-200 dark:border-slate-700 relative z-10">
-                <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/40 rounded-2xl p-5">
-                    <div class="flex gap-3"><i class="fa-solid fa-lightbulb text-fixit-500 text-xl mt-0.5"></i><div><p class="font-extrabold text-sm uppercase tracking-widest mb-1 dark:text-white">Bořkova rada</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300"></p></div></div>
-                </div>
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-check"></i></div>
-                        <h3 class="text-xl font-extrabold dark:text-white">Poptávka připravena!</h3>
+            <div id="popt-result" class="hidden mt-10 relative z-10">
+                <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-200 dark:border-fixit-500/30 rounded-2xl p-6 shadow-sm">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-white dark:bg-fixit-500/20 text-fixit-500 flex items-center justify-center shrink-0 shadow-sm"><i class="fa-solid fa-lightbulb text-lg"></i></div>
+                        <div><p class="font-black text-[11px] uppercase tracking-widest mb-1.5 text-fixit-700 dark:text-fixit-400">Rada od Bořka</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed"></p></div>
                     </div>
-                    <span class="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">Kliknutím na text můžete upravovat</span>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-fixit-500 rounded-l-2xl"></div>
-                    <div class="flex flex-wrap gap-3 mb-4">
-                        <span id="r-kat" contenteditable="true" class="status-badge bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 hover:bg-white dark:hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
-                        <span id="r-nal" contenteditable="true" class="status-badge bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 hover:bg-white dark:hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
-                        <span id="r-cena" contenteditable="true" class="status-badge bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
+                
+                <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
+                    <div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30"><i class="fa-solid fa-check text-xl"></i></div>
+                    <div>
+                        <h3 class="text-2xl font-black dark:text-white">Poptávka připravena!</h3>
+                        <p class="text-sm text-slate-500 mt-1">Kliknutím na jakýkoliv text níže jej můžete před zveřejněním upravit.</p>
                     </div>
-                    <h4 id="r-nazev" contenteditable="true" class="text-2xl font-extrabold mb-3 dark:text-white focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text border border-transparent hover:border-slate-200 dark:hover:border-slate-700">...</h4>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Popis pro řemeslníka</p>
-                    <p id="r-popis" contenteditable="true" class="text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line border border-transparent hover:border-slate-200 dark:hover:border-slate-700 min-h-[4rem]">...</p>
+                </div>
+                
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800 relative overflow-hidden group shadow-inner">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
                     
-                    <button id="btn-show-finalize" onclick="showFinalizeForm()" class="w-full mt-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Pokračovat k detailům</button>
+                    <div class="flex flex-wrap gap-3 mb-6 pl-4">
+                        <span id="r-kat" contenteditable="true" class="status-badge bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-fixit-500 focus:outline-none focus:ring-2 focus:ring-fixit-500 cursor-text transition"></span>
+                        <span id="r-nal" contenteditable="true" class="status-badge bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-text transition"></span>
+                        <span id="r-cena" contenteditable="true" class="status-badge bg-fixit-50 dark:bg-fixit-500/10 text-fixit-700 dark:text-fixit-400 border border-fixit-200 dark:border-fixit-500/30 hover:border-fixit-400 focus:outline-none focus:ring-2 focus:ring-fixit-500 cursor-text transition"></span>
+                    </div>
                     
-                    <div id="popt-finalize" class="hidden mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
-                        <h4 class="text-lg font-extrabold dark:text-white mb-4">Doplňující údaje pro řemeslníka</h4>
+                    <h4 id="r-nazev" contenteditable="true" class="text-3xl font-black mb-6 dark:text-white focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-xl px-4 py-2 -mx-4 hover:bg-white dark:hover:bg-slate-800 transition cursor-text border border-transparent hover:border-slate-200 dark:hover:border-slate-700 pl-4">...</h4>
+                    
+                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-4">Popis pro řemeslníka</p>
+                    <p id="r-popis" contenteditable="true" class="text-base text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-xl px-4 py-3 -mx-4 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line border border-transparent hover:border-slate-200 dark:hover:border-slate-700 min-h-[5rem] pl-4">...</p>
+                    
+                    <button id="btn-show-finalize" onclick="showFinalizeForm()" class="w-full mt-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg transition shadow-xl hover:scale-[1.02]">Pokračovat k detailům adresy</button>
+                    
+                    <div id="popt-finalize" class="hidden mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 pl-4">
+                        <h4 class="text-xl font-black dark:text-white mb-6">Doplňující údaje pro výjezd</h4>
                         
-                        <div class="grid md:grid-cols-3 gap-4 mb-4">
+                        <div class="grid md:grid-cols-3 gap-5 mb-5">
                             <div class="md:col-span-2">
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Ulice a číslo popisné *</label>
-                                <input type="text" id="f-street" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Masarykova 15">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Ulice a číslo popisné *</label>
+                                <input type="text" id="f-street" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. Masarykova 15">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Město *</label>
-                                <input type="text" id="f-city" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město *</label>
+                                <input type="text" id="f-city" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. Brno">
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div class="grid md:grid-cols-2 gap-5 mb-5">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Telefonní číslo *</label>
-                                <input type="tel" id="f-phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ...">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo *</label>
+                                <input type="tel" id="f-phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="+420 ...">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Termín a dostupnost</label>
-                                <select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Termín a dostupnost</label>
+                                <select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm">
                                     <option value="Havarijní stav (Co nejdříve)">Havarijní stav (Co nejdříve)</option>
-                                    <option value="Během několika dnů">Během několika dnů</option>
+                                    <option value="Během několika dnů" selected>Během několika dnů</option>
                                     <option value="Nespěchá (do měsíce)">Nespěchá (do měsíce)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <div class="grid md:grid-cols-2 gap-5 mb-8">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Typ nemovitosti</label>
-                                <select id="f-property" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Typ nemovitosti</label>
+                                <select id="f-property" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm">
                                     <option value="Byt">Byt</option>
                                     <option value="Rodinný dům">Rodinný dům</option>
                                     <option value="Komerční prostor">Komerční prostor</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Možnost parkování</label>
-                                <select id="f-parking" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Možnost parkování</label>
+                                <select id="f-parking" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm">
                                     <option value="Bezproblémové (vlastní pozemek / volná ulice)">Bezproblémové (vlastní / volná ulice)</option>
                                     <option value="Placené zóny / modré zóny">Placené zóny / modré zóny</option>
                                     <option value="Velmi špatné parkování">Velmi špatné parkování</option>
@@ -588,7 +736,7 @@ function customerHTML(name) {
                             </div>
                         </div>
 
-                        <button onclick="publishRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Zveřejnit poptávku na Fixit</button>
+                        <button onclick="publishRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-5 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Zveřejnit poptávku na Fixit</button>
                     </div>
                 </div>
             </div>
@@ -598,7 +746,7 @@ function customerHTML(name) {
 
 function initCraftsman(name) {
     buildNav([{id:"market",icon:"fa-map-location-dot",label:"Tržiště zakázek"},{id:"jobs",icon:"fa-hammer",label:"Moje práce"},{id:"c-messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"earnings",icon:"fa-wallet",label:"Výdělky"}]);
-    document.getElementById("header-cta").innerHTML = "<div class=\"flex items-center gap-2 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-xl font-bold text-sm\"><i class=\"fa-solid fa-circle text-green-500 text-xs animate-pulse\"></i> Online</div>";
+    document.getElementById("header-cta").innerHTML = "<div class=\"flex items-center gap-2 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-xl font-bold text-sm shadow-sm\"><i class=\"fa-solid fa-circle text-green-500 text-[10px] animate-pulse\"></i> Online</div>";
     document.getElementById("main-content").innerHTML = craftsmanHTML(name);
     goTab("market", "Tržiště zakázek");
 }
@@ -606,70 +754,73 @@ function initCraftsman(name) {
 function craftsmanHTML(name) {
     return `
     <div id="view-market" class="hidden fade-up">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-extrabold dark:text-white">Tržiště zakázek</h2>
-            <span class="text-sm text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl"><i class="fa-solid fa-location-dot text-fixit-500 mr-1"></i> Brno a okolí</span>
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-extrabold dark:text-white">Tržiště zakázek</h2>
+            <span class="text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl shadow-sm"><i class="fa-solid fa-location-dot text-fixit-500 mr-2"></i> Brno a okolí</span>
         </div>
-        <div class="flex gap-3 mb-6 overflow-x-auto hide-scroll pb-1">
-            <button onclick="filterMarket('all')" id="filter-all" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-fixit-500 text-white shadow">Vše</button>
-            <button onclick="filterMarket('Instalatérství')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Instalatérství</button>
-            <button onclick="filterMarket('Elektrikář')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Elektrikář</button>
-            <button onclick="filterMarket('Malíř')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Malíř</button>
-            <button onclick="filterMarket('Tesař')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Tesař</button>
-            <button onclick="filterMarket('Zámečník')" class="filter-btn shrink-0 px-4 py-2 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition">Zámečník</button>
+        <div class="flex gap-3 mb-8 overflow-x-auto hide-scroll pb-2">
+            <button onclick="filterMarket('all')" id="filter-all" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-fixit-500 text-white shadow-md transition hover:scale-105">Vše</button>
+            <button onclick="filterMarket('Instalatérství')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Instalatérství</button>
+            <button onclick="filterMarket('Elektrikář')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Elektrikář</button>
+            <button onclick="filterMarket('Malíř')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Malíř</button>
+            <button onclick="filterMarket('Tesař')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Tesař</button>
+            <button onclick="filterMarket('Zámečník')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Zámečník</button>
         </div>
-        <div id="market-list" class="space-y-4">
-            <div class="text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-fixit-500 mb-4"></i>
-                <p class="font-bold text-slate-500">Načítám poptávky...</p>
+        <div id="market-list" class="space-y-5">
+            <div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl">
+                <i class="fa-solid fa-circle-notch fa-spin text-5xl text-fixit-500 mb-5 block"></i>
+                <p class="font-bold text-slate-500 text-lg">Hledám nové poptávky ve vašem okolí...</p>
             </div>
         </div>
     </div>
     <div id="view-jobs" class="hidden fade-up">
-        <h2 class="text-2xl font-extrabold mb-6 dark:text-white">Moje práce</h2>
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold text-fixit-500" id="jobs-active-count">0</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Aktivní</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold dark:text-white" id="jobs-done-count">0</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Dokončené</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold text-yellow-500" id="jobs-rating">5.0 ⭐</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Hodnocení</p></div>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Moje práce</h2>
+        <div class="grid grid-cols-3 gap-5 mb-8">
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-fixit-500" id="jobs-active-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Aktivní</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black dark:text-white" id="jobs-done-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Dokončené</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-yellow-500" id="jobs-rating">5.0 ⭐</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Hodnocení</p></div>
         </div>
-        <div id="my-jobs-list" class="space-y-3">
-            <div class="text-center p-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-                <i class="fa-solid fa-hammer text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
-                <p class="font-bold text-slate-500">Zatím žádné zakázky.</p>
-                <p class="text-sm text-slate-400 mt-1">Podejte nabídku na tržišti!</p>
+        <div id="my-jobs-list" class="space-y-4">
+            <div class="text-center p-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl">
+                <i class="fa-solid fa-hammer text-5xl text-slate-300 dark:text-slate-600 mb-4 block"></i>
+                <p class="font-bold text-slate-500 text-lg">Zatím nemáte žádné aktivní zakázky.</p>
+                <p class="text-sm text-slate-400 mt-2">Běžte na Tržiště a podejte svou první nabídku!</p>
             </div>
         </div>
     </div>
     <div id="view-c-messages" class="hidden fade-up max-w-4xl">
-        <h2 class="text-2xl font-extrabold mb-6 dark:text-white">Zprávy</h2>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden" style="height:500px;display:flex;">
-            <div class="w-72 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
-                <div id="conv-list-c" class="flex-1 overflow-y-auto hide-scroll"><div class="p-6 text-center text-sm text-slate-400">Žádné konverzace</div></div>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
+        <div class="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" style="height:600px;display:flex;">
+            <div class="w-80 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col bg-slate-50/50 dark:bg-transparent">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
+                <div id="conv-list-c" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Žádné konverzace</div></div>
             </div>
-            <div class="flex-1 flex flex-col">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white" id="chat-partner-name-c">Vyberte konverzaci</p></div>
-                <div id="chat-msgs-c" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3"></div>
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-3">
-                    <input type="text" id="msg-input-c" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')sendMsgC()" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
-                    <button onclick="sendMsgC()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-10 h-10 rounded-xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button>
+            <div class="flex-1 flex flex-col relative">
+                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-4 bg-white/50 dark:bg-transparent backdrop-blur-md z-10">
+                    <p class="font-extrabold dark:text-white" id="chat-partner-name-c">Vyberte konverzaci</p>
+                </div>
+                <div id="chat-msgs-c" class="flex-1 overflow-y-auto hide-scroll p-6 flex flex-col gap-4"></div>
+                <div class="p-5 border-t border-slate-200 dark:border-slate-800 flex gap-3 bg-slate-50 dark:bg-transparent">
+                    <input type="text" id="msg-input-c" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')sendMsgC()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm">
+                    <button onclick="sendMsgC()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center transition shrink-0 shadow-md hover:scale-105"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
     </div>
     <div id="view-earnings" class="hidden fade-up max-w-3xl">
-        <h2 class="text-2xl font-extrabold mb-6 dark:text-white">Výdělky</h2>
-        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 mb-6 text-white shadow-xl">
-            <p class="text-sm font-bold uppercase tracking-widest opacity-60 mb-1">Celkové výdělky</p>
-            <p class="text-4xl font-extrabold mb-1">0 Kč</p>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Výdělky</h2>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 text-white/5 text-9xl"><i class="fa-solid fa-wallet"></i></div>
+            <p class="text-xs font-black uppercase tracking-widest opacity-60 mb-2 relative z-10">Celkové výdělky přes Fixit</p>
+            <p class="text-5xl font-black mb-1 relative z-10">0 Kč</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 text-center text-sm text-slate-400 py-8">Zatím žádné výplaty.</div>
+        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné výplaty.</div>
     </div>`;
 }
 
 function buildNav(items) {
-    document.getElementById("sidebar-nav").innerHTML = items.map(item => `<button onclick="goTab('${item.id}','${item.label}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ${item.icon} w-5 text-center text-base"></i> ${item.label}</button>`).join("");
-    document.getElementById("bottom-nav-items").innerHTML = items.map(item => `<button onclick="goTab('${item.id}','${item.label}')" id="bnav-${item.id}" class="flex-1 flex flex-col items-center gap-1 py-2 text-slate-400 hover:text-fixit-500 transition"><i class="fa-solid ${item.icon} text-lg"></i><span class="text-[10px] font-bold">${item.label.split(" ")[0]}</span></button>`).join("");
+    document.getElementById("sidebar-nav").innerHTML = items.map(item => `<button onclick="goTab('${item.id}','${item.label}')" id="nav-${item.id}" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ${item.icon} w-5 text-center text-lg"></i> ${item.label}</button>`).join("");
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => `<button onclick="goTab('${item.id}','${item.label}')" id="bnav-${item.id}" class="flex-1 flex flex-col items-center gap-1.5 py-2 text-slate-400 hover:text-fixit-500 transition"><i class="fa-solid ${item.icon} text-xl"></i><span class="text-[10px] font-bold tracking-wide">${item.label.split(" ")[0]}</span></button>`).join("");
 }
 
 window.goTab = function(id, title) {
@@ -686,222 +837,6 @@ window.goTab = function(id, title) {
     if (id === "messages") loadCustomerConversations();
     if (id === "c-messages") loadCraftsmanConversations();
     if (id === "market") loadMarketFromDB();
-}
-
-function refreshRequestsList() {
-    const list = document.getElementById("requests-list"); 
-    if (!list) return;
-    
-    const empty = document.getElementById("empty-req");
-    
-    list.querySelectorAll(".req-card").forEach(c => c.remove());
-
-    if (STATE.requests.length === 0) { 
-        if(empty) empty.classList.remove("hidden"); 
-        return; 
-    }
-    
-    if (empty) empty.classList.add("hidden");
-    
-    STATE.requests.forEach((req, i) => {
-        const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
-        const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
-        const div = document.createElement("div");
-        div.className = "req-card bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-fixit-500 hover:shadow-md transition fade-up relative group";
-        
-        // Zobrazení fotky, pokud existuje (z lokální paměti)
-        const photoHtml = req.photo ? `<div class="w-24 h-24 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900"><img src="data:${req.mime||'image/jpeg'};base64,${req.photo}" class="w-full h-full object-cover"></div>` : '';
-
-        div.innerHTML = `
-            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onclick="deleteRequest(${i}, ${req.sbId || 'null'})" class="text-slate-400 hover:text-red-500 transition" title="Smazat poptávku"><i class="fa-solid fa-trash-can"></i></button>
-            </div>
-            <div class="flex items-center justify-between mb-2 pr-8">
-                <h4 class="font-extrabold dark:text-white truncate mr-3">${req.title}</h4>
-                <span class="status-badge ${badgeMap[req.status]} shrink-0">${statusMap[req.status]}</span>
-            </div>
-            <p class="text-sm text-slate-500 mb-3">${req.kat} • ${req.time}</p>
-            
-            <div class="flex gap-4 mb-4">
-                ${photoHtml}
-                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-4 flex-1">${req.popis}</p>
-            </div>
-            
-            <div class="flex gap-2 mt-4">
-                <button onclick="loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button>
-                <button onclick="markDone(${i})" class="text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-green-500 hover:text-green-600 transition">Označit hotovo</button>
-            </div>`;
-        list.insertBefore(div, list.querySelector("#empty-req"));
-    });
-}
-
-window.markDone = function(i) { STATE.requests[i].status = "done"; refreshRequestsList(); refreshDashboard(); }
-
-function refreshDashboard() {
-    const sa = document.getElementById("stat-active"); if(sa) sa.innerText = STATE.requests.filter(r => r.status !== "done").length;
-    const st = document.getElementById("stat-total"); if(st) st.innerText = STATE.requests.length;
-    const dl = document.getElementById("dash-requests-list");
-    if (dl && STATE.requests.length > 0) {
-        dl.innerHTML = STATE.requests.slice(0,3).map(r => `<div class="flex items-center gap-3 py-3 border-b border-slate-100 dark:border-slate-700 last:border-0"><div class="w-8 h-8 bg-fixit-50 dark:bg-fixit-500/20 text-fixit-500 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">${r.title}</p><p class="text-xs text-slate-500">${r.kat} • ${r.time}</p></div><span class="status-badge ${r.status==="done"?"status-done":"status-waiting"} shrink-0 text-[10px]">${r.status==="done"?"Hotovo":"Čeká"}</span></div>`).join("");
-    } else if (dl) {
-        dl.innerHTML = `<p class="text-slate-400 text-sm text-center py-6">Zatím žádné poptávky. <button onclick="goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p>`;
-    }
-}
-
-let activeChatId = null, msgSubscription = null;
-
-window.openConversation = async function(requestId, partnerName, partnerSeed) {
-    activeChatId = String(requestId);
-    const nameEl = document.getElementById("chat-partner-name") || document.getElementById("chat-partner-name-c");
-    if (nameEl) nameEl.innerText = partnerName;
-    const avatarEl = document.getElementById("chat-partner-avatar");
-    if (avatarEl) avatarEl.style.backgroundImage = "url(https://api.dicebear.com/7.x/avataaars/svg?seed=" + partnerSeed + ")";
-    document.querySelectorAll(".conv-item").forEach(el => el.classList.remove("bg-fixit-50","border-fixit-500"));
-    const ac = document.getElementById("conv-" + requestId); if(ac) ac.classList.add("bg-fixit-50","border-fixit-500");
-    await loadMessages(requestId);
-    subscribeMessages(requestId);
-}
-
-async function loadMessages(requestId) {
-    const boxId = APP_ROLE === "customer" ? "chat-msgs" : "chat-msgs-c";
-    const box = document.getElementById(boxId); if (!box) return;
-    box.innerHTML = "<div class=\"text-center text-slate-400 text-sm py-4\">Načítám zprávy...</div>";
-    if (!sb) { box.innerHTML = "<div class=\"text-center text-slate-400 text-sm py-4\">Nepřipojeno.</div>"; return; }
-    const { data, error } = await sb.from("messages").select("*").eq("conversation_id", String(requestId)).order("created_at", { ascending: true });
-    if (error) { box.innerHTML = "<div class=\"text-center text-red-400 text-sm py-4\">Chyba načítání.</div>"; return; }
-    box.innerHTML = "";
-    if (data.length === 0) { box.innerHTML = "<div class=\"text-center text-slate-400 text-sm py-4\">Zatím žádné zprávy.</div>"; return; }
-    data.forEach(m => renderMessage(m, boxId));
-    box.scrollTop = box.scrollHeight;
-}
-
-function renderMessage(m, boxId) {
-    const box = document.getElementById(boxId); if (!box) return;
-    const isMe = m.sender_id === APP_USER?.id;
-    const time = new Date(m.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-    box.querySelector(".text-center")?.remove();
-    const d = document.createElement("div");
-    d.className = "flex " + (isMe ? "justify-end" : "justify-start");
-    d.innerHTML = "<div class=\"max-w-[70%]\">" + (!isMe ? "<p class=\"text-[10px] font-bold text-slate-400 mb-1 ml-1\">" + (m.sender_name||"Uživatel") + "</p>" : "") + "<div class=\"px-4 py-2.5 rounded-2xl text-sm " + (isMe ? "bg-fixit-500 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white") + "\"><p>" + m.text + "</p><p class=\"text-[10px] opacity-60 mt-1 " + (isMe?"text-right":"") + "\">" + time + "</p></div></div>";
-    box.appendChild(d); box.scrollTop = box.scrollHeight;
-}
-
-function subscribeMessages(requestId) {
-    if (msgSubscription) { try { sb.removeChannel(msgSubscription); } catch(e) {} }
-    if (!sb) return;
-    const boxId = APP_ROLE === "customer" ? "chat-msgs" : "chat-msgs-c";
-    msgSubscription = sb.channel("msgs-" + requestId).on("postgres_changes", { event:"INSERT", schema:"public", table:"messages", filter:"conversation_id=eq." + requestId }, payload => { if (payload.new.sender_id !== APP_USER?.id) renderMessage(payload.new, boxId); }).subscribe();
-}
-
-window.sendMsg = async function() {
-    const inp = document.getElementById("msg-input");
-    const txt = inp?.value?.trim(); if (!txt) return;
-    if (!activeChatId) { alert("Vyberte konverzaci."); return; }
-    inp.value = "";
-    const msgData = { conversation_id: activeChatId, sender_id: APP_USER?.id, sender_name: document.getElementById("user-name").innerText, text: txt };
-    renderMessage({ ...msgData, created_at: new Date().toISOString() }, "chat-msgs");
-    if (sb) await sb.from("messages").insert(msgData);
-}
-
-window.sendMsgC = async function() {
-    const inp = document.getElementById("msg-input-c");
-    const txt = inp?.value?.trim(); if (!txt) return;
-    if (!activeChatId) { alert("Vyberte konverzaci."); return; }
-    inp.value = "";
-    const msgData = { conversation_id: activeChatId, sender_id: APP_USER?.id, sender_name: document.getElementById("user-name").innerText, text: txt };
-    renderMessage({ ...msgData, created_at: new Date().toISOString() }, "chat-msgs-c");
-    if (sb) await sb.from("messages").insert(msgData);
-}
-
-window.loadCustomerConversations = async function() {
-    const list = document.getElementById("conv-list"); if (!list || !sb || !APP_USER) return;
-    const { data: reqs } = await sb.from("requests").select("*").eq("customer_id", APP_USER.id).order("created_at", { ascending: false });
-    if (!reqs || reqs.length === 0) { list.innerHTML = "<div class=\"p-4 text-center text-sm text-slate-400\">Žádné konverzace.<br>Vytvořte poptávku!</div>"; return; }
-    list.innerHTML = reqs.map(r => `<div id="conv-${r.id}" onclick="openConversation(${r.id},'Řemeslník','craftsman${r.id}')" class="conv-item p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-bold text-sm dark:text-white truncate">${r.title}</p><p class="text-xs text-slate-400 mt-0.5">${r.category} • <span class="text-fixit-500">${r.status==="waiting"?"Hledáme":r.status==="active"?"Probíhá":"Hotovo"}</span></p></div>`).join("");
-}
-
-window.loadCraftsmanConversations = async function() {
-    const list = document.getElementById("conv-list-c"); if (!list || !sb || !APP_USER) return;
-    const { data: offers } = await sb.from("offers").select("*, requests(*)").eq("craftsman_id", APP_USER.id).order("created_at", { ascending: false });
-    if (!offers || offers.length === 0) { list.innerHTML = "<div class=\"p-4 text-center text-sm text-slate-400\">Žádné konverzace.<br>Podejte nabídku!</div>"; return; }
-    list.innerHTML = offers.map(o => `<div id="conv-${o.request_id}" onclick="openConversation(${o.request_id},'${(o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'")}','customer${o.request_id}')" class="conv-item p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-bold text-sm dark:text-white truncate">${o.requests?.title||"Poptávka"}</p><p class="text-xs text-slate-400 mt-0.5">${o.requests?.category||""} • ${o.requests?.customer_name||"Zákazník"}</p></div>`).join("");
-}
-
-window.applyJob = async function(btn, title, requestId) {
-    if (!sb || !APP_USER) { alert("Musíte být přihlášeni."); return; }
-    btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Odesílám..."; btn.disabled = true;
-    try {
-        const { error } = await sb.from("offers").insert({ request_id: requestId, craftsman_id: APP_USER.id, craftsman_name: document.getElementById("user-name").innerText, message: "Mám zájem o zakázku: " + title, price: "Dohodou", status: "pending" });
-        if (error) throw error;
-        btn.innerHTML = "<i class=\"fa-solid fa-check mr-2\"></i>Nabídka odeslána!";
-        btn.className = btn.className.replace("bg-fixit-500 hover:bg-fixit-600","bg-green-500"); btn.disabled = true;
-        STATE.craftJobs.push({ title, requestId, status:"pending", time: new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) });
-        refreshCraftsmanJobs(); activeChatId = String(requestId);
-    } catch(e) { btn.innerHTML = "Podat nabídku"; btn.disabled = false; alert("Chyba: " + e.message); }
-}
-
-window.loadOffersForRequest = async function(requestId, requestTitle) {
-    if (!sb) return;
-    const { data: offers } = await sb.from("offers").select("*").eq("request_id", requestId).order("created_at", { ascending: false });
-    document.getElementById("offers-modal-title").innerText = requestTitle;
-    const modalList = document.getElementById("offers-modal-list");
-    if (!offers || offers.length === 0) { modalList.innerHTML = "<div class=\"text-center text-slate-400 py-8\"><i class=\"fa-solid fa-inbox text-3xl mb-3 block\"></i><p>Zatím žádné nabídky.</p></div>"; }
-    else { modalList.innerHTML = offers.map(o => `<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl"><div class="flex items-center gap-3 mb-3"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(o.craftsman_name)}&backgroundColor=0f172a" class="w-10 h-10 rounded-full bg-slate-200"><div><p class="font-bold dark:text-white">${o.craftsman_name}</p><p class="text-xs text-slate-500">${new Date(o.created_at).toLocaleDateString("cs")}</p></div><span class="ml-auto font-bold text-fixit-500">${o.price}</span></div><p class="text-sm text-slate-600 dark:text-slate-400 mb-3">${o.message}</p><button onclick="acceptOffer(${o.id},${requestId},'${(o.craftsman_name||"").replace(/'/g,"\\'")}'); closeOffersModal();" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-2.5 rounded-xl font-bold text-sm transition">Přijmout & Zahájit chat</button></div>`).join(""); }
-    const modal = document.getElementById("offers-modal"); modal.classList.remove("hidden"); void modal.offsetWidth; modal.classList.add("opacity-100");
-}
-
-window.acceptOffer = async function(offerId, requestId, craftsmanName) {
-    if (!sb) return;
-    await sb.from("offers").update({ status: "accepted" }).eq("id", offerId);
-    await sb.from("requests").update({ status: "active" }).eq("id", requestId);
-    const req = STATE.requests.find(r => r.sbId === requestId); if(req) req.status = "active";
-    refreshRequestsList(); refreshDashboard();
-    activeChatId = String(requestId);
-    goTab("messages", "Zprávy");
-    setTimeout(() => openConversation(requestId, craftsmanName, "craftsman" + requestId), 300);
-}
-
-window.closeOffersModal = function() {
-    const modal = document.getElementById("offers-modal");
-    if (modal) { modal.classList.add("hidden"); modal.classList.remove("opacity-100"); }
-}
-
-function refreshCraftsmanJobs() {
-    const cnt = document.getElementById("jobs-active-count"); if(cnt) cnt.innerText = STATE.craftJobs.length;
-    const list = document.getElementById("my-jobs-list"); if(!list) return;
-    list.querySelector(".text-center")?.remove(); list.innerHTML = "";
-    STATE.craftJobs.forEach(job => {
-        const d = document.createElement("div");
-        d.className = "bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 fade-up";
-        d.innerHTML = `<div class="flex items-center justify-between mb-2"><div><h4 class="font-bold dark:text-white text-sm">${job.title}</h4><p class="text-xs text-slate-500 mt-0.5">${job.time}</p></div><span class="status-badge status-waiting">Čekám</span></div><button onclick="activeChatId='${job.requestId}'; goTab('c-messages','Zprávy'); setTimeout(()=>openConversation('${job.requestId}','Zákazník','customer${job.requestId}'),300);" class="text-xs font-bold text-fixit-500 hover:underline">Napsat zákazníkovi →</button>`;
-        list.appendChild(d);
-    });
-}
-
-async function loadCraftsmanJobsFromDB() {
-    if (!sb || !APP_USER) return;
-    const { data } = await sb.from("offers").select("*, requests(title, category)").eq("craftsman_id", APP_USER.id);
-    if (data && data.length > 0) { STATE.craftJobs = data.map(o => ({ title: o.requests?.title||"Zakázka", requestId: o.request_id, status: o.status, time: new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) })); refreshCraftsmanJobs(); }
-}
-
-async function loadCustomerRequestsFromDB() {
-    if (!sb || !APP_USER) return;
-    const { data } = await sb.from("requests").select("*").eq("customer_id", APP_USER.id).order("created_at", { ascending: false });
-    if (data && data.length > 0) { STATE.requests = data.map(r => ({ sbId: r.id, title: r.title, kat: r.category, popis: r.description, time: new Date(r.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}), status: r.status })); refreshRequestsList(); refreshDashboard(); }
-}
-
-async function loadMarketFromDB() {
-    const list = document.getElementById("market-list"); if (!list || !sb) return;
-    const { data, error } = await sb.from("requests").select("*").eq("status","waiting").order("created_at", { ascending: false });
-    if (error || !data || data.length === 0) { list.innerHTML = "<div class=\"text-center p-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl\"><i class=\"fa-solid fa-inbox text-4xl text-slate-300 dark:text-slate-600 mb-4\"></i><p class=\"font-bold text-slate-500\">Zatím žádné poptávky.</p></div>"; return; }
-    const iconMap = { "Instalatérství":"fa-faucet-drip","Elektrikář":"fa-bolt","Malíř":"fa-paint-roller","Tesař":"fa-door-open","Zámečník":"fa-lock","default":"fa-screwdriver-wrench" };
-    list.innerHTML = data.map((r,i) => `<div class="market-item bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 hover:border-fixit-500 hover:shadow-lg transition fade-up" data-kat="${r.category||"other"}" style="animation-delay:${i*60}ms"><div class="flex items-start gap-4"><div class="w-12 h-12 bg-fixit-50 dark:bg-fixit-500/20 text-fixit-500 rounded-xl flex items-center justify-center text-xl shrink-0"><i class="fa-solid ${iconMap[r.category]||iconMap.default}"></i></div><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-2 mb-2"><h4 class="font-extrabold dark:text-white leading-tight">${r.title}</h4><span class="status-badge ${r.urgency==="Vysoká"?"bg-red-100 text-red-600":"status-waiting"} shrink-0">${r.urgency||"Střední"}</span></div><div class="flex flex-wrap gap-3 text-xs text-slate-500 mb-3"><span><i class="fa-solid fa-tag mr-1"></i>${r.category||"Ostatní"}</span><span><i class="fa-solid fa-user mr-1"></i>${r.customer_name||"Zákazník"}</span><span class="font-bold"><i class="fa-solid fa-coins mr-1 text-fixit-500"></i>${r.price_estimate||"Dohodou"}</span></div><p class="text-sm text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">${r.description||""}</p><div class="flex gap-2"><button onclick="applyJob(this,'${r.title.replace(/'/g,"\\'")}',${r.id})" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-2.5 rounded-xl font-bold text-sm transition shadow hover:scale-[1.02]">Podat nabídku</button><button class="w-10 h-10 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 transition"><i class="fa-regular fa-bookmark"></i></button></div></div></div></div>`).join("");
-}
-
-window.filterMarket = function(kat) {
-    document.querySelectorAll(".filter-btn").forEach(b => { b.className = b.className.replace("bg-fixit-500 text-white shadow","bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"); });
-    event.target.className = event.target.className.replace("bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300","bg-fixit-500 text-white shadow");
-    document.querySelectorAll(".market-item").forEach(item => { item.style.display = (kat === "all" || item.dataset.kat === kat) ? "" : "none"; });
 }
 </script>
 </body>
