@@ -234,24 +234,16 @@ window.initApp = function(role, name) {
     }, 500);
 }
 
-// ===== AI NAPOJENI NA /api/gemini =====
 window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
-    const isLocal = ["127.0.0.1","localhost"].includes(window.location.hostname) || window.location.protocol === "file:";
-    if (isLocal) {
-        await new Promise(r => setTimeout(r, 1500));
-        if (useJson) {
-            if (parts.length <= 1) return JSON.stringify({ status: "question", message: "Popište mi problém podrobněji – kde přesně je závada a jak dlouho to trvá?" });
-            return JSON.stringify({ status: "done", nazev: "Testovací poptávka", kategorie: "Ukázka", popis: "Lokální testovací mód – na Vercelu bude AI plně funkční.", nalehavost: "Nízká", odhad_ceny: "0 Kč", rada: "Toto je ukázka. Na ostrém Vercelu budu analyzovat skutečný problém." });
-        }
-        return "Jsem Bořek v testovacím módu. Na ostrém Vercelu budu plně funkční!";
-    }
-    const response = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parts, systemPrompt, useJson })
+    // URL adresu '/api/gemini' možná ještě upravíme podle toho, co zjistíš z minulého webu
+    const res = await fetch('/api/gemini', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ parts, systemPrompt, useJson }) 
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "HTTP " + response.status);
+    
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'API chyba');
     return data.text;
 }
 
@@ -332,12 +324,22 @@ window.publishRequest = async function() {
     const popis = document.getElementById("r-popis").innerText;
     const nal = document.getElementById("r-nal").innerText;
     const cena = document.getElementById("r-cena").innerText;
+    let sbId = null;
+
     if (sb && APP_USER) {
-        try { await sb.from("requests").insert({ customer_id: APP_USER.id, customer_name: document.getElementById("user-name").innerText, title, category: kat, description: popis, urgency: nal, price_estimate: cena, status: "waiting" }); }
+        try {
+             const { data, error } = await sb.from("requests").insert({
+                 customer_id: APP_USER.id,
+                 customer_name: document.getElementById("user-name").innerText,
+                 title, category: kat, description: popis, urgency: nal, price_estimate: cena, status: "waiting"
+             }).select();
+             if (error) throw error;
+             if (data && data.length > 0) sbId = data[0].id;
+        }
         catch(e) { console.error(e); }
     }
     const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-    STATE.requests.unshift({ title, kat, popis, time: now, status: "waiting" });
+    STATE.requests.unshift({ sbId: sbId, title, kat, popis, time: now, status: "waiting" });
     refreshRequestsList(); refreshDashboard();
     poptHistoryText = ""; poptBase64 = null; poptMime = null;
     document.getElementById("popt-input").value = "";
@@ -348,6 +350,23 @@ window.publishRequest = async function() {
     ["popt-result","popt-tip","popt-chat"].forEach(id => document.getElementById(id)?.classList.add("hidden"));
     document.getElementById("popt-form").classList.remove("hidden");
     goTab("requests", "Moje poptávky");
+}
+
+window.deleteRequest = async function(index, sbId) {
+    if(!confirm("Opravdu chcete tuto poptávku smazat?")) return;
+
+    if (sbId && sb) {
+        try {
+            await sb.from("requests").delete().eq("id", sbId);
+            // Smažeme také případné nabídky a zprávy (ideálně by mělo být nastaveno ON DELETE CASCADE v databázi, ale pro jistotu)
+            await sb.from("offers").delete().eq("request_id", sbId);
+            await sb.from("messages").delete().eq("conversation_id", String(sbId));
+        } catch(e) { console.error("Chyba při mazání z DB:", e); }
+    }
+
+    STATE.requests.splice(index, 1);
+    refreshRequestsList();
+    refreshDashboard();
 }
 
 function initCustomer(name) {
@@ -457,20 +476,23 @@ function customerHTML(name) {
                 <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/40 rounded-2xl p-5">
                     <div class="flex gap-3"><i class="fa-solid fa-lightbulb text-fixit-500 text-xl mt-0.5"></i><div><p class="font-extrabold text-sm uppercase tracking-widest mb-1 dark:text-white">Bořkova rada</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300"></p></div></div>
                 </div>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-check"></i></div>
-                    <h3 class="text-xl font-extrabold dark:text-white">Poptávka připravena!</h3>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-check"></i></div>
+                        <h3 class="text-xl font-extrabold dark:text-white">Poptávka připravena!</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">Kliknutím na text můžete upravovat</span>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 relative overflow-hidden group">
                     <div class="absolute top-0 left-0 w-1.5 h-full bg-fixit-500 rounded-l-2xl"></div>
                     <div class="flex flex-wrap gap-3 mb-4">
-                        <span id="r-kat" class="status-badge bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400"></span>
-                        <span id="r-nal" class="status-badge bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400"></span>
-                        <span id="r-cena" class="status-badge bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"></span>
+                        <span id="r-kat" contenteditable="true" class="status-badge bg-fixit-100 text-fixit-700 dark:bg-fixit-500/20 dark:text-fixit-400 hover:bg-white dark:hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
+                        <span id="r-nal" contenteditable="true" class="status-badge bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 hover:bg-white dark:hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
+                        <span id="r-cena" contenteditable="true" class="status-badge bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-1 focus:ring-fixit-500 rounded-md cursor-text transition"></span>
                     </div>
-                    <h4 id="r-nazev" contenteditable="true" class="text-2xl font-extrabold mb-3 dark:text-white focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text">...</h4>
+                    <h4 id="r-nazev" contenteditable="true" class="text-2xl font-extrabold mb-3 dark:text-white focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text border border-transparent hover:border-slate-200 dark:hover:border-slate-700">...</h4>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Popis pro řemeslníka</p>
-                    <p id="r-popis" contenteditable="true" class="text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line">...</p>
+                    <p id="r-popis" contenteditable="true" class="text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line border border-transparent hover:border-slate-200 dark:hover:border-slate-700 min-h-[4rem]">...</p>
                     <button onclick="publishRequest()" class="w-full mt-6 bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Zveřejnit poptávku na Fixit</button>
                 </div>
             </div>
@@ -512,12 +534,13 @@ function craftsmanHTML(name) {
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold text-fixit-500" id="jobs-active-count">0</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Aktivní</p></div>
             <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold dark:text-white" id="jobs-done-count">0</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Dokončené</p></div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold text-yellow-500">5.0 ⭐</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Hodnocení</p></div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center"><p class="text-2xl font-extrabold text-yellow-500" id="jobs-rating">5.0 ⭐</p><p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Hodnocení</p></div>
         </div>
         <div id="my-jobs-list" class="space-y-3">
             <div class="text-center p-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
                 <i class="fa-solid fa-hammer text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
                 <p class="font-bold text-slate-500">Zatím žádné zakázky.</p>
+                <p class="text-sm text-slate-400 mt-1">Podejte nabídku na tržišti!</p>
             </div>
         </div>
     </div>
@@ -579,8 +602,21 @@ function refreshRequestsList() {
         const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
         const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
         const div = document.createElement("div");
-        div.className = "req-card bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-fixit-500 hover:shadow-md transition fade-up";
-        div.innerHTML = `<div class="flex items-center justify-between mb-2"><h4 class="font-extrabold dark:text-white truncate mr-3">${req.title}</h4><span class="status-badge ${badgeMap[req.status]} shrink-0">${statusMap[req.status]}</span></div><p class="text-sm text-slate-500 mb-3">${req.kat} • ${req.time}</p><p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">${req.popis}</p><div class="flex gap-2 mt-4"><button onclick="loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button><button onclick="markDone(${i})" class="text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-green-500 hover:text-green-600 transition">Označit hotovo</button></div>`;
+        div.className = "req-card bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-fixit-500 hover:shadow-md transition fade-up relative group";
+        div.innerHTML = `
+            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="deleteRequest(${i}, ${req.sbId || 'null'})" class="text-slate-400 hover:text-red-500 transition" title="Smazat poptávku"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+            <div class="flex items-center justify-between mb-2 pr-8">
+                <h4 class="font-extrabold dark:text-white truncate mr-3">${req.title}</h4>
+                <span class="status-badge ${badgeMap[req.status]} shrink-0">${statusMap[req.status]}</span>
+            </div>
+            <p class="text-sm text-slate-500 mb-3">${req.kat} • ${req.time}</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">${req.popis}</p>
+            <div class="flex gap-2 mt-4">
+                <button onclick="loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 text-xs font-bold py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-fixit-500 hover:text-white transition">Zobrazit nabídky</button>
+                <button onclick="markDone(${i})" class="text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-green-500 hover:text-green-600 transition">Označit hotovo</button>
+            </div>`;
         list.insertBefore(div, list.querySelector("#empty-req"));
     });
 }
@@ -593,6 +629,8 @@ function refreshDashboard() {
     const dl = document.getElementById("dash-requests-list");
     if (dl && STATE.requests.length > 0) {
         dl.innerHTML = STATE.requests.slice(0,3).map(r => `<div class="flex items-center gap-3 py-3 border-b border-slate-100 dark:border-slate-700 last:border-0"><div class="w-8 h-8 bg-fixit-50 dark:bg-fixit-500/20 text-fixit-500 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard"></i></div><div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">${r.title}</p><p class="text-xs text-slate-500">${r.kat} • ${r.time}</p></div><span class="status-badge ${r.status==="done"?"status-done":"status-waiting"} shrink-0 text-[10px]">${r.status==="done"?"Hotovo":"Čeká"}</span></div>`).join("");
+    } else if (dl) {
+        dl.innerHTML = `<p class="text-slate-400 text-sm text-center py-6">Zatím žádné poptávky. <button onclick="goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p>`;
     }
 }
 
