@@ -319,12 +319,32 @@ window.replyAI = function() {
     processPopt(poptHistoryText);
 }
 
+window.showFinalizeForm = function() {
+    document.getElementById('btn-show-finalize').classList.add('hidden');
+    document.getElementById('popt-finalize').classList.remove('hidden');
+    document.getElementById('popt-finalize').scrollIntoView({ behavior: 'smooth' });
+}
+
 window.publishRequest = async function() {
     const title = document.getElementById("r-nazev").innerText;
     const kat = document.getElementById("r-kat").innerText;
-    const popis = document.getElementById("r-popis").innerText;
+    let popis = document.getElementById("r-popis").innerText;
     const nal = document.getElementById("r-nal").innerText;
     const cena = document.getElementById("r-cena").innerText;
+    
+    // Získání dat z doplňujícího formuláře
+    const location = document.getElementById("f-location").value.trim();
+    const timeframe = document.getElementById("f-timeframe").value;
+
+    if (!location) {
+        alert("Prosím, vyplňte lokalitu, abychom mohli najít řemeslníka ve vašem okolí.");
+        document.getElementById("f-location").focus();
+        return;
+    }
+
+    // Přidání lokality a termínu k popisu
+    const finalPopis = `Lokalita: ${location}\nPreferovaný termín: ${timeframe}\n\n${popis}`;
+
     let sbId = null;
 
     if (sb && APP_USER) {
@@ -332,7 +352,7 @@ window.publishRequest = async function() {
              const { data, error } = await sb.from("requests").insert({
                  customer_id: APP_USER.id,
                  customer_name: document.getElementById("user-name").innerText,
-                 title, category: kat, description: popis, urgency: nal, price_estimate: cena, status: "waiting"
+                 title, category: kat, description: finalPopis, urgency: nal, price_estimate: cena, status: "waiting"
              }).select();
              if (error) throw error;
              if (data && data.length > 0) sbId = data[0].id;
@@ -340,15 +360,19 @@ window.publishRequest = async function() {
         catch(e) { console.error(e); }
     }
     const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-    STATE.requests.unshift({ sbId: sbId, title, kat, popis, time: now, status: "waiting" });
+    STATE.requests.unshift({ sbId: sbId, title, kat, popis: finalPopis, time: now, status: "waiting" });
     refreshRequestsList(); refreshDashboard();
     poptHistoryText = ""; poptBase64 = null; poptMime = null;
     document.getElementById("popt-input").value = "";
+    document.getElementById("f-location").value = "";
     document.getElementById("popt-chat-msgs").innerHTML = "";
     document.getElementById("photo-preview").classList.add("hidden");
     document.getElementById("photo-zone").querySelector("i").classList.remove("hidden");
     document.getElementById("photo-zone").querySelector("p").classList.remove("hidden");
-    ["popt-result","popt-tip","popt-chat"].forEach(id => document.getElementById(id)?.classList.add("hidden"));
+    
+    // Reset vizuálních částí poptávky
+    ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id => document.getElementById(id)?.classList.add("hidden"));
+    document.getElementById("btn-show-finalize").classList.remove("hidden");
     document.getElementById("popt-form").classList.remove("hidden");
     goTab("requests", "Moje poptávky");
 }
@@ -441,15 +465,16 @@ function customerHTML(name) {
                 <div class="w-14 h-14 rounded-full bg-fixit-500 flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-hard-hat text-xl"></i></div>
                 <div><h3 class="text-xl font-extrabold dark:text-white">Asistent Bořek</h3><p class="text-fixit-600 dark:text-fixit-500 text-xs font-bold uppercase tracking-widest">Příprava zakázky</p></div>
             </div>
+            
             <div id="popt-form" class="space-y-5 relative z-10">
                 <div class="grid md:grid-cols-2 gap-5">
-                    <div>
+                    <div class="flex flex-col">
                         <label class="font-bold text-sm text-slate-600 dark:text-slate-300 mb-2 block">Co se pokazilo?</label>
-                        <textarea id="popt-input" rows="5" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none" placeholder="Př: Praskla trubka pod dřezem..."></textarea>
+                        <textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[160px]" placeholder="Př: Praskla trubka pod dřezem..."></textarea>
                     </div>
-                    <div>
+                    <div class="flex flex-col">
                         <label class="font-bold text-sm text-slate-600 dark:text-slate-300 mb-2 block">Fotka závady (volitelné)</label>
-                        <div class="relative h-full min-h-[120px] group">
+                        <div class="relative flex-1 min-h-[160px] group">
                             <input type="file" accept="image/*" onchange="handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                             <div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 transition overflow-hidden relative">
                                 <i class="fa-solid fa-camera text-3xl mb-2 text-slate-400"></i>
@@ -461,6 +486,7 @@ function customerHTML(name) {
                 </div>
                 <button onclick="startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl">Analyzovat problém</button>
             </div>
+
             <div id="popt-chat" class="hidden flex flex-col gap-5 relative z-10">
                 <div id="popt-chat-msgs" class="flex flex-col gap-3 max-h-96 overflow-y-auto p-5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 hide-scroll"></div>
                 <div id="popt-reply-area" class="hidden flex gap-3">
@@ -468,10 +494,12 @@ function customerHTML(name) {
                     <button onclick="replyAI()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-6 py-3.5 rounded-full font-bold transition hover:scale-105 shadow">Odeslat</button>
                 </div>
             </div>
+            
             <div id="popt-loading" class="hidden mt-10 text-center relative z-10">
                 <i class="fa-solid fa-microchip fa-spin text-4xl text-fixit-500 mb-4"></i>
                 <p class="font-bold text-slate-500">Bořek analyzuje data...</p>
             </div>
+            
             <div id="popt-result" class="hidden mt-10 pt-10 border-t border-slate-200 dark:border-slate-700 relative z-10">
                 <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/40 rounded-2xl p-5">
                     <div class="flex gap-3"><i class="fa-solid fa-lightbulb text-fixit-500 text-xl mt-0.5"></i><div><p class="font-extrabold text-sm uppercase tracking-widest mb-1 dark:text-white">Bořkova rada</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300"></p></div></div>
@@ -493,7 +521,27 @@ function customerHTML(name) {
                     <h4 id="r-nazev" contenteditable="true" class="text-2xl font-extrabold mb-3 dark:text-white focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text border border-transparent hover:border-slate-200 dark:hover:border-slate-700">...</h4>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Popis pro řemeslníka</p>
                     <p id="r-popis" contenteditable="true" class="text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none focus:ring-2 focus:ring-fixit-500 rounded-lg px-2 -mx-2 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line border border-transparent hover:border-slate-200 dark:hover:border-slate-700 min-h-[4rem]">...</p>
-                    <button onclick="publishRequest()" class="w-full mt-6 bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Zveřejnit poptávku na Fixit</button>
+                    
+                    <button id="btn-show-finalize" onclick="showFinalizeForm()" class="w-full mt-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Pokračovat k detailům</button>
+                    
+                    <div id="popt-finalize" class="hidden mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
+                        <h4 class="font-extrabold dark:text-white mb-4">Doplňující informace</h4>
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                             <div>
+                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Lokalita (Město / PSČ) *</label>
+                                 <input type="text" id="f-location" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno">
+                             </div>
+                             <div>
+                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Kdy potřebujete opravu?</label>
+                                 <select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                                     <option>Co nejdříve (Havarijní stav)</option>
+                                     <option>Během několika dnů</option>
+                                     <option>Nespěchá (během měsíce)</option>
+                                 </select>
+                             </div>
+                        </div>
+                        <button onclick="publishRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-bold text-lg transition shadow-xl hover:scale-[1.01]">Zveřejnit poptávku na Fixit</button>
+                    </div>
                 </div>
             </div>
         </div>
