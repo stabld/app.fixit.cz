@@ -351,12 +351,20 @@ window.launchApp = function(role, name) {
 }
 
 window.initApp = function(role, name) {
-    document.getElementById("user-name").innerText = name;
-    document.getElementById("user-role-lbl").innerText = role === "customer" ? "Zákazník" : "Řemeslník";
-    document.getElementById("user-avatar").src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role === "customer" ? "f59e0b" : "0f172a");
+    const userNameEl = document.getElementById("user-name");
+    if(userNameEl) userNameEl.innerText = name;
+    
+    const userRoleEl = document.getElementById("user-role-lbl");
+    if(userRoleEl) userRoleEl.innerText = role === "customer" ? "Zákazník" : "Řemeslník";
+    
+    const userAvatarEl = document.getElementById("user-avatar");
+    if(userAvatarEl) userAvatarEl.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role === "customer" ? "f59e0b" : "0f172a");
+    
     const tt = document.getElementById("theme-toggle");
     const ui = () => { const d = document.documentElement.classList.contains("dark"); document.getElementById("theme-toggle-dark-icon").classList.toggle("hidden",d); document.getElementById("theme-toggle-light-icon").classList.toggle("hidden",!d); };
-    ui(); tt.addEventListener("click", () => { document.documentElement.classList.toggle("dark"); localStorage.setItem("color-theme", document.documentElement.classList.contains("dark")?"dark":"light"); ui(); });
+    ui(); 
+    if(tt) tt.addEventListener("click", () => { document.documentElement.classList.toggle("dark"); localStorage.setItem("color-theme", document.documentElement.classList.contains("dark")?"dark":"light"); ui(); });
+    
     if (role === "customer") initCustomer(name); else initCraftsman(name);
     setTimeout(async () => {
         if (role === "customer") { await loadCustomerRequestsFromDB(); await loadCustomerConversations(); }
@@ -453,72 +461,137 @@ window.showFinalizeForm = function() {
     document.getElementById('popt-finalize').scrollIntoView({ behavior: 'smooth' });
 }
 
-window.publishRequest = async function() {
-    const title = document.getElementById("r-nazev").innerText;
-    const kat = document.getElementById("r-kat").innerText;
-    let popis = document.getElementById("r-popis").innerText;
-    const nal = document.getElementById("r-nal").innerText;
-    const cena = document.getElementById("r-cena").innerText;
+// ROBUSTNÍ VERZE ZVEŘEJNĚNÍ POPTÁVKY BEZ MOŽNOSTI ZAMRZNUTÍ
+window.publishRequest = async function(event) {
+    let btn = null;
+    let originalText = "Zveřejnit poptávku na Fixit";
     
-    const street = document.getElementById("f-street").value.trim();
-    const city = document.getElementById("f-city").value.trim();
-    const phone = document.getElementById("f-phone").value.trim();
-    const timeframe = document.getElementById("f-timeframe").value;
-    const property = document.getElementById("f-property").value;
-    const parking = document.getElementById("f-parking").value;
-
-    if (!street || !city || !phone) {
-        alert("Prosím, vyplňte ulici, město a telefonní číslo, aby se s vámi mohl řemeslník spojit.");
-        return;
+    if (event && event.currentTarget) {
+        btn = event.currentTarget;
+        originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Zpracovávám...';
+        btn.disabled = true;
     }
+    
+    try {
+        // 1. Získání textů z HTML (bezpečné načtení, i když prvek náhodou chybí)
+        const titleEl = document.getElementById("r-nazev");
+        const katEl = document.getElementById("r-kat");
+        const popisEl = document.getElementById("r-popis");
+        const nalEl = document.getElementById("r-nal");
+        const cenaEl = document.getElementById("r-cena");
 
-    const detailInfo = [
-        `📍 Adresa: ${street}, ${city}`,
-        `📞 Telefon: ${phone}`,
-        `📅 Termín: ${timeframe}`,
-        `🏠 Typ objektu: ${property}`,
-        `🚗 Parkování: ${parking}`
-    ].join('\n');
+        const title = titleEl ? titleEl.innerText : "Nová poptávka";
+        const kat = katEl ? katEl.innerText : "Ostatní";
+        const popis = popisEl ? popisEl.innerText : "";
+        const nal = nalEl ? nalEl.innerText : "Střední";
+        const cena = cenaEl ? cenaEl.innerText : "Dohodou";
+        
+        // 2. Získání dat z formuláře
+        const streetEl = document.getElementById("f-street");
+        const cityEl = document.getElementById("f-city");
+        const phoneEl = document.getElementById("f-phone");
+        const timeframeEl = document.getElementById("f-timeframe");
+        const propertyEl = document.getElementById("f-property");
+        const parkingEl = document.getElementById("f-parking");
 
-    const finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
+        const street = streetEl ? streetEl.value.trim() : "";
+        const city = cityEl ? cityEl.value.trim() : "";
+        const phone = phoneEl ? phoneEl.value.trim() : "";
+        const timeframe = timeframeEl ? timeframeEl.value : "";
+        const property = propertyEl ? propertyEl.value : "";
+        const parking = parkingEl ? parkingEl.value : "";
 
-    const currentPhoto = poptBase64;
-    const currentMime = poptMime;
-    let sbId = null;
-
-    if (sb && APP_USER) {
-        try {
-             const { data, error } = await sb.from("requests").insert({
-                 customer_id: APP_USER.id,
-                 customer_name: document.getElementById("user-name").innerText,
-                 title, category: kat, description: finalPopis, urgency: nal, price_estimate: cena, status: "waiting"
-             }).select();
-             if (error) throw error;
-             if (data && data.length > 0) sbId = data[0].id;
+        if (!street || !city || !phone) {
+            alert("Prosím, vyplňte ulici, město a telefonní číslo, aby se s vámi mohl řemeslník spojit.");
+            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+            return;
         }
-        catch(e) { console.error(e); }
+
+        // 3. Spojení popisu a doplňujících detailů
+        const detailInfo = [
+            `📍 Adresa: ${street}, ${city}`,
+            `📞 Telefon: ${phone}`,
+            `📅 Termín: ${timeframe}`,
+            `🏠 Typ objektu: ${property}`,
+            `🚗 Parkování: ${parking}`
+        ].join('\n');
+
+        const finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
+
+        const currentPhoto = poptBase64;
+        const currentMime = poptMime;
+        let sbId = null;
+
+        // 4. Odeslání do Supabase (pokud je připojeno)
+        if (sb && APP_USER) {
+            const userNameEl = document.getElementById("user-name");
+            const cName = userNameEl ? userNameEl.textContent : "Zákazník";
+            
+            const { data, error } = await sb.from("requests").insert({
+                 customer_id: APP_USER.id,
+                 customer_name: cName,
+                 title: title, category: kat, description: finalPopis, urgency: nal, price_estimate: cena, status: "waiting"
+            }).select();
+            
+            if (error) {
+                console.error("Supabase chyba:", error);
+            } else if (data && data.length > 0) {
+                sbId = data[0].id;
+            }
+        }
+        
+        // 5. Aktualizace lokálního stavu aplikce
+        const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
+        STATE.requests.unshift({ sbId: sbId, title: title, kat: kat, popis: finalPopis, time: now, status: "waiting", photo: currentPhoto, mime: currentMime });
+        
+        refreshRequestsList(); 
+        refreshDashboard();
+        
+        // 6. Vyčištění a restart formuláře
+        poptHistoryText = ""; poptBase64 = null; poptMime = null;
+        
+        const inputsToClear = ["popt-input", "f-street", "f-city", "f-phone"];
+        inputsToClear.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
+        
+        const msgsEl = document.getElementById("popt-chat-msgs");
+        if (msgsEl) msgsEl.innerHTML = "";
+        
+        const previewEl = document.getElementById("photo-preview");
+        if (previewEl) previewEl.classList.add("hidden");
+        
+        const pZone = document.getElementById("photo-zone");
+        if (pZone) {
+            const iEl = pZone.querySelector("i");
+            const pEl = pZone.querySelector("p");
+            if (iEl) iEl.classList.remove("hidden");
+            if (pEl) pEl.classList.remove("hidden");
+        }
+        
+        ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add("hidden");
+        });
+        
+        const btnShow = document.getElementById("btn-show-finalize");
+        if (btnShow) btnShow.classList.remove("hidden");
+        
+        const pForm = document.getElementById("popt-form");
+        if (pForm) pForm.classList.remove("hidden");
+        
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        
+        // 7. Přepnutí na záložku poptávek
+        goTab("requests", "Moje poptávky");
+        
+    } catch (err) {
+        console.error("Kritická chyba při odesílání:", err);
+        alert("Nastala nečekaná chyba při odesílání poptávky.");
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
     }
-    
-    const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-    STATE.requests.unshift({ sbId: sbId, title, kat, popis: finalPopis, time: now, status: "waiting", photo: currentPhoto, mime: currentMime });
-    refreshRequestsList(); 
-    refreshDashboard();
-    
-    poptHistoryText = ""; poptBase64 = null; poptMime = null;
-    document.getElementById("popt-input").value = "";
-    document.getElementById("f-street").value = "";
-    document.getElementById("f-city").value = "";
-    document.getElementById("f-phone").value = "";
-    
-    document.getElementById("popt-chat-msgs").innerHTML = "";
-    document.getElementById("photo-preview").classList.add("hidden");
-    document.getElementById("photo-zone").querySelector("i").classList.remove("hidden");
-    document.getElementById("photo-zone").querySelector("p").classList.remove("hidden");
-    
-    ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id => document.getElementById(id)?.classList.add("hidden"));
-    document.getElementById("btn-show-finalize").classList.remove("hidden");
-    document.getElementById("popt-form").classList.remove("hidden");
-    goTab("requests", "Moje poptávky");
 }
 
 window.deleteRequest = async function(index, sbId) {
@@ -736,7 +809,7 @@ function customerHTML(name) {
                             </div>
                         </div>
 
-                        <button onclick="publishRequest()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-5 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Zveřejnit poptávku na Fixit</button>
+                        <button onclick="publishRequest(event)" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-5 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Zveřejnit poptávku na Fixit</button>
                     </div>
                 </div>
             </div>
