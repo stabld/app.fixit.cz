@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        return res.status(500).json({ error: 'API klíč není nastaven na serveru.' });
+        return res.status(500).json({ error: 'GEMINI_API_KEY není nastaven na serveru.' });
     }
 
     try {
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         messages.push({ role: 'user', content: userText });
 
         const payload = {
-            model: 'gpt-4o',
+            model: 'gpt-4o-mini',
             messages,
             max_tokens: 1024,
         };
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
             payload.response_format = { type: 'json_object' };
         }
 
-        const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
-            return res.status(response.status).json({ error: data.error?.message || 'Chyba od API' });
+            return res.status(response.status).json({ error: data.error?.message || 'Chyba od OpenAI API' });
         }
 
         return res.status(200).json({ text: data.choices[0].message.content });
