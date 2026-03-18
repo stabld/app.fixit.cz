@@ -224,6 +224,33 @@
             <input type="hidden" id="co-req-title">
         </div>
     </div>
+
+    <div id="rating-modal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md flex flex-col overflow-hidden relative">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-star"></i></div>
+                <h3 class="text-2xl font-black dark:text-white mb-2">Hodnocení práce</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Jak jste byli spokojeni s odvedenou prací? Vaše recenze pomůže ostatním zákazníkům.</p>
+                
+                <div class="flex justify-center gap-2 mb-6" id="star-rating-container">
+                    <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(1)"></i>
+                    <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(2)"></i>
+                    <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(3)"></i>
+                    <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(4)"></i>
+                    <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(5)"></i>
+                </div>
+                
+                <textarea id="rating-comment" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-inner resize-none mb-6" placeholder="Napište krátkou recenzi... (volitelné)"></textarea>
+                
+                <div class="flex gap-3">
+                    <button onclick="window.closeRatingModal()" class="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Zrušit</button>
+                    <button id="btn-submit-rating" onclick="window.submitRating()" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-fixit-500/30">Odeslat</button>
+                </div>
+                <input type="hidden" id="rating-req-index">
+                <input type="hidden" id="rating-req-sbid">
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -245,10 +272,10 @@ window.poptBase64 = null;
 window.poptMime = null;
 window.activeChatId = null;
 window.msgSubscription = null;
+window.currentRatingValue = 5;
 
 // --- PAGE LOADER ANIMATION LOGIC & SESSION CHECK ---
 window.addEventListener('load', async () => {
-    // Schování loaderu po animaci
     setTimeout(() => {
         const loader = document.getElementById('page-loader');
         if (loader) {
@@ -259,7 +286,6 @@ window.addEventListener('load', async () => {
         }
     }, 1000); 
 
-    // Kontrola existující relace (Remember me)
     if (window.sb) {
         const { data: { session } } = await window.sb.auth.getSession();
         if (session && session.user) {
@@ -358,7 +384,7 @@ window.createBeautifulCard = function(req, isMarket, i) {
 
                     <div class="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
                         <button onclick="window.loadOffersForRequest(${req.sbId||0},'${(req.title||"").replace(/'/g,"\\'")}')" class="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-md">Zobrazit nabídky řemeslníků</button>
-                        <button onclick="window.markDone(${i})" class="px-6 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-check mr-2"></i>Označit hotovo</button>
+                        ${req.status !== 'done' ? `<button onclick="window.openRatingModal(${i}, ${req.sbId || 'null'})" class="px-6 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-check mr-2"></i>Označit hotovo</button>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -399,6 +425,73 @@ window.createBeautifulCard = function(req, isMarket, i) {
         console.error("Chyba vykresleni karty:", err);
         return `<div class="p-4 bg-red-50 text-red-500 rounded-xl">Chyba vykreslení karty. Prosím, obnovte stránku.</div>`;
     }
+}
+
+// --- FUNKCE PRO HODNOCENÍ (RATING) ---
+window.openRatingModal = function(index, sbId) {
+    document.getElementById("rating-req-index").value = index;
+    document.getElementById("rating-req-sbid").value = sbId;
+    window.setRating(5); 
+    document.getElementById("rating-comment").value = "";
+    
+    const modal = document.getElementById("rating-modal");
+    modal.classList.remove("hidden");
+    void modal.offsetWidth;
+    modal.classList.add("opacity-100");
+}
+
+window.closeRatingModal = function() {
+    const modal = document.getElementById("rating-modal");
+    if (modal) {
+        modal.classList.remove("opacity-100");
+        setTimeout(() => modal.classList.add("hidden"), 300);
+    }
+}
+
+window.setRating = function(val) {
+    window.currentRatingValue = val;
+    const container = document.getElementById("star-rating-container");
+    const stars = container.querySelectorAll("i");
+    stars.forEach((star, idx) => {
+        if (idx < val) {
+            star.classList.remove("text-slate-300", "dark:text-slate-600");
+            star.classList.add("text-yellow-400");
+        } else {
+            star.classList.remove("text-yellow-400");
+            star.classList.add("text-slate-300", "dark:text-slate-600");
+        }
+    });
+}
+
+window.submitRating = async function() {
+    const index = document.getElementById("rating-req-index").value;
+    const sbId = document.getElementById("rating-req-sbid").value;
+    const comment = document.getElementById("rating-comment").value.trim();
+    const btn = document.getElementById("btn-submit-rating");
+    const origText = btn.innerHTML;
+    
+    btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Ukládám...";
+    btn.disabled = true;
+    
+    if (sbId !== "null" && window.sb) {
+        try {
+            await window.sb.from("requests").update({ status: "done" }).eq("id", sbId);
+            // Pokus o uložení hodnocení do tabulky reviews (pokud existuje)
+            await window.sb.from("reviews").insert({ 
+                request_id: sbId, 
+                rating: window.currentRatingValue, 
+                comment: comment 
+            });
+        } catch(e) { console.error("Chyba při ukládání hodnocení do DB:", e); }
+    }
+    
+    window.STATE.requests[index].status = "done";
+    window.refreshRequestsList();
+    window.refreshDashboard();
+    
+    btn.innerHTML = origText;
+    btn.disabled = false;
+    window.closeRatingModal();
 }
 
 // --- AUTH FUNKCE ---
@@ -523,7 +616,6 @@ window.initApp = function(role, name) {
     
     if (role === "customer") window.initCustomer(name); else window.initCraftsman(name);
     
-    // Načtení profilových dat do formuláře
     setTimeout(() => {
         if(window.APP_USER) {
             const meta = window.APP_USER.user_metadata || {};
@@ -633,6 +725,7 @@ window.showFinalizeForm = function() {
     document.getElementById('popt-finalize').scrollIntoView({ behavior: 'smooth' });
 }
 
+// --- ZVEŘEJNĚNÍ POPTÁVKY ---
 window.publishRequest = async function(btnNode) {
     let originalText = "Zveřejnit poptávku na Fixit";
     try {
@@ -872,7 +965,7 @@ window.customerHTML = function(name) {
         </div>
         <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné platby.</div>
     </div>
-
+    
     <div id="view-profile" class="hidden fade-up max-w-4xl mx-auto">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Můj profil</h2>
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
@@ -898,7 +991,7 @@ window.customerHTML = function(name) {
                             <input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ...">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město / Působnost</label>
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město</label>
                             <input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno">
                         </div>
                     </div>
@@ -1212,12 +1305,6 @@ window.refreshRequestsList = function() {
     });
 }
 
-window.markDone = function(i) { 
-    window.STATE.requests[i].status = "done"; 
-    window.refreshRequestsList(); 
-    window.refreshDashboard(); 
-}
-
 window.refreshDashboard = function() {
     const sa = document.getElementById("stat-active"); if(sa) sa.innerText = window.STATE.requests.filter(r => r.status !== "done").length;
     const st = document.getElementById("stat-total"); if(st) st.innerText = window.STATE.requests.length;
@@ -1434,21 +1521,50 @@ window.closeOffersModal = function() {
 }
 
 window.refreshCraftsmanJobs = function() {
-    const cnt = document.getElementById("jobs-active-count"); if(cnt) cnt.innerText = window.STATE.craftJobs.length;
+    // Počítáme dokončené a aktivní práce
+    const completedJobs = window.STATE.craftJobs.filter(j => j.status === 'done' || j.status === 'completed').length;
+    const allActive = window.STATE.craftJobs.length - completedJobs;
+    
+    const cnt = document.getElementById("jobs-active-count"); 
+    if(cnt) cnt.innerText = allActive;
+    
+    const doneCnt = document.getElementById("jobs-done-count");
+    if(doneCnt) doneCnt.innerText = completedJobs;
+    
     const list = document.getElementById("my-jobs-list"); if(!list) return;
     list.querySelector(".text-center")?.remove(); list.innerHTML = "";
+    
     window.STATE.craftJobs.forEach(job => {
         const d = document.createElement("div");
         d.className = "bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm fade-up";
-        d.innerHTML = `<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">${job.title}</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">${job.time}</p></div><span class="status-badge status-waiting">Čekám</span></div><button onclick="window.activeChatId='${job.requestId}'; window.goTab('c-messages','Zprávy'); setTimeout(()=>window.openConversation('${job.requestId}','Zákazník','customer${job.requestId}'),300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zákazníkovi</button>`;
+        
+        let statusBadge = `<span class="status-badge status-waiting">Čekám na odpověď</span>`;
+        if (job.status === 'accepted' || job.status === 'active') statusBadge = `<span class="status-badge status-active">Aktivní zakázka</span>`;
+        if (job.status === 'done' || job.status === 'completed') statusBadge = `<span class="status-badge status-done">Dokončeno</span>`;
+        
+        d.innerHTML = `<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">${job.title}</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">${job.time}</p></div>${statusBadge}</div><button onclick="window.activeChatId='${job.requestId}'; window.goTab('c-messages','Zprávy'); setTimeout(()=>window.openConversation('${job.requestId}','Zákazník','customer${job.requestId}'),300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zákazníkovi</button>`;
         list.appendChild(d);
     });
 }
 
 window.loadCraftsmanJobsFromDB = async function() {
     if (!window.sb || !window.APP_USER) return;
-    const { data } = await window.sb.from("offers").select("*, requests(title, category)").eq("craftsman_id", window.APP_USER.id);
-    if (data && data.length > 0) { window.STATE.craftJobs = data.map(o => ({ title: o.requests?.title||"Zakázka", requestId: o.request_id, status: o.status, time: new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) })); window.refreshCraftsmanJobs(); }
+    const { data } = await window.sb.from("offers").select("*, requests(title, category, status)").eq("craftsman_id", window.APP_USER.id);
+    if (data && data.length > 0) { 
+        window.STATE.craftJobs = data.map(o => {
+            // Pokud zákazník označil jako hotovo, chová se i nabídka jako hotová
+            let finalStatus = o.status;
+            if (o.requests?.status === 'done') finalStatus = 'done';
+            
+            return { 
+                title: o.requests?.title||"Zakázka", 
+                requestId: o.request_id, 
+                status: finalStatus, 
+                time: new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) 
+            };
+        }); 
+        window.refreshCraftsmanJobs(); 
+    }
 }
 
 window.loadCustomerRequestsFromDB = async function() {
