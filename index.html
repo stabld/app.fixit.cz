@@ -92,8 +92,41 @@
             #chat-container-customer > div:first-child, #chat-container-craftsman > div:first-child { width:100% !important; border-right:none !important; max-height:180px; border-bottom:1px solid #e2e8f0; }
             #chat-msgs, #chat-msgs-c { min-height:250px; }
         }
-        @media (max-width: 1023px) { #sidebar { display: none; } #mobile-bottom-nav { display: flex; } #main-content { padding-bottom: 80px; } }
-        @media (min-width: 1024px) { #mobile-bottom-nav { display: none; } }
+        @media (max-width: 1023px) { 
+            #sidebar { display: none !important; } 
+            #mobile-bottom-nav { display: flex !important; } 
+            #main-content { padding-bottom: 80px; }
+            #page-title { font-size: 1rem; }
+            .max-w-5xl, .max-w-6xl { padding-left: 0; padding-right: 0; }
+        }
+        @media (min-width: 1024px) { #mobile-bottom-nav { display: none !important; } }
+        @media (max-width: 767px) {
+            /* Header */
+            header { padding-left: 1rem !important; padding-right: 1rem !important; }
+            #header-cta button { font-size: 12px !important; padding: 8px 12px !important; }
+            #header-cta button i { display: none; }
+            /* Main content */
+            #main-content { padding: 1rem !important; padding-bottom: 80px !important; }
+            /* Cards */
+            .req-card { padding: 1rem !important; border-radius: 1.25rem !important; }
+            .market-item { padding: 1rem !important; border-radius: 1.25rem !important; }
+            /* Grid stats - 2 cols */
+            .grid.grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+            /* Jobs grid */
+            .grid.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+            /* Poptávka form */
+            #view-new .grid { grid-template-columns: 1fr !important; }
+            /* Modals */
+            .max-w-3xl, .max-w-lg, .max-w-md { max-width: calc(100vw - 2rem) !important; }
+            /* Toast bottom on mobile */
+            #toast-container { bottom: 80px !important; top: auto !important; right: 12px !important; left: 12px !important; }
+        }
+        @media (max-width: 480px) {
+            #header-cta button span { display: none; }
+            .rounded-\[2\.5rem\] { border-radius: 1.5rem !important; }
+            .p-8 { padding: 1.25rem !important; }
+            .md\:p-12 { padding: 1.25rem !important; }
+        }
     </style>
     <script>
         if (localStorage.getItem("color-theme") === "dark" || (!("color-theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -101,13 +134,13 @@
         } else { document.documentElement.classList.remove("dark"); }
     </script>
 </head>
-<body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white h-screen overflow-hidden">
+<body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white">
 
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
 <!-- LOADER - stejný jako na webu -->
-<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;">
+<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;min-height:-webkit-fill-available;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;">
     <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
         <path id="loader-hex" d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" style="stroke-dasharray:300;stroke-dashoffset:300;animation:loader-draw 1s ease forwards 0.2s;"/>
         <circle cx="50" cy="48" r="16" fill="#f59e0b"/>
@@ -118,7 +151,7 @@
 </div>
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 hidden">
+<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 hidden overflow-y-auto">
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10">
@@ -182,7 +215,7 @@
 </div>
 
 <!-- MAIN APP -->
-<div id="main-app" class="hidden flex h-screen w-full transition-opacity duration-500 opacity-0">
+<div id="main-app" class="hidden flex h-screen w-full transition-opacity duration-500 opacity-0 overflow-hidden">
     <aside id="sidebar" class="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-shrink-0 z-50" style="width:272px">
         <div>
             <div class="h-20 flex items-center px-6 border-b border-slate-200 dark:border-slate-800">
@@ -861,7 +894,7 @@ window._doDeleteRequest = async function(index, sbId) {
 // === CUSTOMER INIT ===
 window.initCustomer = function(name) {
     window.buildNav([{id:"dash",icon:"fa-house",label:"Nástěnka"},{id:"requests",icon:"fa-list-check",label:"Moje poptávky"},{id:"messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"payments",icon:"fa-shield-halved",label:"Platby & Escrow"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
-    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová poptávka</button>';
+    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> <span>Nová poptávka</span></button>';
     document.getElementById("main-content").innerHTML = window.customerHTML(name);
     window.goTab("dash","Nástěnka");
 };
@@ -915,7 +948,7 @@ window.customerHTML = function(name) {
             </div>
         </div>
     </div>
-    <div id="view-new" class="hidden fade-up max-w-5xl mx-auto">
+    <div id="view-new" class="hidden fade-up max-w-5xl mx-auto w-full">
         <div class="bg-white dark:bg-[#0f172a] p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-200 dark:border-slate-800 relative overflow-hidden">
             <div class="absolute top-[-20%] right-[-10%] w-96 h-96 bg-fixit-500/10 rounded-full blur-[100px] pointer-events-none"></div>
             <div class="mb-10 flex items-center gap-5 relative z-10 border-b border-slate-100 dark:border-slate-800 pb-6"><div class="w-16 h-16 rounded-2xl bg-fixit-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-fixit-500/30"><i class="fa-solid fa-hard-hat text-2xl"></i></div><div><h3 class="text-2xl font-extrabold dark:text-white leading-tight">Asistent Bořek</h3><p class="text-fixit-600 dark:text-fixit-500 text-[11px] font-black uppercase tracking-widest mt-1">Příprava zakázky s umělou inteligencí</p></div></div>
