@@ -146,13 +146,60 @@
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
         <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-2"></div>
     </nav>
-    <div id="offers-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    
+    <div id="offers-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
                 <div><h3 class="font-extrabold dark:text-white">Nabídky řemeslníků</h3><p class="text-sm text-slate-500" id="offers-modal-title"></p></div>
                 <button onclick="window.closeOffersModal()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
             </div>
             <div id="offers-modal-list" class="flex-1 overflow-y-auto p-6 space-y-4 hide-scroll"></div>
+        </div>
+    </div>
+
+    <div id="craftsman-offer-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-xl font-black dark:text-white">Detail poptávky</h3>
+                <button onclick="window.closeOfferModal()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 md:p-8 hide-scroll">
+                <div class="flex flex-col md:flex-row gap-6 mb-8">
+                    <div id="co-photo-wrap" class="w-full md:w-48 h-40 shrink-0 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hidden shadow-inner relative group cursor-pointer">
+                        <img id="co-photo" src="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-3">
+                            <span id="co-cat" class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wide"></span>
+                            <span id="co-urg" class="px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-[11px] font-extrabold text-red-600 dark:text-red-400 uppercase tracking-wide"></span>
+                        </div>
+                        <h4 id="co-title" class="text-2xl md:text-3xl font-black dark:text-white leading-tight mb-4"></h4>
+                        <div id="co-desc" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line space-y-3"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-inner">
+                    <h4 class="font-extrabold text-lg dark:text-white mb-5 flex items-center gap-3"><i class="fa-solid fa-file-signature text-fixit-500"></i> Vaše nabídka pro zákazníka</h4>
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Odhadovaná cena (Kč) nebo "Dohodou"</label>
+                            <input type="text" id="co-price" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. 1500 Kč, nebo Dohodou...">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Zpráva pro zákazníka (dotaz, dostupnost...)</label>
+                            <textarea id="co-msg" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm resize-none" placeholder="Dobrý den, mohu přijet zítra odpoledne..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0f172a]">
+                <button id="co-submit-btn" onclick="window.submitCraftsmanOffer()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Odeslat nabídku zákazníkovi</button>
+            </div>
+            
+            <input type="hidden" id="co-req-id">
+            <input type="hidden" id="co-req-title">
         </div>
     </div>
 </div>
@@ -182,7 +229,7 @@ try {
 
 window.APP_ROLE = "customer";
 window.APP_USER = null;
-window.STATE = { requests: [], craftJobs: [] };
+window.STATE = { requests: [], craftJobs: [], marketRequests: [] };
 
 window.poptHistoryText = "";
 window.poptBase64 = null;
@@ -190,13 +237,32 @@ window.poptMime = null;
 window.activeChatId = null;
 window.msgSubscription = null;
 
+// --- POMOCNÁ FUNKCE PRO ZÍSKÁNÍ FOTKY Z POPISU ---
+window.extractPhotoFromDesc = function(rawDesc) {
+    if (!rawDesc) return { desc: "", photo: null, mime: null };
+    const parts = rawDesc.split("||PHOTO||");
+    if (parts.length > 1) {
+        const desc = parts[0].trim();
+        const photoParts = parts[1].split("||MIME||");
+        return { desc: desc, photo: photoParts[0], mime: photoParts[1] };
+    }
+    return { desc: rawDesc, photo: null, mime: null };
+}
+
 // --- VYKRESLENÍ KRÁSNÝCH KARET ---
 window.createBeautifulCard = function(req, isMarket, i) {
     try {
         const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
         const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
         
-        let mainDesc = req.popis || "";
+        // Magie pro extrakci fotky uložené v textu (aby to prošlo přes existující Supabase)
+        let rawDesc = req.description || req.popis || "";
+        let extracted = window.extractPhotoFromDesc(rawDesc);
+        
+        let mainDesc = extracted.desc;
+        let reqPhoto = extracted.photo || req.photo; // fallback pro lokální stav u zákazníka
+        let reqMime = extracted.mime || req.mime;
+        
         let detailsHtml = "";
         
         if (mainDesc.includes("---")) {
@@ -217,9 +283,9 @@ window.createBeautifulCard = function(req, isMarket, i) {
             }
         }
 
-        const photoHtml = req.photo ? `
+        const photoHtml = reqPhoto ? `
             <div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer">
-                <img src="data:${req.mime||'image/jpeg'};base64,${req.photo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <img src="data:${reqMime||'image/jpeg'};base64,${reqPhoto}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
             </div>` : '';
 
@@ -283,7 +349,7 @@ window.createBeautifulCard = function(req, isMarket, i) {
                             ${detailsHtml}
                             
                             <div class="flex gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-                                <button onclick="window.applyJob(this,'${(req.title||'').replace(/'/g,"\\'")}',${req.id})" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Podat nabídku řemeslníka</button>
+                                <button onclick="window.openOfferModal(${i})" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Podat nabídku zákazníkovi</button>
                                 <button class="w-12 h-12 border-2 border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 hover:bg-fixit-50 dark:hover:bg-fixit-500/10 transition-colors"><i class="fa-regular fa-bookmark"></i></button>
                             </div>
                         </div>
@@ -476,7 +542,7 @@ window.showFinalizeForm = function() {
     document.getElementById('popt-finalize').scrollIntoView({ behavior: 'smooth' });
 }
 
-// --- NEPRŮSTŘELNÁ VERZE ODESÍLÁNÍ POPTÁVKY ---
+// --- ZVEŘEJNĚNÍ POPTÁVKY ---
 window.publishRequest = async function(btnNode) {
     let originalText = "Zveřejnit poptávku na Fixit";
     
@@ -517,7 +583,12 @@ window.publishRequest = async function(btnNode) {
             `🚗 Parkování: ${parking}`
         ].join('\n');
 
-        const finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
+        // Spojení popisu a přidání zakódované fotky pro uložení do jediné buňky v DB
+        let finalPopis = `${popis}\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n${detailInfo}`;
+        
+        if (window.poptBase64 && window.poptMime) {
+            finalPopis += `\n||PHOTO||${window.poptBase64}||MIME||${window.poptMime}`;
+        }
 
         let sbId = null;
 
@@ -539,7 +610,6 @@ window.publishRequest = async function(btnNode) {
         }
         
         const now = new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
-        
         window.STATE.requests.unshift({ sbId: sbId, title: title, kat: kat, popis: finalPopis, time: now, status: "waiting", photo: window.poptBase64, mime: window.poptMime });
         
         window.refreshRequestsList(); 
@@ -1021,17 +1091,105 @@ window.loadCraftsmanConversations = async function() {
     list.innerHTML = offers.map(o => `<div id="conv-${o.request_id}" onclick="window.openConversation(${o.request_id},'${(o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'")}','customer${o.request_id}')" class="conv-item p-5 cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-extrabold text-sm dark:text-white truncate">${o.requests?.title||"Poptávka"}</p><p class="text-xs text-slate-400 mt-1">${o.requests?.category||""} • ${o.requests?.customer_name||"Zákazník"}</p></div>`).join("");
 }
 
-window.applyJob = async function(btn, title, requestId) {
+// --- FUNKCE PRO ZOBRAZENÍ MODALU S DETAILEM PRO ŘEMESLNÍKA ---
+window.openOfferModal = function(index) {
+    const req = window.STATE.marketRequests[index];
+    if (!req) return;
+    
+    document.getElementById('co-req-id').value = req.id;
+    document.getElementById('co-req-title').value = req.title;
+    
+    document.getElementById('co-title').innerText = req.title;
+    document.getElementById('co-cat').innerText = req.category || 'Ostatní';
+    document.getElementById('co-urg').innerText = req.urgency || 'Střední';
+    
+    let extracted = window.extractPhotoFromDesc(req.description);
+    document.getElementById('co-desc').innerHTML = extracted.desc.replace(/\n/g, '<br>');
+    
+    document.getElementById('co-price').value = req.price_estimate || 'Dohodou';
+    document.getElementById('co-msg').value = `Dobrý den, mám zájem o vaši zakázku "${req.title}". Mám čas a vybavení, mohu pomoci.`;
+    
+    const photoWrap = document.getElementById('co-photo-wrap');
+    const photoImg = document.getElementById('co-photo');
+    
+    if (extracted.photo) {
+         photoImg.src = `data:${extracted.mime||'image/jpeg'};base64,${extracted.photo}`;
+         photoWrap.classList.remove('hidden');
+    } else {
+         photoWrap.classList.add('hidden');
+    }
+    
+    const modal = document.getElementById('craftsman-offer-modal');
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.add('opacity-100');
+}
+
+window.closeOfferModal = function() {
+    const modal = document.getElementById('craftsman-offer-modal');
+    if (modal) {
+        modal.classList.remove('opacity-100');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+}
+
+window.submitCraftsmanOffer = async function() {
+    const btn = document.getElementById("co-submit-btn");
+    const originalText = btn.innerHTML;
+    
+    const requestId = document.getElementById("co-req-id").value;
+    const title = document.getElementById("co-req-title").value;
+    const price = document.getElementById("co-price").value.trim();
+    const msg = document.getElementById("co-msg").value.trim();
+    
+    if (!msg) {
+        alert("Napište prosím zákazníkovi alespoň krátkou zprávu.");
+        return;
+    }
+    
     if (!window.sb || !window.APP_USER) { alert("Musíte být přihlášeni."); return; }
-    btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Odesílám..."; btn.disabled = true;
+    
+    btn.innerHTML = "<i class=\"fa-solid fa-circle-notch fa-spin mr-2\"></i>Odesílám..."; 
+    btn.disabled = true;
+    
     try {
-        const { error } = await window.sb.from("offers").insert({ request_id: requestId, craftsman_id: window.APP_USER.id, craftsman_name: document.getElementById("user-name").innerText, message: "Mám zájem o zakázku: " + title, price: "Dohodou", status: "pending" });
+        const { error } = await window.sb.from("offers").insert({ 
+            request_id: requestId, 
+            craftsman_id: window.APP_USER.id, 
+            craftsman_name: document.getElementById("user-name").innerText, 
+            message: msg, 
+            price: price || "Dohodou", 
+            status: "pending" 
+        });
         if (error) throw error;
-        btn.innerHTML = "<i class=\"fa-solid fa-check mr-2\"></i>Nabídka odeslána!";
-        btn.className = btn.className.replace("bg-fixit-500 hover:bg-fixit-600","bg-green-500"); btn.disabled = true;
-        window.STATE.craftJobs.push({ title, requestId, status:"pending", time: new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) });
-        window.refreshCraftsmanJobs(); window.activeChatId = String(requestId);
-    } catch(e) { btn.innerHTML = "Podat nabídku"; btn.disabled = false; alert("Chyba: " + e.message); }
+        
+        btn.innerHTML = "<i class=\"fa-solid fa-check mr-2\"></i>Odesláno!";
+        btn.className = btn.className.replace("bg-fixit-500 hover:bg-fixit-600","bg-green-500"); 
+        
+        window.STATE.craftJobs.push({ 
+            title: title, 
+            requestId: requestId, 
+            status: "pending", 
+            time: new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}) 
+        });
+        
+        window.refreshCraftsmanJobs(); 
+        window.activeChatId = String(requestId);
+        
+        setTimeout(() => {
+            window.closeOfferModal();
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.className = btn.className.replace("bg-green-500","bg-fixit-500 hover:bg-fixit-600");
+            window.goTab('c-messages', 'Zprávy');
+            window.openConversation(requestId, 'Zákazník', 'customer'+requestId);
+        }, 1000);
+        
+    } catch(e) { 
+        btn.innerHTML = originalText; 
+        btn.disabled = false; 
+        alert("Chyba při odesílání: " + e.message); 
+    }
 }
 
 window.loadOffersForRequest = async function(requestId, requestTitle) {
@@ -1088,6 +1246,9 @@ window.loadMarketFromDB = async function() {
     const list = document.getElementById("market-list"); if (!list || !window.sb) return;
     const { data, error } = await window.sb.from("requests").select("*").eq("status","waiting").order("created_at", { ascending: false });
     if (error || !data || data.length === 0) { list.innerHTML = "<div class=\"text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl\"><i class=\"fa-solid fa-inbox text-5xl text-slate-300 dark:text-slate-600 mb-5 block\"></i><p class=\"font-bold text-slate-500 text-lg\">Zatím žádné poptávky ve vašem okolí.</p></div>"; return; }
+    
+    // Uložení načtených dat do globálního stavu pro pozdější zobrazení detailu v modalu
+    window.STATE.marketRequests = data;
     
     list.innerHTML = data.map((r,i) => {
         return window.createBeautifulCard({
