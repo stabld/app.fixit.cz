@@ -92,9 +92,12 @@
             #chat-container-customer > div:first-child, #chat-container-craftsman > div:first-child { width:100% !important; border-right:none !important; max-height:180px; border-bottom:1px solid #e2e8f0; }
             #chat-msgs, #chat-msgs-c { min-height:250px; }
         }
+        /* Safe area for iPhone */
+        #mobile-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        #main-content { padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom, 0px))) !important; }
         @media (max-width: 1023px) { 
             #sidebar { display: none !important; } 
-            #mobile-bottom-nav { display: flex !important; } 
+            #mobile-bottom-nav { display: flex !important; height: auto; min-height: 60px; } 
             #main-content { padding-bottom: 80px; }
             #page-title { font-size: 1rem; }
             .max-w-5xl, .max-w-6xl { padding-left: 0; padding-right: 0; }
@@ -151,7 +154,7 @@
 </div>
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 hidden overflow-y-auto">
+<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 overflow-y-auto">
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10">
@@ -260,7 +263,7 @@
         <div id="main-content" class="flex-1 overflow-y-auto p-6 hide-scroll max-w-6xl mx-auto w-full"></div>
     </main>
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
-        <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-2"></div>
+        <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-1"></div>
     </nav>
 
     <!-- MODAL: NABÍDKY -->
@@ -394,16 +397,16 @@ window.addEventListener('load', async () => {
             const name = session.user.user_metadata?.full_name || "Uživatel";
             const authEl = document.getElementById("auth-screen");
             if (authEl) authEl.classList.add("hidden");
-            const app = document.getElementById("main-app");
-            app.classList.remove("hidden"); app.style.opacity = "1";
+            const appEl = document.getElementById("main-app");
+            appEl.classList.remove("hidden"); appEl.style.opacity = "1";
             window.initApp(window.APP_ROLE, name);
         } else {
-            const authEl = document.getElementById("auth-screen");
-            if (authEl) {
-                authEl.classList.remove("hidden");
-                document.getElementById("view-role-select").classList.remove("hidden");
-            }
+            // No session - show auth with role select
+            document.getElementById("view-role-select").classList.remove("hidden");
         }
+    } else {
+        // Supabase not available - show auth
+        document.getElementById("view-role-select").classList.remove("hidden");
     }
 });
 
@@ -1057,7 +1060,7 @@ window.craftsmanHTML = function(name) {
 
 window.buildNav = function(items) {
     document.getElementById("sidebar-nav").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>').join("");
-    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center gap-1.5 py-2 text-slate-400 hover:text-fixit-500 transition"><i class="fa-solid ' + item.icon + ' text-xl"></i><span class="text-[10px] font-bold tracking-wide">' + item.label.split(" ")[0] + '</span></button>').join("");
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Moje","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
 };
 
 window.goTab = function(id, title) {
