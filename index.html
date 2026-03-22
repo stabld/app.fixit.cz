@@ -135,15 +135,41 @@
 <div id="toast-container"></div>
 
 <!-- LOADER -->
-<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;">
-    <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
-        <path id="loader-hex" d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" style="stroke-dasharray:300;stroke-dashoffset:300;animation:loader-draw 1s ease forwards 0.2s;"/>
+<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;">
+    <svg id="loader-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" style="opacity:0;">
+        <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="300" stroke-dashoffset="300" id="loader-hex-path"/>
         <circle cx="50" cy="48" r="16" fill="#f59e0b"/>
         <path d="M40 58 L30 68 L45 64 Z" fill="#f59e0b"/>
     </svg>
-    <div style="color:white;font-weight:800;font-size:1.875rem;letter-spacing:-0.025em;opacity:0;animation:loader-fadein-up 0.5s ease forwards 0.8s;">Fixit</div>
-    <div style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;animation:loader-fadein-up 0.5s ease forwards 1.1s;">Profesionální řemesla v Brně</div>
+    <div id="loader-title" style="color:white;font-weight:800;font-size:1.875rem;letter-spacing:-0.025em;opacity:0;transform:translateY(20px);">Fixit</div>
+    <div id="loader-sub" style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;transform:translateY(20px);">Profesionální řemesla v Brně</div>
 </div>
+<script>
+// Spusť loader animaci okamžitě přes JS (spolehlivější než CSS animation-delay)
+(function() {
+    function animate(el, props, duration, delay, easing) {
+        setTimeout(function() {
+            el.style.transition = 'opacity ' + duration + 'ms ' + (easing||'ease') + ', transform ' + duration + 'ms ' + (easing||'ease');
+            Object.keys(props).forEach(function(k) { el.style[k] = props[k]; });
+        }, delay || 0);
+    }
+    var svg = document.getElementById('loader-svg');
+    var hex = document.getElementById('loader-hex-path');
+    var title = document.getElementById('loader-title');
+    var sub = document.getElementById('loader-sub');
+    // Logo fade in
+    animate(svg, {opacity: '1'}, 300, 50);
+    // Hex path draw animation
+    setTimeout(function() {
+        hex.style.transition = 'stroke-dashoffset 1s ease';
+        hex.style.strokeDashoffset = '0';
+    }, 200);
+    // Title slide up
+    animate(title, {opacity: '1', transform: 'translateY(0)'}, 500, 800);
+    // Subtitle slide up
+    animate(sub, {opacity: '1', transform: 'translateY(0)'}, 500, 1100);
+})();
+</script>
 
 <!-- AUTH SCREEN -->
 <div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4">
@@ -381,15 +407,23 @@ window._hideLoader = function() {
     window._loaderHidden = true;
     const loader = document.getElementById('loader');
     if (loader) {
+        loader.style.transition = 'opacity 0.6s ease';
         loader.style.opacity = '0';
-        loader.style.transform = 'scale(1.05)';
         loader.style.pointerEvents = 'none';
-        setTimeout(function() { if (loader.parentNode) loader.remove(); }, 600);
+        setTimeout(function() { if (loader.parentNode) loader.remove(); }, 650);
     }
 };
 
-// FIX: Záložní timeout zkrácen na 3s - pokud selže cokoliv, loader zmizí
-setTimeout(window._hideLoader, 3000);
+// Loader se zobrazí minimálně 2.5s, pak zmizí
+window._loaderReady = false;
+window._loaderMinTimeDone = false;
+window._tryHideLoader = function() {
+    if (window._loaderReady && window._loaderMinTimeDone) window._hideLoader();
+};
+setTimeout(function() {
+    window._loaderMinTimeDone = true;
+    window._tryHideLoader();
+}, 2500);
 
 // === SESSION CHECK ===
 async function runSessionCheck() {
