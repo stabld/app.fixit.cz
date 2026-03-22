@@ -698,7 +698,7 @@ window.initApp = function(role, name) {
     const el = (id) => document.getElementById(id);
     if(el("user-name")) el("user-name").innerText = name;
     if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
-    const savedAv = window.APP_USER?.user_metadata?.avatar;
+    const savedAv = window.APP_USER?.user_metadata?.avatar_url;
     if(el("user-avatar")) el("user-avatar").src = savedAv || avatarUrl;
     const tt = el("theme-toggle");
     const ui = () => { const d = document.documentElement.classList.contains("dark"); el("theme-toggle-dark-icon").classList.toggle("hidden",d); el("theme-toggle-light-icon").classList.toggle("hidden",!d); };
@@ -716,7 +716,7 @@ window.initApp = function(role, name) {
                 else if(id==="prof-city") pel.value = meta.city||"";
                 else if(id==="prof-bio") pel.value = meta.bio||"";
             });
-            const savedAvatar = window.APP_USER?.user_metadata?.avatar;
+            const savedAvatar = window.APP_USER?.user_metadata?.avatar_url;
             const displayAvatar = savedAvatar || avatarUrl;
             if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
             if(el("user-avatar")) el("user-avatar").src = displayAvatar;
@@ -736,29 +736,27 @@ window._profilePhotoBase64 = null;
 window.handleProfilePhoto = function(input) {
     const file = input.files[0]; if (!file) return;
     if (file.size > 10000000) { window.showToast("Fotka je příliš velká", "Maximální velikost je 10 MB.", "error"); return; }
+    // Zobraz náhled okamžitě přes canvas kompresí
     const reader = new FileReader();
     reader.onload = function(e) {
-        // Zkomprimuj na max 300x300px a kvalitu 0.8 pomocí Canvas
         const img = new Image();
         img.onload = function() {
             const canvas = document.createElement("canvas");
-            const MAX = 300;
+            const MAX = 400;
             let w = img.width, h = img.height;
             if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
             else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
             canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, w, h);
-            const compressed = canvas.toDataURL("image/jpeg", 0.82);
-            window._profilePhotoBase64 = compressed;
-            document.querySelectorAll("#prof-avatar-img").forEach(function(el) {
-                el.src = compressed; el.style.objectFit = "cover";
-            });
-            document.getElementById("user-avatar").src = compressed;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            const preview = canvas.toDataURL("image/jpeg", 0.85);
+            document.querySelectorAll("#prof-avatar-img").forEach(function(el) { el.src = preview; el.style.objectFit = "cover"; });
+            document.getElementById("user-avatar").src = preview;
         };
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
+    // Ulož původní File objekt pro upload do Storage
+    window._profilePhotoFile = file;
 };
 
 window.saveProfile = async function(btnNode) {
@@ -772,19 +770,52 @@ window.saveProfile = async function(btnNode) {
             city: document.getElementById("prof-city").value.trim(),
             bio: document.getElementById("prof-bio")?.value.trim()||""
         };
-        if (window._profilePhotoBase64) {
-            updateData.avatar = window._profilePhotoBase64;
+        // Upload fotky do Supabase Storage bucket "avatars"
+        if (window._profilePhotoFile) {
+            try {
+                const ext = window._profilePhotoFile.name.split(".").pop().toLowerCase() || "jpg";
+                const safeExt = ["jpg","jpeg","png","gif","webp"].includes(ext) ? ext : "jpg";
+                const path = window.APP_USER.id + "." + safeExt;
+                // Zkus upload
+                const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoFile, { upsert: true, contentType: window._profilePhotoFile.type });
+                if (upErr) {
+                    // Bucket možná neexistuje - zkus ho vytvořit
+                    await window.sb.storage.createBucket("avatars", { public: true });
+                    const { error: upErr2 } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoFile, { upsert: true, contentType: window._profilePhotoFile.type });
+                    if (upErr2) throw new Error(upErr2.message);
+                }
+                const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
+                updateData.avatar_url = urlData.publicUrl + "?t=" + Date.now();
+            } catch(storageErr) {
+                console.warn("Storage error, using base64 fallback:", storageErr.message);
+                // Fallback: zkomprimuj a ulož jako base64 (max ~50KB)
+                const fallbackUrl = await new Promise(function(resolve) {
+                    const fr = new FileReader();
+                    fr.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const c = document.createElement("canvas");
+                            const M = 150; let w = img.width, h = img.height;
+                            if(w>h){if(w>M){h=Math.round(h*M/w);w=M;}}else{if(h>M){w=Math.round(w*M/h);h=M;}}
+                            c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+                            resolve(c.toDataURL("image/jpeg", 0.7));
+                        };
+                        img.src = e.target.result;
+                    };
+                    fr.readAsDataURL(window._profilePhotoFile);
+                });
+                updateData.avatar_url = fallbackUrl;
+            }
+            window._profilePhotoFile = null;
         }
         const { data, error } = await window.sb.auth.updateUser({ data: updateData });
         if (error) throw error;
         window.APP_USER = data.user;
         const name = data.user.user_metadata.full_name;
-        const savedAvatar = data.user.user_metadata.avatar;
+        const avatarUrl = data.user.user_metadata.avatar_url || ("https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a"));
         document.getElementById("user-name").innerText = name;
-        const avatarUrl = savedAvatar || ("https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a"));
         document.getElementById("user-avatar").src = avatarUrl;
         document.querySelectorAll("#prof-avatar-img").forEach(function(img) { img.src = avatarUrl; });
-        window._profilePhotoBase64 = null;
         window.showToast("Profil uložen! ✅", "Vaše změny byly úspěšně uloženy.", "success");
     } catch(e) { window.showToast("Chyba ukládání", e.message, "error"); }
     finally { btnNode.innerHTML = orig; btnNode.disabled = false; }
