@@ -397,24 +397,36 @@ window._marketMap = null;
 
 // === SESSION CHECK ===
 window.addEventListener('load', async () => {
-    if (window.sb) {
-        const { data: { session } } = await window.sb.auth.getSession();
-        if (session && session.user) {
-            window.APP_USER = session.user;
-            window.APP_ROLE = session.user.user_metadata?.role || "customer";
-            const name = session.user.user_metadata?.full_name || "Uživatel";
-            const authEl = document.getElementById("auth-screen");
-            if (authEl) authEl.classList.add("hidden");
-            const appEl = document.getElementById("main-app");
-            appEl.classList.remove("hidden"); appEl.style.opacity = "1";
-            window.initApp(window.APP_ROLE, name);
+    // Vždy po 2s zobraz přihlášení pokud session nenalezena
+    const showAuth = () => {
+        const rs = document.getElementById("view-role-select");
+        if (rs) rs.classList.remove("hidden");
+    };
+    const authTimeout = setTimeout(showAuth, 2500);
+
+    try {
+        if (window.sb) {
+            const { data: { session } } = await window.sb.auth.getSession();
+            if (session && session.user) {
+                clearTimeout(authTimeout);
+                window.APP_USER = session.user;
+                window.APP_ROLE = session.user.user_metadata?.role || "customer";
+                const name = session.user.user_metadata?.full_name || "Uživatel";
+                document.getElementById("auth-screen").classList.add("hidden");
+                const appEl = document.getElementById("main-app");
+                appEl.classList.remove("hidden"); appEl.style.opacity = "1";
+                window.initApp(window.APP_ROLE, name);
+            } else {
+                clearTimeout(authTimeout);
+                showAuth();
+            }
         } else {
-            // No session - show auth with role select
-            document.getElementById("view-role-select").classList.remove("hidden");
+            clearTimeout(authTimeout);
+            showAuth();
         }
-    } else {
-        // Supabase not available - show auth
-        document.getElementById("view-role-select").classList.remove("hidden");
+    } catch(e) {
+        clearTimeout(authTimeout);
+        showAuth();
     }
 });
 
