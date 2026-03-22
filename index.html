@@ -733,30 +733,50 @@ window.initApp = function(role, name) {
 // === PROFIL ===
 window._profilePhotoBase64 = null;
 
-window.handleProfilePhoto = function(input) {
+window.handleProfilePhoto = async function(input) {
     const file = input.files[0]; if (!file) return;
     if (file.size > 10000000) { window.showToast("Fotka je příliš velká", "Maximální velikost je 10 MB.", "error"); return; }
-    // Zobraz náhled okamžitě přes canvas kompresí
+
+    // 1. Okamžitý náhled
     const reader = new FileReader();
     reader.onload = function(e) {
         const img = new Image();
         img.onload = function() {
             const canvas = document.createElement("canvas");
-            const MAX = 400;
-            let w = img.width, h = img.height;
-            if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
-            else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            const MAX = 400; let w = img.width, h = img.height;
+            if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+            canvas.width=w; canvas.height=h;
+            canvas.getContext("2d").drawImage(img,0,0,w,h);
             const preview = canvas.toDataURL("image/jpeg", 0.85);
-            document.querySelectorAll("#prof-avatar-img").forEach(function(el) { el.src = preview; el.style.objectFit = "cover"; });
+            document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=preview; el.style.objectFit="cover"; });
             document.getElementById("user-avatar").src = preview;
         };
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
-    // Ulož původní File objekt pro upload do Storage
-    window._profilePhotoFile = file;
+
+    // 2. Okamžitý upload do Storage (bez čekání na Uložit)
+    if (!window.sb || !window.APP_USER) { window._profilePhotoFile = file; return; }
+    try {
+        const ext = file.name.split(".").pop().toLowerCase();
+        const safeExt = ["jpg","jpeg","png","gif","webp"].includes(ext) ? ext : "jpg";
+        const path = window.APP_USER.id + "." + safeExt;
+        const { error: upErr } = await window.sb.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+        if (upErr) throw new Error(upErr.message);
+        const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
+        const publicUrl = urlData.publicUrl + "?v=" + Date.now();
+        // Ulož URL do metadata hned
+        await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
+        const { data: fresh } = await window.sb.auth.getUser();
+        if (fresh?.user) window.APP_USER = fresh.user;
+        window._profilePhotoUrl = publicUrl;
+        window._profilePhotoFile = null;
+        window.showToast("Fotka nahrána! 📸", "Profilová fotka byla úspěšně uložena.", "success");
+    } catch(err) {
+        // Storage selhal - ulož file pro pozdější pokus při kliknutí Uložit
+        window._profilePhotoFile = file;
+        window.showToast("Fotka načtena", "Klikni Uložit pro uložení profilu i fotky.", "info");
+    }
 };
 
 window.saveProfile = async function(btnNode) {
@@ -771,7 +791,7 @@ window.saveProfile = async function(btnNode) {
             bio: document.getElementById("prof-bio")?.value.trim()||""
         };
 
-        // Upload fotky do Supabase Storage bucket "avatars"
+        // Pokud fotka nebyla uploadnuta automaticky, zkus to teď
         if (window._profilePhotoFile) {
             btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Nahrávám fotku...';
             try {
@@ -779,32 +799,16 @@ window.saveProfile = async function(btnNode) {
                 const safeExt = ["jpg","jpeg","png","gif","webp"].includes(ext) ? ext : "jpg";
                 const path = window.APP_USER.id + "." + safeExt;
                 const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoFile, { upsert: true, contentType: window._profilePhotoFile.type });
-                if (upErr) throw new Error("Storage: " + upErr.message);
+                if (upErr) throw new Error("Storage chyba: " + upErr.message);
                 const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-                // Přidej timestamp aby se překonala cache
                 updateData.avatar_url = urlData.publicUrl + "?v=" + Date.now();
                 window._profilePhotoFile = null;
             } catch(storageErr) {
-                // Fallback na base64 komprimovaný obrázek
-                window.showToast("Poznámka", "Storage nedostupný, ukládám jako náhled.", "info");
-                const fallbackUrl = await new Promise(function(resolve) {
-                    const fr = new FileReader();
-                    fr.onload = function(e) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const c = document.createElement("canvas");
-                            const M = 200; let w = img.width, h = img.height;
-                            if(w>h){if(w>M){h=Math.round(h*M/w);w=M;}}else{if(h>M){w=Math.round(w*M/h);h=M;}}
-                            c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h);
-                            resolve(c.toDataURL("image/jpeg", 0.75));
-                        };
-                        img.src = e.target.result;
-                    };
-                    fr.readAsDataURL(window._profilePhotoFile);
-                });
-                updateData.avatar_url = fallbackUrl;
-                window._profilePhotoFile = null;
+                throw new Error("Nepodařilo se nahrát fotku: " + storageErr.message);
             }
+        } else if (window._profilePhotoUrl) {
+            updateData.avatar_url = window._profilePhotoUrl;
+            window._profilePhotoUrl = null;
         }
 
         btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám profil...';
