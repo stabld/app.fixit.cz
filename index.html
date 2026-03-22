@@ -698,7 +698,8 @@ window.initApp = function(role, name) {
     const el = (id) => document.getElementById(id);
     if(el("user-name")) el("user-name").innerText = name;
     if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
-    if(el("user-avatar")) el("user-avatar").src = avatarUrl;
+    const savedAv = window.APP_USER?.user_metadata?.avatar;
+    if(el("user-avatar")) el("user-avatar").src = savedAv || avatarUrl;
     const tt = el("theme-toggle");
     const ui = () => { const d = document.documentElement.classList.contains("dark"); el("theme-toggle-dark-icon").classList.toggle("hidden",d); el("theme-toggle-light-icon").classList.toggle("hidden",!d); };
     ui();
@@ -715,7 +716,10 @@ window.initApp = function(role, name) {
                 else if(id==="prof-city") pel.value = meta.city||"";
                 else if(id==="prof-bio") pel.value = meta.bio||"";
             });
-            if(el("prof-avatar-img")) el("prof-avatar-img").src = avatarUrl;
+            const savedAvatar = window.APP_USER?.user_metadata?.avatar;
+            const displayAvatar = savedAvatar || avatarUrl;
+            if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
+            if(el("user-avatar")) el("user-avatar").src = displayAvatar;
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
         }
     }, 100);
@@ -727,19 +731,47 @@ window.initApp = function(role, name) {
 };
 
 // === PROFIL ===
+window._profilePhotoBase64 = null;
+
+window.handleProfilePhoto = function(input) {
+    const file = input.files[0]; if (!file) return;
+    if (file.size > 500000) { window.showToast("Fotka je příliš velká", "Maximální velikost je 500 KB.", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        window._profilePhotoBase64 = e.target.result;
+        document.querySelectorAll("#prof-avatar-img").forEach(function(img) {
+            img.src = e.target.result;
+            img.style.objectFit = "cover";
+        });
+        document.getElementById("user-avatar").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
 window.saveProfile = async function(btnNode) {
     if (!window.sb || !window.APP_USER) return;
     const orig = btnNode.innerHTML;
     btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám...'; btnNode.disabled = true;
     try {
-        const { data, error } = await window.sb.auth.updateUser({ data: { full_name: document.getElementById("prof-name").value.trim(), phone: document.getElementById("prof-phone").value.trim(), city: document.getElementById("prof-city").value.trim(), bio: document.getElementById("prof-bio")?.value.trim()||"" } });
+        const updateData = {
+            full_name: document.getElementById("prof-name").value.trim(),
+            phone: document.getElementById("prof-phone").value.trim(),
+            city: document.getElementById("prof-city").value.trim(),
+            bio: document.getElementById("prof-bio")?.value.trim()||""
+        };
+        if (window._profilePhotoBase64) {
+            updateData.avatar = window._profilePhotoBase64;
+        }
+        const { data, error } = await window.sb.auth.updateUser({ data: updateData });
         if (error) throw error;
         window.APP_USER = data.user;
         const name = data.user.user_metadata.full_name;
+        const savedAvatar = data.user.user_metadata.avatar;
         document.getElementById("user-name").innerText = name;
-        const avatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a");
+        const avatarUrl = savedAvatar || ("https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a"));
         document.getElementById("user-avatar").src = avatarUrl;
-        if(document.getElementById("prof-avatar-img")) document.getElementById("prof-avatar-img").src = avatarUrl;
+        document.querySelectorAll("#prof-avatar-img").forEach(function(img) { img.src = avatarUrl; });
+        window._profilePhotoBase64 = null;
         window.showToast("Profil uložen! ✅", "Vaše změny byly úspěšně uloženy.", "success");
     } catch(e) { window.showToast("Chyba ukládání", e.message, "error"); }
     finally { btnNode.innerHTML = orig; btnNode.disabled = false; }
@@ -958,11 +990,33 @@ window.customerHTML = function(name) {
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Můj profil</h2>
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
             <div class="flex flex-col md:flex-row gap-8">
-                <div class="flex flex-col items-center gap-4"><img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover"><span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest" id="prof-role-badge">Role</span></div>
+                <div class="flex flex-col items-center gap-3 shrink-0">
+                    <div class="relative group">
+                        <img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover">
+                        <label for="prof-avatar-input" class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>Změnit</span>
+                        </label>
+                        <input type="file" id="prof-avatar-input" accept="image/*" class="hidden" onchange="window.handleProfilePhoto(this)">
+                        <label for="prof-avatar-input" class="absolute -bottom-1 -right-1 w-9 h-9 bg-fixit-500 hover:bg-fixit-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition">
+                            <i class="fa-solid fa-camera text-white text-sm"></i>
+                        </label>
+                    </div>
+                    <span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest" id="prof-role-badge">Role</span>
+                    <p class="text-xs text-slate-400 text-center">Max. 500 KB<br>JPG, PNG, GIF</p>
+                </div>
                 <div class="flex-1 space-y-5">
-                    <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div></div>
-                    <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div></div>
-                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3"><button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button><button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button></div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
+                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button>
+                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1068,12 +1122,34 @@ window.craftsmanHTML = function(name) {
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Můj profil</h2>
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
             <div class="flex flex-col md:flex-row gap-8">
-                <div class="flex flex-col items-center gap-4"><img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover"><span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest" id="prof-role-badge">Role</span></div>
+                <div class="flex flex-col items-center gap-3 shrink-0">
+                    <div class="relative group">
+                        <img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover">
+                        <label for="prof-avatar-input" class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
+                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>Změnit</span>
+                        </label>
+                        <input type="file" id="prof-avatar-input" accept="image/*" class="hidden" onchange="window.handleProfilePhoto(this)">
+                        <label for="prof-avatar-input" class="absolute -bottom-1 -right-1 w-9 h-9 bg-fixit-500 hover:bg-fixit-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition">
+                            <i class="fa-solid fa-camera text-white text-sm"></i>
+                        </label>
+                    </div>
+                    <span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest" id="prof-role-badge">Role</span>
+                    <p class="text-xs text-slate-400 text-center">Max. 500 KB<br>JPG, PNG, GIF</p>
+                </div>
                 <div class="flex-1 space-y-5">
-                    <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div></div>
-                    <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město / Působnost</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div></div>
-                    <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">O mně / Popis služeb</label><textarea id="prof-bio" rows="4" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white resize-none" placeholder="Popište své zkušenosti..."></textarea></div>
-                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3"><button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button><button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button></div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město / Působnost</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div>
+                    </div>
+                    <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">O mně / Popis služeb</label><textarea id="prof-bio" rows="4" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white resize-none" placeholder="Popište své zkušenosti, specializaci, reference..."></textarea></div>
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
+                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button>
+                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button>
+                    </div>
                 </div>
             </div>
         </div>
