@@ -89,16 +89,17 @@
         #chat-container-customer, #chat-container-craftsman { display:flex; height:min(600px,calc(100vh - 200px)); min-height:400px; }
         @media (max-width:767px) {
             #chat-container-customer, #chat-container-craftsman { flex-direction:column; height:auto; }
-            #chat-container-customer > div:first-child, #chat-container-craftsman > div:first-child { width:100% !important; border-right:none !important; max-height:180px; border-bottom:1px solid #e2e8f0; }
-            #chat-msgs, #chat-msgs-c { min-height:250px; }
+            #chat-container-customer > div:first-child, #chat-container-craftsman > div:first-child { width:100% !important; border-right:none !important; max-height:240px; border-bottom:1px solid #334155; overflow-y:auto; }
+            #conv-list, #conv-list-c { max-height:200px; overflow-y:auto; }
+            #chat-msgs, #chat-msgs-c { min-height:300px; }
         }
         /* Safe area for iPhone */
         #mobile-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
-        #main-content { padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom, 0px))) !important; }
+        #main-content { padding-bottom: max(160px, calc(160px + env(safe-area-inset-bottom, 0px))) !important; }
         @media (max-width: 1023px) { 
             #sidebar { display: none !important; } 
             #mobile-bottom-nav { display: flex !important; height: auto; min-height: 60px; } 
-            #main-content { padding-bottom: 100px; }
+            #main-content { padding-bottom: 160px; }
             #page-title { font-size: 1rem; }
             .max-w-5xl, .max-w-6xl { padding-left: 0; padding-right: 0; }
         }
@@ -110,7 +111,7 @@
             #header-cta button span { display: none !important; }
             #header-cta button i { display: inline !important; font-size: 16px !important; }
             /* Main content */
-            #main-content { padding: 1rem !important; padding-bottom: 100px !important; }
+            #main-content { padding: 1rem !important; padding-bottom: 160px !important; }
             /* Cards */
             .req-card { padding: 1rem !important; border-radius: 1.25rem !important; }
             .market-item { padding: 1rem !important; border-radius: 1.25rem !important; }
@@ -952,7 +953,7 @@ window.customerHTML = function(name) {
                 <div class="flex-1 space-y-5">
                     <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div></div>
                     <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div></div>
-                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800"><button onclick="window.saveProfile(this)" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button></div>
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3"><button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button><button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button></div>
                 </div>
             </div>
         </div>
@@ -1057,7 +1058,7 @@ window.craftsmanHTML = function(name) {
                     <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div></div>
                     <div class="grid md:grid-cols-2 gap-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město / Působnost</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div></div>
                     <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">O mně / Popis služeb</label><textarea id="prof-bio" rows="4" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white resize-none" placeholder="Popište své zkušenosti..."></textarea></div>
-                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800"><button onclick="window.saveProfile(this)" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button></div>
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3"><button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button><button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button></div>
                 </div>
             </div>
         </div>
@@ -1066,7 +1067,7 @@ window.craftsmanHTML = function(name) {
 
 window.buildNav = function(items) {
     document.getElementById("sidebar-nav").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>').join("");
-    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Moje","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Poptávky","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
 };
 
 window.goTab = function(id, title) {
