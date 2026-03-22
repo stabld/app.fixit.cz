@@ -154,7 +154,7 @@
 </div>
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 overflow-y-auto">
+<div id="auth-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4">
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10">
@@ -395,28 +395,21 @@ setTimeout(window._hideLoader, 5000);
 
 // === SESSION CHECK ===
 window.addEventListener('load', async () => {
-    try {
-        if (window.sb) {
-            const { data: { session } } = await window.sb.auth.getSession();
-            if (session && session.user) {
-                window.APP_USER = session.user;
-                window.APP_ROLE = session.user.user_metadata?.role || "customer";
-                const name = session.user.user_metadata?.full_name || "Uživatel";
-                // Skryj auth, ukáž app
-                document.getElementById("auth-screen").classList.add("hidden");
-                const appEl = document.getElementById("main-app");
-                appEl.classList.remove("hidden");
-                appEl.style.opacity = "1";
-                window._hideLoader();
-                window.initApp(window.APP_ROLE, name);
-            } else {
-                // Žádná session - ukáž přihlášení
-                window._hideLoader();
-            }
+    if (window.sb) {
+        const { data: { session } } = await window.sb.auth.getSession();
+        if (session && session.user) {
+            window.APP_USER = session.user;
+            window.APP_ROLE = session.user.user_metadata?.role || "customer";
+            const name = session.user.user_metadata?.full_name || "Uživatel";
+            document.getElementById("auth-screen").classList.add("hidden");
+            const appEl = document.getElementById("main-app");
+            appEl.classList.remove("hidden"); appEl.style.opacity = "1";
+            window._hideLoader();
+            window.initApp(window.APP_ROLE, name);
         } else {
             window._hideLoader();
         }
-    } catch(e) {
+    } else {
         window._hideLoader();
     }
 });
