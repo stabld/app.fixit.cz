@@ -263,7 +263,7 @@
         <div id="main-content" class="flex-1 overflow-y-auto p-6 hide-scroll max-w-6xl mx-auto w-full"></div>
     </main>
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
-        <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-1"></div>
+        <div id="bottom-nav-items" class="flex w-full items-center h-16"></div>
     </nav>
 
     <!-- MODAL: NABÍDKY -->
@@ -350,6 +350,14 @@
                 <button onclick="window.doConfirmDelete()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-xl font-bold transition shadow-lg">Smazat</button>
             </div>
         </div>
+    </div>
+
+    <!-- LIGHTBOX PRO FOTKY -->
+    <div id="lightbox" class="hidden fixed inset-0 z-[500] flex items-center justify-center bg-black/90 backdrop-blur-sm" onclick="window.closeLightbox()">
+        <button onclick="window.closeLightbox()" class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-xl transition z-10">
+            <i class="fa-solid fa-times"></i>
+        </button>
+        <img id="lightbox-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl" onclick="event.stopPropagation()">
     </div>
 </div>
 <script>
@@ -514,7 +522,7 @@ window.createBeautifulCard = function(req, isMarket, i) {
                 }
             }
         }
-        const photoHtml = reqPhoto ? '<div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer"><img src="data:' + (reqMime||'image/jpeg') + ';base64,' + reqPhoto + '" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"></div>' : '';
+        const photoHtml = reqPhoto ? '<div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer" onclick="window.openLightbox(this.querySelector(\"img\").src)"><img src="data:' + (reqMime||'image/jpeg') + ';base64,' + reqPhoto + '" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center"><i class="fa-solid fa-expand text-white opacity-0 group-hover:opacity-100 text-2xl transition-all"></i></div></div>' : '';
         if (!isMarket) {
             return '<div class="req-card relative bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group fade-up overflow-hidden">' +
                 '<div class="absolute top-0 left-0 w-1.5 h-full ' + (req.status==='done'?'bg-slate-300 dark:bg-slate-700':'bg-fixit-500') + '"></div>' +
@@ -993,7 +1001,7 @@ window.customerHTML = function(name) {
 
 window.initCraftsman = function(name) {
     window.buildNav([{id:"market",icon:"fa-map-location-dot",label:"Tržiště zakázek"},{id:"jobs",icon:"fa-hammer",label:"Moje práce"},{id:"c-messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"earnings",icon:"fa-wallet",label:"Výdělky"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
-    document.getElementById("header-cta").innerHTML = '<div class="flex items-center gap-2 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-xl font-bold text-sm shadow-sm"><i class="fa-solid fa-circle text-green-500 text-[10px] animate-pulse"></i> Online</div>';
+    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab('market','Tržiště zakázek')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-magnifying-glass"></i> <span>Hledat zakázky</span></button>';
     document.getElementById("main-content").innerHTML = window.craftsmanHTML(name);
     window.goTab("market","Tržiště zakázek");
 };
@@ -1370,6 +1378,22 @@ window.filterMarket = function(kat) {
     event.target.className=event.target.className.replace("bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105","bg-fixit-500 text-white shadow-md hover:scale-105 transition");
     document.querySelectorAll(".market-item").forEach(item=>{item.style.display=(kat==="all"||item.dataset.kat===kat)?"":"none";});
 };
+
+// === LIGHTBOX ===
+window.openLightbox = function(src) {
+    const lb = document.getElementById("lightbox");
+    const img = document.getElementById("lightbox-img");
+    img.src = src;
+    lb.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+};
+window.closeLightbox = function() {
+    document.getElementById("lightbox").classList.add("hidden");
+    document.body.style.overflow = "";
+};
+document.addEventListener("keydown", function(e) {
+    if(e.key === "Escape") window.closeLightbox();
+});
 </script>
 </body>
 </html>
