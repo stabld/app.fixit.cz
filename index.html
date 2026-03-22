@@ -708,7 +708,8 @@ window.initApp = function(role, name) {
     if(el("user-name")) el("user-name").innerText = name;
     if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
     const savedAv = window.APP_USER?.user_metadata?.avatar_url;
-    if(el("user-avatar")) el("user-avatar").src = savedAv || avatarUrl;
+    const displayAv = savedAv ? (savedAv + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
+    if(el("user-avatar")) el("user-avatar").src = displayAv;
     const tt = el("theme-toggle");
     const ui = () => { const d = document.documentElement.classList.contains("dark"); el("theme-toggle-dark-icon").classList.toggle("hidden",d); el("theme-toggle-light-icon").classList.toggle("hidden",!d); };
     ui();
@@ -726,7 +727,7 @@ window.initApp = function(role, name) {
                 else if(id==="prof-bio") pel.value = meta.bio||"";
             });
             const savedAvatar = window.APP_USER?.user_metadata?.avatar_url;
-            const displayAvatar = savedAvatar || avatarUrl;
+            const displayAvatar = savedAvatar ? (savedAvatar + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
             if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
             if(el("user-avatar")) el("user-avatar").src = displayAvatar;
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
@@ -785,7 +786,7 @@ window.handleProfilePhoto = async function(input) {
         if (upErr) throw new Error(upErr.message);
 
         const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-        // Stabilní URL bez timestamp - stejná na všech zařízeních
+        // URL bez cache-busting - prohlížeč dostane vždy čerstvou verzi díky upsert
         const publicUrl = urlData.publicUrl;
 
         const { error: metaErr } = await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
@@ -794,9 +795,12 @@ window.handleProfilePhoto = async function(input) {
         const { data: fresh } = await window.sb.auth.getUser();
         if (fresh?.user) window.APP_USER = fresh.user;
 
-        // Aktualizuj UI s novou URL
-        document.getElementById("user-avatar").src = publicUrl;
-        document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=publicUrl; });
+        // Aktualizuj UI - přidej cache-buster do img src (ne do uloženého URL)
+        const displayUrl = publicUrl + "?v=" + Date.now();
+        document.getElementById("user-avatar").src = displayUrl;
+        document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=displayUrl; });
+        // Vyčisti cache pro sebe
+        if (window.APP_USER) delete window._avatarCache[window.APP_USER.id];
         window._profilePhotoBlob = null;
         window.showToast("Fotka nahrána! 📸", "Profilová fotka byla úspěšně uložena.", "success");
     } catch(err) {
@@ -1308,22 +1312,23 @@ window.showMsgPanel = function(role) {
 window._avatarCache = {};
 
 window.getUserAvatar = async function(userId, fallbackSeed, fallbackBg) {
-    if (!userId) return "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
-    // Vrať z cache
+    const fallback = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
+    if (!userId || !window.sb) return fallback;
     if (window._avatarCache[userId]) return window._avatarCache[userId];
-    // Zkus načíst z Supabase Storage - stabilní URL
     try {
+        // Nejdřív zkus načíst avatar_url z Supabase auth pro daného uživatele
+        // Pro vlastního usera máme data přímo
+        if (window.APP_USER && window.APP_USER.id === userId) {
+            const url = window.APP_USER.user_metadata?.avatar_url;
+            if (url) { window._avatarCache[userId] = url; return url; }
+        }
+        // Pro cizího uživatele zkus Storage URL přímo (bez HEAD requestu)
         const { data } = window.sb.storage.from("avatars").getPublicUrl(userId + ".jpg");
         if (data?.publicUrl) {
-            // Ověř že soubor existuje (HEAD request)
-            const check = await fetch(data.publicUrl, { method: "HEAD" });
-            if (check.ok) {
-                window._avatarCache[userId] = data.publicUrl;
-                return data.publicUrl;
-            }
+            window._avatarCache[userId] = data.publicUrl;
+            return data.publicUrl;
         }
     } catch(e) {}
-    const fallback = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
     window._avatarCache[userId] = fallback;
     return fallback;
 };
