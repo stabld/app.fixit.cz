@@ -104,16 +104,24 @@
         }
         @media (min-width: 1024px) { #mobile-bottom-nav { display: none !important; } }
         @media (max-width: 767px) {
+            /* Header */
             header { padding-left: 1rem !important; padding-right: 1rem !important; }
             #header-cta button { font-size: 12px !important; padding: 8px 12px !important; }
             #header-cta button i { display: none; }
+            /* Main content */
             #main-content { padding: 1rem !important; padding-bottom: 80px !important; }
+            /* Cards */
             .req-card { padding: 1rem !important; border-radius: 1.25rem !important; }
             .market-item { padding: 1rem !important; border-radius: 1.25rem !important; }
+            /* Grid stats - 2 cols */
             .grid.grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+            /* Jobs grid */
             .grid.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+            /* Poptávka form */
             #view-new .grid { grid-template-columns: 1fr !important; }
+            /* Modals */
             .max-w-3xl, .max-w-lg, .max-w-md { max-width: calc(100vw - 2rem) !important; }
+            /* Toast bottom on mobile */
             #toast-container { bottom: 80px !important; top: auto !important; right: 12px !important; left: 12px !important; }
         }
         @media (max-width: 480px) {
@@ -134,45 +142,19 @@
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<!-- LOADER -->
-<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;">
-    <svg id="loader-svg" width="80" height="80" viewBox="0 0 100 100" fill="none" style="opacity:0;">
-        <path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="300" stroke-dashoffset="300" id="loader-hex-path"/>
+<!-- LOADER - stejný jako na webu -->
+<div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;min-height:-webkit-fill-available;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;">
+    <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+        <path id="loader-hex" d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" style="stroke-dasharray:300;stroke-dashoffset:300;animation:loader-draw 1s ease forwards 0.2s;"/>
         <circle cx="50" cy="48" r="16" fill="#f59e0b"/>
         <path d="M40 58 L30 68 L45 64 Z" fill="#f59e0b"/>
     </svg>
-    <div id="loader-title" style="color:white;font-weight:800;font-size:1.875rem;letter-spacing:-0.025em;opacity:0;transform:translateY(20px);">Fixit</div>
-    <div id="loader-sub" style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;transform:translateY(20px);">Profesionální řemesla v Brně</div>
+    <div style="color:white;font-weight:800;font-size:1.875rem;letter-spacing:-0.025em;opacity:0;animation:loader-fadein-up 0.5s ease forwards 0.8s;">Fixit</div>
+    <div style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;animation:loader-fadein-up 0.5s ease forwards 1.1s;">Profesionální řemesla v Brně</div>
 </div>
-<script>
-// Spusť loader animaci okamžitě přes JS (spolehlivější než CSS animation-delay)
-(function() {
-    function animate(el, props, duration, delay, easing) {
-        setTimeout(function() {
-            el.style.transition = 'opacity ' + duration + 'ms ' + (easing||'ease') + ', transform ' + duration + 'ms ' + (easing||'ease');
-            Object.keys(props).forEach(function(k) { el.style[k] = props[k]; });
-        }, delay || 0);
-    }
-    var svg = document.getElementById('loader-svg');
-    var hex = document.getElementById('loader-hex-path');
-    var title = document.getElementById('loader-title');
-    var sub = document.getElementById('loader-sub');
-    // Logo fade in
-    animate(svg, {opacity: '1'}, 300, 50);
-    // Hex path draw animation
-    setTimeout(function() {
-        hex.style.transition = 'stroke-dashoffset 1s ease';
-        hex.style.strokeDashoffset = '0';
-    }, 200);
-    // Title slide up
-    animate(title, {opacity: '1', transform: 'translateY(0)'}, 500, 800);
-    // Subtitle slide up
-    animate(sub, {opacity: '1', transform: 'translateY(0)'}, 500, 1100);
-})();
-</script>
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4" style="opacity:0;pointer-events:none;transition:opacity 0.4s ease;">
+<div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 dark:bg-fixit-dark p-4 transition-opacity duration-500 overflow-y-auto">
     <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-fixit-500/20 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
     <div class="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-12 relative z-10">
@@ -180,7 +162,7 @@
             <svg width="48" height="48" viewBox="0 0 100 100" fill="none"><path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/><circle cx="50" cy="48" r="16" fill="white"/><path d="M40 58 L30 68 L45 64 Z" fill="white"/></svg>
             <span class="font-extrabold text-4xl tracking-tighter dark:text-white">Fixit</span>
         </div>
-        <div id="view-role-select">
+        <div id="view-role-select" class="hidden">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center dark:text-white">Vítejte v aplikaci</h2>
             <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
             <div class="grid md:grid-cols-2 gap-6">
@@ -281,7 +263,7 @@
         <div id="main-content" class="flex-1 overflow-y-auto p-6 hide-scroll max-w-6xl mx-auto w-full"></div>
     </main>
     <nav id="mobile-bottom-nav" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50 hidden">
-        <div id="bottom-nav-items" class="flex w-full items-center h-16"></div>
+        <div id="bottom-nav-items" class="flex justify-around items-center h-16 px-1"></div>
     </nav>
 
     <!-- MODAL: NABÍDKY -->
@@ -369,16 +351,7 @@
             </div>
         </div>
     </div>
-
-    <!-- LIGHTBOX PRO FOTKY -->
-    <div id="lightbox" class="hidden fixed inset-0 z-[500] flex items-center justify-center bg-black/90 backdrop-blur-sm" onclick="window.closeLightbox()">
-        <button onclick="window.closeLightbox()" class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-xl transition z-10">
-            <i class="fa-solid fa-times"></i>
-        </button>
-        <img id="lightbox-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl" onclick="event.stopPropagation()">
-    </div>
 </div>
-
 <script>
 // === GLOBÁLNÍ PROMĚNNÉ ===
 window.SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
@@ -400,79 +373,42 @@ window._pendingDelete = null;
 window._marketMap = null;
 
 // === LOADER ===
-// FIX: Loader se vždy skryje - buď po session checku nebo po max 3s
-window._loaderHidden = false;
-window._hideLoader = function() {
-    if (window._loaderHidden) return;
-    window._loaderHidden = true;
-    const loader = document.getElementById('loader');
-    const auth = document.getElementById('auth-screen');
-    if (loader) {
-        loader.style.transition = 'opacity 0.6s ease';
-        loader.style.opacity = '0';
-        loader.style.pointerEvents = 'none';
-        setTimeout(function() {
-            if (loader.parentNode) loader.remove();
-            // Zobraz auth screen jen pokud app není vidět
-            if (auth && !window.APP_USER) {
-                auth.style.pointerEvents = '';
-                auth.style.opacity = '1';
-            }
-        }, 650);
-    } else if (auth && !window.APP_USER) {
-        auth.style.pointerEvents = '';
-        auth.style.opacity = '1';
+(function() {
+    function hideLoader() {
+        const loader = document.getElementById('loader');
+        if (loader && loader.style.opacity !== '0') {
+            loader.style.opacity = '0';
+            loader.style.transform = 'scale(1.05)';
+            loader.style.pointerEvents = 'none';
+            setTimeout(() => { if (loader.parentNode) loader.remove(); }, 600);
+        }
     }
-};
-
-// Loader se zobrazí minimálně 2.5s, pak zmizí
-window._loaderReady = false;
-window._loaderMinTimeDone = false;
-window._tryHideLoader = function() {
-    if (window._loaderReady && window._loaderMinTimeDone) window._hideLoader();
-};
-setTimeout(function() {
-    window._loaderMinTimeDone = true;
-    window._tryHideLoader();
-}, 2500);
+    setTimeout(hideLoader, 4000);
+    window.addEventListener('load', function() { setTimeout(hideLoader, 1800); });
+})();
 
 // === SESSION CHECK ===
-async function runSessionCheck() {
-    try {
-        if (window.sb) {
-            const { data: { session } } = await window.sb.auth.getSession();
-            if (session && session.user) {
-                window.APP_USER = session.user;
-                window.APP_ROLE = session.user.user_metadata?.role || "customer";
-                const name = session.user.user_metadata?.full_name || "Uživatel";
-                // Skryj auth screen PŘED zobrazením app
-                const auth = document.getElementById("auth-screen");
-                if (auth) { auth.classList.add("hidden"); auth.style.opacity = "0"; }
-                const appEl = document.getElementById("main-app");
-                appEl.classList.remove("hidden");
-                appEl.style.opacity = "1";
-                window._hideLoader();
-                window.initApp(window.APP_ROLE, name);
-            } else {
-                // Není přihlášen - skryj loader, zobraz auth
-                window._hideLoader();
-            }
+window.addEventListener('load', async () => {
+    if (window.sb) {
+        const { data: { session } } = await window.sb.auth.getSession();
+        if (session && session.user) {
+            window.APP_USER = session.user;
+            window.APP_ROLE = session.user.user_metadata?.role || "customer";
+            const name = session.user.user_metadata?.full_name || "Uživatel";
+            const authEl = document.getElementById("auth-screen");
+            if (authEl) authEl.classList.add("hidden");
+            const appEl = document.getElementById("main-app");
+            appEl.classList.remove("hidden"); appEl.style.opacity = "1";
+            window.initApp(window.APP_ROLE, name);
         } else {
-            // Supabase nedostupné - skryj loader
-            window._hideLoader();
+            // No session - show auth with role select
+            document.getElementById("view-role-select").classList.remove("hidden");
         }
-    } catch(e) {
-        // Jakákoliv chyba - skryj loader
-        console.error("Session check error:", e);
-        window._hideLoader();
+    } else {
+        // Supabase not available - show auth
+        document.getElementById("view-role-select").classList.remove("hidden");
     }
-}
-
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", runSessionCheck);
-} else {
-    runSessionCheck();
-}
+});
 
 // === TOAST ===
 window.showToast = function(title, message, type) {
@@ -532,10 +468,9 @@ window.toggleNotifDropdown = function() {
     const isOpen = dd.classList.contains("open");
     if (isOpen) { dd.classList.remove("open"); return; }
     dd.classList.add("open");
-    setTimeout(function() {
+    setTimeout(() => {
         document.addEventListener("click", function closeDD(e) {
-            const bell = document.getElementById("notif-bell");
-            if (bell && !bell.contains(e.target)) {
+            if (!document.getElementById("notif-bell").contains(e.target)) {
                 dd.classList.remove("open");
                 document.removeEventListener("click", closeDD);
             }
@@ -571,15 +506,15 @@ window.createBeautifulCard = function(req, isMarket, i) {
             mainDesc = pts[0].trim();
             if (pts.length > 1) {
                 let rawDetails = pts[1].replace("📋 DOPLŇUJÍCÍ INFORMACE:", "").trim();
-                const detailItems = rawDetails.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l; });
+                const detailItems = rawDetails.split(/\r?\n/).map(l => l.trim()).filter(l => l);
                 if (detailItems.length > 0) {
                     detailsHtml = '<div class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-700/50"><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Doplňující informace</p><div class="flex flex-wrap gap-2">' +
-                        detailItems.map(function(item) { return '<div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">' + item + '</div>'; }).join('') +
+                        detailItems.map(item => '<div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">' + item + '</div>').join('') +
                         '</div></div>';
                 }
             }
         }
-        const photoHtml = reqPhoto ? '<div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer" onclick="window.openLightbox(this.querySelector(\'img\').src)"><img src="data:' + (reqMime||'image/jpeg') + ';base64,' + reqPhoto + '" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"><div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center"><i class="fa-solid fa-expand text-white opacity-0 group-hover:opacity-100 text-2xl transition-all"></i></div></div>' : '';
+        const photoHtml = reqPhoto ? '<div class="w-full md:w-48 h-32 md:h-full shrink-0 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700/50 shadow-sm relative group cursor-pointer"><img src="data:' + (reqMime||'image/jpeg') + ';base64,' + reqPhoto + '" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"></div>' : '';
         if (!isMarket) {
             return '<div class="req-card relative bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group fade-up overflow-hidden">' +
                 '<div class="absolute top-0 left-0 w-1.5 h-full ' + (req.status==='done'?'bg-slate-300 dark:bg-slate-700':'bg-fixit-500') + '"></div>' +
@@ -620,11 +555,11 @@ window.openRatingModal = function(index, sbId) {
 };
 window.closeRatingModal = function() {
     const modal = document.getElementById("rating-modal");
-    if (modal) { modal.classList.remove("opacity-100"); setTimeout(function() { modal.classList.add("hidden"); }, 300); }
+    if (modal) { modal.classList.remove("opacity-100"); setTimeout(() => modal.classList.add("hidden"), 300); }
 };
 window.setRating = function(val) {
     window.currentRatingValue = val;
-    document.getElementById("star-rating-container").querySelectorAll("i").forEach(function(star, idx) {
+    document.getElementById("star-rating-container").querySelectorAll("i").forEach((star, idx) => {
         star.classList.toggle("text-yellow-400", idx < val);
         star.classList.toggle("text-slate-300", idx >= val);
     });
@@ -632,6 +567,7 @@ window.setRating = function(val) {
 window.submitRating = async function() {
     const index = document.getElementById("rating-req-index").value;
     const sbId = document.getElementById("rating-req-sbid").value;
+    const comment = document.getElementById("rating-comment").value.trim();
     const btn = document.getElementById("btn-submit-rating");
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám...'; btn.disabled = true;
@@ -653,7 +589,7 @@ window.confirmDelete = function(index, sbId) {
 };
 window.closeConfirmModal = function() {
     const modal = document.getElementById("confirm-modal");
-    if (modal) { modal.classList.remove("opacity-100"); setTimeout(function() { modal.classList.add("hidden"); }, 300); }
+    if (modal) { modal.classList.remove("opacity-100"); setTimeout(() => modal.classList.add("hidden"), 300); }
     window._pendingDelete = null;
 };
 window.doConfirmDelete = function() {
@@ -699,7 +635,7 @@ window.doRegister = async function() {
         const { error } = await window.sb.auth.signUp({ email: document.getElementById("reg-email").value, password: document.getElementById("reg-pass").value, options: { data: { full_name: document.getElementById("reg-name").value, role: window.APP_ROLE } } });
         if (error) throw error;
         window.showOk("Účet vytvořen! Nyní se přihlaste.");
-        setTimeout(function() { window.switchTab("login"); }, 1800);
+        setTimeout(() => window.switchTab("login"), 1800);
     } catch(e) { window.showErr("Chyba: " + e.message); }
     finally { btn.innerHTML = "Vytvořit účet"; btn.disabled = false; }
 };
@@ -714,7 +650,7 @@ window.doLogin = async function() {
         window.showOk("Přihlášeno! Spouštím aplikaci...");
         window.APP_USER = data.user;
         const name = data.user.user_metadata?.full_name || "Uživatel";
-        setTimeout(function() { window.launchApp(window.APP_ROLE, name); }, 900);
+        setTimeout(() => window.launchApp(window.APP_ROLE, name), 900);
     } catch(e) { window.showErr("Špatný e-mail nebo heslo."); }
     finally { btn.innerHTML = "Přihlásit se"; btn.disabled = false; }
 };
@@ -729,7 +665,7 @@ window.doResetPassword = async function() {
         const { error } = await window.sb.auth.resetPasswordForEmail(email);
         if (error) throw error;
         window.showOk("Odkaz pro obnovu hesla byl odeslán.");
-        setTimeout(function() { window.switchTab("login"); }, 4000);
+        setTimeout(() => window.switchTab("login"), 4000);
     } catch(e) { window.showErr("Chyba: " + e.message); }
     finally { btn.innerHTML = "Odeslat odkaz"; btn.disabled = false; }
 };
@@ -738,41 +674,31 @@ window.doLogout = async function() { if(window.sb) await window.sb.auth.signOut(
 
 window.launchApp = function(role, name) {
     const as = document.getElementById("auth-screen");
-    as.style.transition = 'opacity 0.4s ease';
-    as.style.opacity = "0";
-    as.style.pointerEvents = "none";
-    setTimeout(function() {
+    as.style.opacity = "0"; as.style.transition = "opacity 0.4s";
+    setTimeout(() => {
         as.classList.add("hidden");
         const app = document.getElementById("main-app");
         app.classList.remove("hidden"); app.style.opacity = "0";
-        setTimeout(function() { app.style.transition = "opacity 0.4s"; app.style.opacity = "1"; }, 50);
+        setTimeout(() => { app.style.transition = "opacity 0.4s"; app.style.opacity = "1"; }, 50);
         window.initApp(role, name);
     }, 400);
 };
 
 window.initApp = function(role, name) {
     const avatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role==="customer"?"f59e0b":"0f172a");
-    const el = function(id) { return document.getElementById(id); };
+    const el = (id) => document.getElementById(id);
     if(el("user-name")) el("user-name").innerText = name;
     if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
     if(el("user-avatar")) el("user-avatar").src = avatarUrl;
     const tt = el("theme-toggle");
-    const ui = function() {
-        const d = document.documentElement.classList.contains("dark");
-        el("theme-toggle-dark-icon").classList.toggle("hidden",d);
-        el("theme-toggle-light-icon").classList.toggle("hidden",!d);
-    };
+    const ui = () => { const d = document.documentElement.classList.contains("dark"); el("theme-toggle-dark-icon").classList.toggle("hidden",d); el("theme-toggle-light-icon").classList.toggle("hidden",!d); };
     ui();
-    if(tt) tt.addEventListener("click", function() {
-        document.documentElement.classList.toggle("dark");
-        localStorage.setItem("color-theme", document.documentElement.classList.contains("dark")?"dark":"light");
-        ui();
-    });
+    if(tt) tt.addEventListener("click", () => { document.documentElement.classList.toggle("dark"); localStorage.setItem("color-theme", document.documentElement.classList.contains("dark")?"dark":"light"); ui(); });
     if (role === "customer") window.initCustomer(name); else window.initCraftsman(name);
-    setTimeout(function() {
+    setTimeout(() => {
         if(window.APP_USER) {
             const meta = window.APP_USER.user_metadata || {};
-            ["prof-name","prof-email","prof-phone","prof-city","prof-bio"].forEach(function(id) {
+            ["prof-name","prof-email","prof-phone","prof-city","prof-bio"].forEach(id => {
                 const pel = el(id); if(!pel) return;
                 if(id==="prof-name") pel.value = name;
                 else if(id==="prof-email") pel.value = window.APP_USER.email||"";
@@ -784,11 +710,11 @@ window.initApp = function(role, name) {
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
         }
     }, 100);
-    setTimeout(async function() {
+    setTimeout(async () => {
         if (role==="customer") { await window.loadCustomerRequestsFromDB(); await window.loadCustomerConversations(); }
         else { await window.loadCraftsmanJobsFromDB(); await window.loadCraftsmanConversations(); await window.loadMarketFromDB(); }
     }, 500);
-    setTimeout(function() { window.showToast("Vítej, " + name + "! 👋", "Přihlášen jako " + (role==="customer"?"Zákazník":"Řemeslník") + ".", "success"); }, 600);
+    setTimeout(() => window.showToast("Vítej, " + name + "! 👋", "Přihlášen jako " + (role==="customer"?"Zákazník":"Řemeslník") + ".", "success"), 600);
 };
 
 // === PROFIL ===
@@ -822,7 +748,7 @@ window.handlePhoto = function(input) {
     const file = input.files[0]; if (!file) return;
     window.poptMime = file.type;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = e => {
         document.getElementById("photo-preview").src = e.target.result;
         document.getElementById("photo-preview").classList.remove("hidden");
         window.poptBase64 = e.target.result.split(",")[1];
@@ -894,15 +820,15 @@ window.publishRequest = async function(btnNode) {
     let orig = "Zveřejnit poptávku na Fixit";
     try {
         if(btnNode&&btnNode.tagName){orig=btnNode.innerHTML;btnNode.innerHTML='<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Zpracovávám...';btnNode.disabled=true;}
-        const getText=function(id,def){const el=document.getElementById(id);return el?el.innerText.trim():def;};
-        const getValue=function(id,def){const el=document.getElementById(id);return el?el.value.trim():def;};
+        const getText=(id,def)=>{const el=document.getElementById(id);return el?el.innerText.trim():def;};
+        const getValue=(id,def)=>{const el=document.getElementById(id);return el?el.value.trim():def;};
         const title=getText("r-nazev","Nová poptávka"),kat=getText("r-kat","Ostatní"),popis=getText("r-popis",""),nal=getText("r-nal","Střední"),cena=getText("r-cena","Dohodou");
         const street=getValue("f-street",""),city=getValue("f-city",""),phone=getValue("f-phone",""),timeframe=getValue("f-timeframe","Během několika dnů"),property=getValue("f-property","Byt"),parking=getValue("f-parking","Bezproblémové"),budget=getValue("f-budget","");
 
-        const highlightError = function(id) {
+        const highlightError = (id) => {
             const el=document.getElementById(id); if(!el)return; el.focus();
             el.style.borderColor="#ef4444"; el.style.boxShadow="0 0 0 3px rgba(239,68,68,0.18)";
-            setTimeout(function(){el.style.borderColor="";el.style.boxShadow="";},3000);
+            setTimeout(()=>{el.style.borderColor="";el.style.boxShadow="";},3000);
         };
 
         if(!street||!city||!phone){
@@ -938,11 +864,11 @@ window.publishRequest = async function(btnNode) {
         window.STATE.requests.unshift({sbId,title,kat,popis:finalPopis,time:now,status:"waiting",photo:window.poptBase64,mime:window.poptMime});
         window.refreshRequestsList(); window.refreshDashboard();
         window.poptHistoryText=""; window.poptBase64=null; window.poptMime=null;
-        ["popt-input","f-street","f-city","f-phone","f-budget"].forEach(function(id){const el=document.getElementById(id);if(el)el.value="";});
+        ["popt-input","f-street","f-city","f-phone","f-budget"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
         document.getElementById("popt-chat-msgs").innerHTML="";
         document.getElementById("photo-preview").classList.add("hidden");
         const pz=document.getElementById("photo-zone");if(pz){pz.querySelector("i").classList.remove("hidden");pz.querySelector("p").classList.remove("hidden");}
-        ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(function(id){const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+        ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
         document.getElementById("btn-show-finalize").classList.remove("hidden");
         document.getElementById("popt-form").classList.remove("hidden");
         if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;}
@@ -971,8 +897,7 @@ window._doDeleteRequest = async function(index, sbId) {
 // === CUSTOMER INIT ===
 window.initCustomer = function(name) {
     window.buildNav([{id:"dash",icon:"fa-house",label:"Nástěnka"},{id:"requests",icon:"fa-list-check",label:"Moje poptávky"},{id:"messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"payments",icon:"fa-shield-halved",label:"Platby & Escrow"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
-    // FIX: opravené uvozovky v onclick
-    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nov\u00e1 popt\u00e1vka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> <span>Nov\u00e1 popt\u00e1vka</span></button>';
+    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> <span>Nová poptávka</span></button>';
     document.getElementById("main-content").innerHTML = window.customerHTML(name);
     window.goTab("dash","Nástěnka");
 };
@@ -1066,16 +991,9 @@ window.customerHTML = function(name) {
     </div>`;
 };
 
-// FIX: initCraftsman - opravená syntaxe uvozovek v innerHTML
 window.initCraftsman = function(name) {
     window.buildNav([{id:"market",icon:"fa-map-location-dot",label:"Tržiště zakázek"},{id:"jobs",icon:"fa-hammer",label:"Moje práce"},{id:"c-messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"earnings",icon:"fa-wallet",label:"Výdělky"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
-    // FIX: použití createElementu místo innerHTML pro bezpečné vložení onclick
-    const ctaBtn = document.createElement('button');
-    ctaBtn.className = 'bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105';
-    ctaBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> <span>Hledat zakázky</span>';
-    ctaBtn.addEventListener('click', function() { window.goTab('market', 'Tržiště zakázek'); });
-    document.getElementById("header-cta").innerHTML = '';
-    document.getElementById("header-cta").appendChild(ctaBtn);
+    document.getElementById("header-cta").innerHTML = '<div class="flex items-center gap-2 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-xl font-bold text-sm shadow-sm"><i class="fa-solid fa-circle text-green-500 text-[10px] animate-pulse"></i> Online</div>';
     document.getElementById("main-content").innerHTML = window.craftsmanHTML(name);
     window.goTab("market","Tržiště zakázek");
 };
@@ -1141,19 +1059,14 @@ window.craftsmanHTML = function(name) {
 };
 
 window.buildNav = function(items) {
-    document.getElementById("sidebar-nav").innerHTML = items.map(function(item) {
-        return '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>';
-    }).join("");
-    const shortLabels = {"dash":"Domů","requests":"Moje","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"};
-    document.getElementById("bottom-nav-items").innerHTML = items.map(function(item) {
-        return '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + (shortLabels[item.id]||item.label.split(" ")[0]) + '</span></button>';
-    }).join("");
+    document.getElementById("sidebar-nav").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>').join("");
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Moje","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
 };
 
 window.goTab = function(id, title) {
-    document.querySelectorAll('[id^="view-"]').forEach(function(el) { el.classList.add("hidden"); el.classList.remove("fade-up"); });
-    document.querySelectorAll(".nav-item").forEach(function(el) { el.classList.remove("active","text-slate-900","dark:text-white"); el.classList.add("text-slate-600","dark:text-slate-400"); });
-    document.querySelectorAll('[id^="bnav-"]').forEach(function(el) { el.classList.remove("text-fixit-500"); el.classList.add("text-slate-400"); });
+    document.querySelectorAll('[id^="view-"]').forEach(el => { el.classList.add("hidden"); el.classList.remove("fade-up"); });
+    document.querySelectorAll(".nav-item").forEach(el => { el.classList.remove("active","text-slate-900","dark:text-white"); el.classList.add("text-slate-600","dark:text-slate-400"); });
+    document.querySelectorAll('[id^="bnav-"]').forEach(el => { el.classList.remove("text-fixit-500"); el.classList.add("text-slate-400"); });
     const view = document.getElementById("view-"+id);
     if(view){view.classList.remove("hidden");void view.offsetWidth;view.classList.add("fade-up");}
     const sideBtn = document.getElementById("nav-"+id);
@@ -1174,10 +1087,10 @@ window.goTab = function(id, title) {
 window.refreshRequestsList = function() {
     const list = document.getElementById("requests-list"); if(!list) return;
     const empty = document.getElementById("empty-req");
-    list.querySelectorAll(".req-card").forEach(function(c) { c.remove(); });
+    list.querySelectorAll(".req-card").forEach(c => c.remove());
     if(window.STATE.requests.length===0){if(empty)empty.classList.remove("hidden");return;}
     if(empty)empty.classList.add("hidden");
-    window.STATE.requests.forEach(function(req,i) {
+    window.STATE.requests.forEach((req,i) => {
         const div = document.createElement("div");
         div.innerHTML = window.createBeautifulCard(req,false,i);
         list.insertBefore(div.firstElementChild, list.querySelector("#empty-req"));
@@ -1185,15 +1098,13 @@ window.refreshRequestsList = function() {
 };
 
 window.refreshDashboard = function() {
-    const sa=document.getElementById("stat-active");if(sa)sa.innerText=window.STATE.requests.filter(function(r){return r.status!=="done";}).length;
+    const sa=document.getElementById("stat-active");if(sa)sa.innerText=window.STATE.requests.filter(r=>r.status!=="done").length;
     const st=document.getElementById("stat-total");if(st)st.innerText=window.STATE.requests.length;
     const dl=document.getElementById("dash-requests-list");
     if(dl&&window.STATE.requests.length>0){
-        dl.innerHTML=window.STATE.requests.slice(0,3).map(function(r){
-            return '<div class="flex items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0"><div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard-list"></i></div><div class="flex-1 min-w-0"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-500 mt-0.5">' + r.kat + ' • ' + r.time + '</p></div><span class="status-badge ' + (r.status==="done"?"status-done":r.status==="active"?"status-active":"status-waiting") + ' shrink-0">' + (r.status==="done"?"Hotovo":r.status==="active"?"Probíhá":"Čeká") + '</span></div>';
-        }).join("");
+        dl.innerHTML=window.STATE.requests.slice(0,3).map(r=>'<div class="flex items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0"><div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard-list"></i></div><div class="flex-1 min-w-0"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-500 mt-0.5">' + r.kat + ' • ' + r.time + '</p></div><span class="status-badge ' + (r.status==="done"?"status-done":r.status==="active"?"status-active":"status-waiting") + ' shrink-0">' + (r.status==="done"?"Hotovo":r.status==="active"?"Probíhá":"Čeká") + '</span></div>').join("");
     } else if(dl){
-        dl.innerHTML='<p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="window.goTab(\'new\',\'Nov\u00e1 popt\u00e1vka\')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p>';
+        dl.innerHTML='<p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p>';
     }
 };
 
@@ -1204,7 +1115,7 @@ window.openConversation = async function(requestId, partnerName, partnerSeed) {
     if(nameEl) nameEl.innerText = partnerName;
     const avatarEl = document.getElementById("chat-partner-avatar");
     if(avatarEl){avatarEl.style.backgroundImage="url(https://api.dicebear.com/7.x/avataaars/svg?seed="+partnerSeed+")";avatarEl.style.backgroundSize="cover";}
-    document.querySelectorAll(".conv-item").forEach(function(el){el.classList.remove("bg-white","dark:bg-slate-800/50","border-fixit-500");});
+    document.querySelectorAll(".conv-item").forEach(el=>el.classList.remove("bg-white","dark:bg-slate-800/50","border-fixit-500"));
     const ac=document.getElementById("conv-"+requestId);if(ac)ac.classList.add("bg-white","dark:bg-slate-800/50","border-fixit-500");
     await window.loadMessages(requestId);
     window.subscribeMessages(requestId);
@@ -1219,7 +1130,7 @@ window.loadMessages = async function(requestId) {
     if(error){box.innerHTML='<div class="text-center text-red-400 text-sm py-8">Chyba načítání.</div>';return;}
     box.innerHTML="";
     if(data.length===0){box.innerHTML='<div class="text-center text-slate-400 text-sm py-10"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Zatím žádné zprávy. Napište první!</div>';return;}
-    data.forEach(function(m){window.renderMessage(m,boxId);});
+    data.forEach(m=>window.renderMessage(m,boxId));
     box.scrollTop=box.scrollHeight;
 };
 
@@ -1244,7 +1155,7 @@ window.subscribeMessages = function(requestId) {
     if(window.msgSubscription){try{window.sb.removeChannel(window.msgSubscription);}catch(e){}}
     if(!window.sb)return;
     const boxId=window.APP_ROLE==="customer"?"chat-msgs":"chat-msgs-c";
-    window.msgSubscription=window.sb.channel("msgs-"+requestId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+requestId},function(payload){
+    window.msgSubscription=window.sb.channel("msgs-"+requestId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+requestId},payload=>{
         if(payload.new.sender_id!==window.APP_USER?.id){
             window.renderMessage(payload.new,boxId);
             window.showToast("Nová zpráva! 💬","Zpráva od "+(payload.new.sender_name||"řemeslníka")+".","info");
@@ -1282,18 +1193,14 @@ window.loadCustomerConversations = async function() {
     const list=document.getElementById("conv-list");if(!list||!window.sb||!window.APP_USER)return;
     const {data:reqs}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
     if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Vytvořte poptávku!</div>';return;}
-    list.innerHTML=reqs.map(function(r){
-        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\')" class="conv-item p-5 cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-400 mt-1">' + r.category + ' • <span class="text-fixit-500 font-bold">' + (r.status==="waiting"?"Hledáme":r.status==="active"?"Probíhá":"Hotovo") + '</span></p></div>';
-    }).join("");
+    list.innerHTML=reqs.map(r=>'<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\')" class="conv-item p-5 cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-400 mt-1">' + r.category + ' • <span class="text-fixit-500 font-bold">' + (r.status==="waiting"?"Hledáme":r.status==="active"?"Probíhá":"Hotovo") + '</span></p></div>').join("");
 };
 
 window.loadCraftsmanConversations = async function() {
     const list=document.getElementById("conv-list-c");if(!list||!window.sb||!window.APP_USER)return;
     const {data:offers}=await window.sb.from("offers").select("*, requests(*)").eq("craftsman_id",window.APP_USER.id).order("created_at",{ascending:false});
     if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Podejte nabídku!</div>';return;}
-    list.innerHTML=offers.map(function(o){
-        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'") + '\',\'customer' + o.request_id + '\')" class="conv-item p-5 cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-extrabold text-sm dark:text-white truncate">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-1">' + (o.requests?.category||"") + ' • ' + (o.requests?.customer_name||"Zákazník") + '</p></div>';
-    }).join("");
+    list.innerHTML=offers.map(o=>'<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'") + '\',\'customer' + o.request_id + '\')" class="conv-item p-5 cursor-pointer hover:bg-white dark:hover:bg-slate-800/50 border-b border-slate-200/50 dark:border-slate-800 border-l-2 border-l-transparent transition"><p class="font-extrabold text-sm dark:text-white truncate">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-1">' + (o.requests?.category||"") + ' • ' + (o.requests?.customer_name||"Zákazník") + '</p></div>').join("");
 };
 
 // === MODAL PRO ŘEMESLNÍKA ===
@@ -1316,7 +1223,7 @@ window.openOfferModal = function(index) {
 };
 window.closeOfferModal = function() {
     const modal=document.getElementById("craftsman-offer-modal");
-    if(modal){modal.classList.remove("opacity-100");setTimeout(function(){modal.classList.add("hidden");},300);}
+    if(modal){modal.classList.remove("opacity-100");setTimeout(()=>modal.classList.add("hidden"),300);}
 };
 
 window.submitCraftsmanOffer = async function() {
@@ -1337,7 +1244,7 @@ window.submitCraftsmanOffer = async function() {
         window.showToast("Nabídka odeslána! 🎉","Zákazník obdrží vaši nabídku co nejdříve.","success");
         window.STATE.craftJobs.push({title,requestId,status:"pending",time:new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})});
         window.refreshCraftsmanJobs();window.activeChatId=String(requestId);
-        setTimeout(function(){window.closeOfferModal();btn.innerHTML=orig;btn.disabled=false;btn.className=btn.className.replace("bg-green-500","bg-fixit-500 hover:bg-fixit-600");window.goTab("c-messages","Zprávy");window.openConversation(requestId,"Zákazník","customer"+requestId);},1000);
+        setTimeout(()=>{window.closeOfferModal();btn.innerHTML=orig;btn.disabled=false;btn.className=btn.className.replace("bg-green-500","bg-fixit-500 hover:bg-fixit-600");window.goTab("c-messages","Zprávy");window.openConversation(requestId,"Zákazník","customer"+requestId);},1000);
     } catch(e){btn.innerHTML=orig;btn.disabled=false;window.showToast("Chyba odesílání",e.message,"error");}
 };
 
@@ -1348,9 +1255,7 @@ window.loadOffersForRequest = async function(requestId, requestTitle) {
     document.getElementById("offers-modal-title").innerText=requestTitle;
     const modalList=document.getElementById("offers-modal-list");
     if(!offers||offers.length===0){modalList.innerHTML='<div class="text-center text-slate-400 py-12"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i><p>Zatím žádné nabídky.</p></div>';}
-    else{modalList.innerHTML=offers.map(function(o){
-        return '<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Přijmout a zahájit zprávy</button></div>';
-    }).join("");}
+    else{modalList.innerHTML=offers.map(o=>'<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Přijmout a zahájit zprávy</button></div>').join("");}
     const modal=document.getElementById("offers-modal");modal.classList.remove("hidden");void modal.offsetWidth;modal.classList.add("opacity-100");
 };
 
@@ -1359,11 +1264,11 @@ window.acceptOffer = async function(offerId, requestId, craftsmanName) {
     await window.sb.from("offers").update({status:"accepted"}).eq("id",offerId);
     await window.sb.from("requests").update({status:"active",craftsman_name:craftsmanName}).eq("id",requestId);
     window.showToast("Nabídka přijata! ✅","Zahajujete spolupráci s "+craftsmanName+".","success");
-    const req=window.STATE.requests.find(function(r){return r.sbId===requestId;});if(req){req.status="active";req.craftsman_name=craftsmanName;}
+    const req=window.STATE.requests.find(r=>r.sbId===requestId);if(req){req.status="active";req.craftsman_name=craftsmanName;}
     window.refreshRequestsList();window.refreshDashboard();
     window.activeChatId=String(requestId);
     window.goTab("messages","Zprávy");
-    setTimeout(function(){window.openConversation(requestId,craftsmanName,"craftsman"+requestId);},300);
+    setTimeout(()=>window.openConversation(requestId,craftsmanName,"craftsman"+requestId),300);
 };
 
 window.closeOffersModal = function() {
@@ -1372,18 +1277,18 @@ window.closeOffersModal = function() {
 };
 
 window.refreshCraftsmanJobs = function() {
-    const completed=window.STATE.craftJobs.filter(function(j){return j.status==="done"||j.status==="completed";}).length;
+    const completed=window.STATE.craftJobs.filter(j=>j.status==="done"||j.status==="completed").length;
     const cnt=document.getElementById("jobs-active-count");if(cnt)cnt.innerText=window.STATE.craftJobs.length-completed;
     const doneCnt=document.getElementById("jobs-done-count");if(doneCnt)doneCnt.innerText=completed;
     const list=document.getElementById("my-jobs-list");if(!list)return;
     list.querySelector(".text-center")?.remove();list.innerHTML="";
-    window.STATE.craftJobs.forEach(function(job){
+    window.STATE.craftJobs.forEach(job=>{
         const d=document.createElement("div");
         d.className="bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm fade-up";
         let badge='<span class="status-badge status-waiting">Čekám na odpověď</span>';
         if(job.status==="accepted"||job.status==="active")badge='<span class="status-badge status-active">Aktivní zakázka</span>';
         if(job.status==="done"||job.status==="completed")badge='<span class="status-badge status-done">Dokončeno</span>';
-        d.innerHTML='<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">' + job.title + '</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">' + job.time + '</p></div>' + badge + '</div><button onclick="window.activeChatId=\'' + job.requestId + '\'; window.goTab(\'c-messages\',\'Zpr\u00e1vy\'); setTimeout(function(){window.openConversation(\'' + job.requestId + '\',\'Z\u00e1kazn\u00edk\',\'customer' + job.requestId + '\');},300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zákazníkovi</button>';
+        d.innerHTML='<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">' + job.title + '</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">' + job.time + '</p></div>' + badge + '</div><button onclick="window.activeChatId=\'' + job.requestId + '\'; window.goTab(\'c-messages\',\'Zprávy\'); setTimeout(()=>window.openConversation(\'' + job.requestId + '\',\'Zákazník\',\'customer' + job.requestId + '\'),300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zákazníkovi</button>';
         list.appendChild(d);
     });
 };
@@ -1392,7 +1297,7 @@ window.loadCraftsmanJobsFromDB = async function() {
     if(!window.sb||!window.APP_USER)return;
     const {data}=await window.sb.from("offers").select("*, requests(title, category, status)").eq("craftsman_id",window.APP_USER.id);
     if(data&&data.length>0){
-        window.STATE.craftJobs=data.map(function(o){
+        window.STATE.craftJobs=data.map(o=>{
             let s=o.status;if(o.requests?.status==="done")s="done";
             return {title:o.requests?.title||"Zakázka",requestId:o.request_id,status:s,time:new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})};
         });
@@ -1404,7 +1309,7 @@ window.loadCustomerRequestsFromDB = async function() {
     if(!window.sb||!window.APP_USER)return;
     const {data}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
     if(data&&data.length>0){
-        window.STATE.requests=data.map(function(r){return {sbId:r.id,title:r.title,kat:r.category,popis:r.description,time:new Date(r.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:r.status,craftsman_name:r.craftsman_name||null};});
+        window.STATE.requests=data.map(r=>({sbId:r.id,title:r.title,kat:r.category,popis:r.description,time:new Date(r.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:r.status,craftsman_name:r.craftsman_name||null}));
         window.refreshRequestsList();window.refreshDashboard();
     }
 };
@@ -1414,9 +1319,7 @@ window.loadMarketFromDB = async function() {
     const {data,error}=await window.sb.from("requests").select("*").eq("status","waiting").order("created_at",{ascending:false});
     if(error||!data||data.length===0){list.innerHTML='<div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-inbox text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">Zatím žádné poptávky ve vašem okolí.</p></div>';return;}
     window.STATE.marketRequests=data;
-    list.innerHTML=data.map(function(r,i){
-        return window.createBeautifulCard({id:r.id,sbId:r.id,title:r.title,kat:r.category||"Ostatní",popis:r.description||"",time:new Date(r.created_at).toLocaleDateString("cs"),status:r.status,urgency:r.urgency||"Střední",category:r.category,customer_name:r.customer_name||"Zákazník",price_estimate:r.price_estimate||"Dohodou"},true,i);
-    }).join("");
+    list.innerHTML=data.map((r,i)=>window.createBeautifulCard({id:r.id,sbId:r.id,title:r.title,kat:r.category||"Ostatní",popis:r.description||"",time:new Date(r.created_at).toLocaleDateString("cs"),status:r.status,urgency:r.urgency||"Střední",category:r.category,customer_name:r.customer_name||"Zákazník",price_estimate:r.price_estimate||"Dohodou"},true,i)).join("");
 };
 
 // === MAPA ===
@@ -1438,7 +1341,7 @@ window.toggleMarketView = function(mode) {
 
 window.initMarketMap = async function() {
     const mapEl=document.getElementById("market-map");if(!mapEl)return;
-    if(window._marketMap){window._marketMap.eachLayer(function(l){if(l instanceof L.Marker)window._marketMap.removeLayer(l);});}
+    if(window._marketMap){window._marketMap.eachLayer(l=>{if(l instanceof L.Marker)window._marketMap.removeLayer(l);});}
     else{window._marketMap=L.map("market-map").setView([49.8,15.5],8);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:18}).addTo(window._marketMap);}
     const requests=window.STATE.marketRequests||[];
     if(requests.length===0)return;
@@ -1453,40 +1356,20 @@ window.initMarketMap = async function() {
             if(geo&&geo.length>0){
                 const lat=parseFloat(geo[0].lat),lon=parseFloat(geo[0].lon);bounds.push([lat,lon]);
                 const urgencyColor=r.urgency==="Vysoká"?"#ef4444":r.urgency==="Nízká"?"#22c55e":"#f59e0b";
-                const popup=L.popup({maxWidth:280,minWidth:220}).setContent('<div class="fixit-pin-popup"><span class="cat-badge">'+(r.category||"Ostatní")+'</span><p class="title">'+(r.title||"Poptávka")+'</p><p class="addr"><i class="fa-solid fa-location-dot" style="color:#f59e0b;margin-right:4px"></i>'+addr+'</p><div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:700;color:'+urgencyColor+';background:'+urgencyColor+'18;padding:3px 8px;border-radius:6px;">'+(r.urgency||"Střední")+' priorita</span>'+(r.price_estimate?'<span style="font-size:11px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:3px 8px;border-radius:6px;">'+r.price_estimate+'</span>':'')+'</div><button class="offer-btn" onclick="window.openOfferModal('+r.id+',\\"'+(r.title||"").replace(/"/g,"")+'\\""); document.querySelectorAll(\".leaflet-popup-close-button\").forEach(function(b){b.click();});">Poslat nabídku →</button></div>');
+                const popup=L.popup({maxWidth:280,minWidth:220}).setContent('<div class="fixit-pin-popup"><span class="cat-badge">'+(r.category||"Ostatní")+'</span><p class="title">'+(r.title||"Poptávka")+'</p><p class="addr"><i class="fa-solid fa-location-dot" style="color:#f59e0b;margin-right:4px"></i>'+addr+'</p><div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:700;color:'+urgencyColor+';background:'+urgencyColor+'18;padding:3px 8px;border-radius:6px;">'+(r.urgency||"Střední")+' priorita</span>'+(r.price_estimate?'<span style="font-size:11px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:3px 8px;border-radius:6px;">'+r.price_estimate+'</span>':'')+'</div><button class="offer-btn" onclick="window.openOfferModal('+r.id+',\\"'+(r.title||"").replace(/"/g,"")+'\\""); document.querySelectorAll(\".leaflet-popup-close-button\").forEach(b=>b.click());">Poslat nabídku →</button></div>');
                 L.marker([lat,lon],{icon:pinIcon}).addTo(window._marketMap).bindPopup(popup);
             }
         }catch(e){}
     }
     if(bounds.length>0)window._marketMap.fitBounds(bounds,{padding:[40,40],maxZoom:13});
-    setTimeout(function(){window._marketMap&&window._marketMap.invalidateSize();},100);
+    setTimeout(()=>window._marketMap&&window._marketMap.invalidateSize(),100);
 };
 
 window.filterMarket = function(kat) {
-    document.querySelectorAll(".filter-btn").forEach(function(b){
-        b.classList.remove("bg-fixit-500","text-white","shadow-md");
-        b.classList.add("bg-white","dark:bg-slate-800","border","border-slate-200","dark:border-slate-700","text-slate-600","dark:text-slate-300","hover:border-fixit-500");
-    });
-    event.target.classList.remove("bg-white","dark:bg-slate-800","border","border-slate-200","dark:border-slate-700","text-slate-600","dark:text-slate-300","hover:border-fixit-500");
-    event.target.classList.add("bg-fixit-500","text-white","shadow-md");
-    document.querySelectorAll(".market-item").forEach(function(item){item.style.display=(kat==="all"||item.dataset.kat===kat)?"":"none";});
+    document.querySelectorAll(".filter-btn").forEach(b=>{b.className=b.className.replace("bg-fixit-500 text-white shadow-md hover:scale-105","bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105");});
+    event.target.className=event.target.className.replace("bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105","bg-fixit-500 text-white shadow-md hover:scale-105 transition");
+    document.querySelectorAll(".market-item").forEach(item=>{item.style.display=(kat==="all"||item.dataset.kat===kat)?"":"none";});
 };
-
-// === LIGHTBOX ===
-window.openLightbox = function(src) {
-    const lb = document.getElementById("lightbox");
-    const img = document.getElementById("lightbox-img");
-    img.src = src;
-    lb.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-};
-window.closeLightbox = function() {
-    document.getElementById("lightbox").classList.add("hidden");
-    document.body.style.overflow = "";
-};
-document.addEventListener("keydown", function(e) {
-    if(e.key === "Escape") window.closeLightbox();
-});
 </script>
 </body>
 </html>
