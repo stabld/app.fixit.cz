@@ -776,7 +776,8 @@ window.handleProfilePhoto = async function(input) {
         if (upErr) throw new Error(upErr.message);
 
         const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-        const publicUrl = urlData.publicUrl + "?v=" + Date.now();
+        // Stabilní URL bez timestamp - stejná na všech zařízeních
+        const publicUrl = urlData.publicUrl;
 
         const { error: metaErr } = await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
         if (metaErr) throw new Error(metaErr.message);
@@ -814,7 +815,7 @@ window.saveProfile = async function(btnNode) {
             const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoBlob, { upsert: true, contentType: "image/jpeg" });
             if (upErr) throw new Error("Chyba nahrávání fotky: " + upErr.message);
             const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-            updateData.avatar_url = urlData.publicUrl + "?v=" + Date.now();
+            updateData.avatar_url = urlData.publicUrl;
             window._profilePhotoBlob = null;
         }
 
@@ -1293,8 +1294,33 @@ window.showMsgPanel = function(role) {
         msgPanel.classList.add('show-mobile');
     }
 };
+// === AVATAR HELPER ===
+// Cache pro avatary - {userId: url}
+window._avatarCache = {};
+
+window.getUserAvatar = async function(userId, fallbackSeed, fallbackBg) {
+    if (!userId) return "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
+    // Vrať z cache
+    if (window._avatarCache[userId]) return window._avatarCache[userId];
+    // Zkus načíst z Supabase Storage - stabilní URL
+    try {
+        const { data } = window.sb.storage.from("avatars").getPublicUrl(userId + ".jpg");
+        if (data?.publicUrl) {
+            // Ověř že soubor existuje (HEAD request)
+            const check = await fetch(data.publicUrl, { method: "HEAD" });
+            if (check.ok) {
+                window._avatarCache[userId] = data.publicUrl;
+                return data.publicUrl;
+            }
+        }
+    } catch(e) {}
+    const fallback = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
+    window._avatarCache[userId] = fallback;
+    return fallback;
+};
+
 // === ZPRÁVY ===
-window.openConversation = async function(requestId, partnerName, partnerSeed) {
+window.openConversation = async function(requestId, partnerName, partnerSeed, partnerUserId) {
     window.activeChatId = String(requestId);
     const nameEl = document.getElementById("chat-partner-name")||document.getElementById("chat-partner-name-c");
     if(nameEl) nameEl.innerText = partnerName;
@@ -1302,7 +1328,16 @@ window.openConversation = async function(requestId, partnerName, partnerSeed) {
     var role = window.APP_ROLE === "customer" ? "customer" : "craftsman";
     window.showMsgPanel(role);
     const avatarEl = document.getElementById("chat-partner-avatar");
-    if(avatarEl){avatarEl.style.backgroundImage="url(https://api.dicebear.com/7.x/avataaars/svg?seed="+partnerSeed+")";avatarEl.style.backgroundSize="cover";}
+    const fallbackBg = window.APP_ROLE === "customer" ? "0f172a" : "f59e0b";
+    if(avatarEl) {
+        const avUrl = await window.getUserAvatar(partnerUserId, partnerSeed, fallbackBg);
+        avatarEl.style.backgroundImage = "url(" + avUrl + ")";
+        avatarEl.style.backgroundSize = "cover";
+        avatarEl.style.backgroundPosition = "center";
+        // Aktualizuj i v seznamu konverzací
+        const cavEl = document.getElementById("cav-" + requestId);
+        if(cavEl) cavEl.src = avUrl;
+    }
     document.querySelectorAll(".conv-item").forEach(el=>el.classList.remove("bg-white","dark:bg-slate-800/50","border-fixit-500"));
     const ac=document.getElementById("conv-"+requestId);if(ac)ac.classList.add("bg-white","dark:bg-slate-800/50","border-fixit-500");
     await window.loadMessages(requestId);
@@ -1381,12 +1416,13 @@ window.loadCustomerConversations = async function() {
     const list=document.getElementById("conv-list");if(!list||!window.sb||!window.APP_USER)return;
     const {data:reqs}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
     if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Vytvořte poptávku!</div>';return;}
+    // Načti avatary asynchronně a pak aktualizuj
     list.innerHTML=reqs.map(r=>{
         const statusColor = r.status==='active' ? 'text-green-500' : r.status==='done' ? 'text-slate-400' : 'text-fixit-500';
         const statusDot = r.status==='active' ? '#22c55e' : r.status==='done' ? '#94a3b8' : '#f59e0b';
         const avatarSeed = (r.craftsman_name||'craftsman') + r.id;
-        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-3 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
-        '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
+        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\',' + (r.craftsman_id ? '\'' + r.craftsman_id + '\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-3 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
+        '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
         '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + ' • <span class="' + statusColor + ' font-semibold">' + (r.status==="waiting"?"Čeká na řemeslníka":r.status==="active"?"Probíhá":"Hotovo") + '</span></p></div>' +
         '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
         '</div>';
