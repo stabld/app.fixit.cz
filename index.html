@@ -162,7 +162,7 @@
             <svg width="48" height="48" viewBox="0 0 100 100" fill="none"><path d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="#f59e0b"/><circle cx="50" cy="48" r="16" fill="white"/><path d="M40 58 L30 68 L45 64 Z" fill="white"/></svg>
             <span class="font-extrabold text-4xl tracking-tighter dark:text-white">Fixit</span>
         </div>
-        <div id="view-role-select" class="hidden">
+        <div id="view-role-select">
             <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center dark:text-white">Vítejte v aplikaci</h2>
             <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
             <div class="grid md:grid-cols-2 gap-6">
@@ -381,52 +381,43 @@ window._pendingDelete = null;
 window._marketMap = null;
 
 // === LOADER ===
-(function() {
-    function hideLoader() {
-        const loader = document.getElementById('loader');
-        if (loader && loader.style.opacity !== '0') {
-            loader.style.opacity = '0';
-            loader.style.transform = 'scale(1.05)';
-            loader.style.pointerEvents = 'none';
-            setTimeout(() => { if (loader.parentNode) loader.remove(); }, 600);
-        }
+window._hideLoader = function() {
+    const loader = document.getElementById('loader');
+    if (loader) {
+        loader.style.opacity = '0';
+        loader.style.transform = 'scale(1.05)';
+        loader.style.pointerEvents = 'none';
+        setTimeout(() => { if (loader.parentNode) loader.remove(); }, 600);
     }
-    setTimeout(hideLoader, 4000);
-    window.addEventListener('load', function() { setTimeout(hideLoader, 1800); });
-})();
+};
+// Záložní - skryj loader po max 5s i kdyby vše selhalo
+setTimeout(window._hideLoader, 5000);
 
 // === SESSION CHECK ===
 window.addEventListener('load', async () => {
-    // Vždy po 2s zobraz přihlášení pokud session nenalezena
-    const showAuth = () => {
-        const rs = document.getElementById("view-role-select");
-        if (rs) rs.classList.remove("hidden");
-    };
-    const authTimeout = setTimeout(showAuth, 2500);
-
     try {
         if (window.sb) {
             const { data: { session } } = await window.sb.auth.getSession();
             if (session && session.user) {
-                clearTimeout(authTimeout);
                 window.APP_USER = session.user;
                 window.APP_ROLE = session.user.user_metadata?.role || "customer";
                 const name = session.user.user_metadata?.full_name || "Uživatel";
+                // Skryj auth, ukáž app
                 document.getElementById("auth-screen").classList.add("hidden");
                 const appEl = document.getElementById("main-app");
-                appEl.classList.remove("hidden"); appEl.style.opacity = "1";
+                appEl.classList.remove("hidden");
+                appEl.style.opacity = "1";
+                window._hideLoader();
                 window.initApp(window.APP_ROLE, name);
             } else {
-                clearTimeout(authTimeout);
-                showAuth();
+                // Žádná session - ukáž přihlášení
+                window._hideLoader();
             }
         } else {
-            clearTimeout(authTimeout);
-            showAuth();
+            window._hideLoader();
         }
     } catch(e) {
-        clearTimeout(authTimeout);
-        showAuth();
+        window._hideLoader();
     }
 });
 
