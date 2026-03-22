@@ -737,45 +737,61 @@ window.handleProfilePhoto = async function(input) {
     const file = input.files[0]; if (!file) return;
     if (file.size > 10000000) { window.showToast("Fotka je příliš velká", "Maximální velikost je 10 MB.", "error"); return; }
 
-    // 1. Okamžitý náhled
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement("canvas");
-            const MAX = 400; let w = img.width, h = img.height;
-            if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
-            canvas.width=w; canvas.height=h;
-            canvas.getContext("2d").drawImage(img,0,0,w,h);
-            const preview = canvas.toDataURL("image/jpeg", 0.85);
-            document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=preview; el.style.objectFit="cover"; });
-            document.getElementById("user-avatar").src = preview;
+    // 1. Převeď na JPEG přes canvas (řeší HEIC, WebP, i všechny mobilní formáty)
+    const compressedBlob = await new Promise(function(resolve) {
+        const fr = new FileReader();
+        fr.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const MAX = 600; let w = img.width, h = img.height;
+                if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}}else{if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+                const canvas = document.createElement("canvas");
+                canvas.width=w; canvas.height=h;
+                canvas.getContext("2d").drawImage(img,0,0,w,h);
+                // Zobraz náhled
+                const preview = canvas.toDataURL("image/jpeg", 0.9);
+                document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=preview; el.style.objectFit="cover"; });
+                document.getElementById("user-avatar").src = preview;
+                // Vrať blob pro upload
+                canvas.toBlob(function(blob){ resolve(blob); }, "image/jpeg", 0.9);
+            };
+            img.onerror = function() { resolve(null); };
+            img.src = e.target.result;
         };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+        fr.onerror = function() { resolve(null); };
+        fr.readAsDataURL(file);
+    });
 
-    // 2. Okamžitý upload do Storage (bez čekání na Uložit)
-    if (!window.sb || !window.APP_USER) { window._profilePhotoFile = file; return; }
+    if (!compressedBlob) { window.showToast("Chyba", "Nepodařilo se načíst obrázek.", "error"); return; }
+
+    // 2. Upload - vždy jako JPEG, pevný název podle user ID
+    if (!window.sb || !window.APP_USER) { window._profilePhotoBlob = compressedBlob; return; }
+
+    window.showToast("Nahrávám...", "Ukládám profilovou fotku.", "info");
     try {
-        const ext = file.name.split(".").pop().toLowerCase();
-        const safeExt = ["jpg","jpeg","png","gif","webp"].includes(ext) ? ext : "jpg";
-        const path = window.APP_USER.id + "." + safeExt;
-        const { error: upErr } = await window.sb.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+        const path = window.APP_USER.id + ".jpg";
+        const { error: upErr } = await window.sb.storage
+            .from("avatars")
+            .upload(path, compressedBlob, { upsert: true, contentType: "image/jpeg" });
         if (upErr) throw new Error(upErr.message);
+
         const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
         const publicUrl = urlData.publicUrl + "?v=" + Date.now();
-        // Ulož URL do metadata hned
-        await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
+
+        const { error: metaErr } = await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
+        if (metaErr) throw new Error(metaErr.message);
+
         const { data: fresh } = await window.sb.auth.getUser();
         if (fresh?.user) window.APP_USER = fresh.user;
-        window._profilePhotoUrl = publicUrl;
-        window._profilePhotoFile = null;
+
+        // Aktualizuj UI s novou URL
+        document.getElementById("user-avatar").src = publicUrl;
+        document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=publicUrl; });
+        window._profilePhotoBlob = null;
         window.showToast("Fotka nahrána! 📸", "Profilová fotka byla úspěšně uložena.", "success");
     } catch(err) {
-        // Storage selhal - ulož file pro pozdější pokus při kliknutí Uložit
-        window._profilePhotoFile = file;
-        window.showToast("Fotka načtena", "Klikni Uložit pro uložení profilu i fotky.", "info");
+        window._profilePhotoBlob = compressedBlob;
+        window.showToast("Chyba fotky", err.message, "error");
     }
 };
 
@@ -791,24 +807,15 @@ window.saveProfile = async function(btnNode) {
             bio: document.getElementById("prof-bio")?.value.trim()||""
         };
 
-        // Pokud fotka nebyla uploadnuta automaticky, zkus to teď
-        if (window._profilePhotoFile) {
+        // Pokud fotka čeká na upload (předchozí pokus selhal)
+        if (window._profilePhotoBlob) {
             btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Nahrávám fotku...';
-            try {
-                const ext = window._profilePhotoFile.name.split(".").pop().toLowerCase() || "jpg";
-                const safeExt = ["jpg","jpeg","png","gif","webp"].includes(ext) ? ext : "jpg";
-                const path = window.APP_USER.id + "." + safeExt;
-                const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoFile, { upsert: true, contentType: window._profilePhotoFile.type });
-                if (upErr) throw new Error("Storage chyba: " + upErr.message);
-                const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-                updateData.avatar_url = urlData.publicUrl + "?v=" + Date.now();
-                window._profilePhotoFile = null;
-            } catch(storageErr) {
-                throw new Error("Nepodařilo se nahrát fotku: " + storageErr.message);
-            }
-        } else if (window._profilePhotoUrl) {
-            updateData.avatar_url = window._profilePhotoUrl;
-            window._profilePhotoUrl = null;
+            const path = window.APP_USER.id + ".jpg";
+            const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoBlob, { upsert: true, contentType: "image/jpeg" });
+            if (upErr) throw new Error("Chyba nahrávání fotky: " + upErr.message);
+            const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
+            updateData.avatar_url = urlData.publicUrl + "?v=" + Date.now();
+            window._profilePhotoBlob = null;
         }
 
         btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám profil...';
