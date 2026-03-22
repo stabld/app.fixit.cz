@@ -394,7 +394,7 @@ window._hideLoader = function() {
 setTimeout(window._hideLoader, 5000);
 
 // === SESSION CHECK ===
-window.addEventListener('load', async () => {
+async function runSessionCheck() {
     if (window.sb) {
         const { data: { session } } = await window.sb.auth.getSession();
         if (session && session.user) {
@@ -412,7 +412,13 @@ window.addEventListener('load', async () => {
     } else {
         window._hideLoader();
     }
-});
+}
+// Spusť po DOMContentLoaded nebo okamžitě pokud DOM je již ready
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", runSessionCheck);
+} else {
+    runSessionCheck();
+}
 
 // === TOAST ===
 window.showToast = function(title, message, type) {
