@@ -13,7 +13,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Fixit">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com">
+window.signInWith = async function(provider) {
+    alert("Debug: Kliknuto na " + provider);
+    if (!window.sb) {
+        if (window.supabase && window.SB_URL && window.SB_KEY) {
+            window.sb = window.supabase.createClient(window.SB_URL, window.SB_KEY);
+        } else {
+            alert("Chyba: window.sb není inicializováno");
+            return;
+        }
+    }
+    try {
+        await window.sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: window.location.origin } });
+    } catch (e) {
+        alert("Chyba auth: " + e.message);
+    }
+};
+</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
