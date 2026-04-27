@@ -219,17 +219,6 @@
                     <button onclick="window.switchTab('forgot')" class="text-sm text-fixit-500 hover:text-fixit-600 font-bold transition">Zapomenuté heslo?</button>
                 </div>
                 <button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">Přihlásit se</button>
-<div class="mt-6">
-    <div class="relative mb-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div>
-        <div class="relative flex justify-center text-sm"><span class="px-2 bg-white dark:bg-slate-900 text-slate-500">nebo se přihlaste přes</span></div>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-        <button onclick="window.signInWith('google')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-google text-lg"></i></button>
-        <button onclick="window.signInWith('facebook')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-facebook text-lg text-blue-600"></i></button>
-    </div>
-</div>
-
             </div>
             <div id="form-reg" class="hidden">
                 <div class="space-y-3">
@@ -391,15 +380,10 @@
 </div>
 <script>
 
-window.signInWith = async function(provider) {
-    if (!window.sb) {
-        if (window.supabase && window.SB_URL && window.SB_KEY) {
-            window.sb = window.supabase.createClient(window.SB_URL, window.SB_KEY);
-        } else {
-            return;
-        }
-    }
-    await window.sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: window.location.origin } });
+window.clearMsgNotif = function() {
+    window.msgNotifCount = 0;
+    const badge = document.getElementById('sidebar-msg-badge');
+    if (badge) badge.classList.add('hidden');
 };
 
 
@@ -490,6 +474,13 @@ window.showToast = function(title, message, type) {
 
 // === NOTIFIKACE ===
 window.addNotif = function(title, message) {
+    const sidebarBadge = document.getElementById('sidebar-msg-badge');
+    if (sidebarBadge) {
+        window.msgNotifCount = (window.msgNotifCount || 0) + 1;
+        sidebarBadge.innerText = window.msgNotifCount;
+        sidebarBadge.classList.remove('hidden');
+    }
+
     window._notifCount++;
     window._notifItems.unshift({ title, message, time: new Date().toLocaleTimeString("cs", {hour:"2-digit",minute:"2-digit"}) });
     if (window._notifItems.length > 10) window._notifItems.pop();
