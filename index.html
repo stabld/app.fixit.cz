@@ -219,6 +219,18 @@
                     <button onclick="window.switchTab('forgot')" class="text-sm text-fixit-500 hover:text-fixit-600 font-bold transition">Zapomenuté heslo?</button>
                 </div>
                 <button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">Přihlásit se</button>
+<div class="mt-6">
+    <div class="relative mb-6">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div>
+        <div class="relative flex justify-center text-sm"><span class="px-2 bg-white dark:bg-slate-900 text-slate-500">nebo se přihlaste přes</span></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3">
+        <button onclick="window.signInWith('google')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-google text-lg"></i></button>
+        <button onclick="window.signInWith('facebook')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-facebook text-lg text-blue-600"></i></button>
+        <button onclick="window.signInWith('apple')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-apple text-lg"></i></button>
+    </div>
+</div>
+
             </div>
             <div id="form-reg" class="hidden">
                 <div class="space-y-3">
@@ -379,6 +391,39 @@
     </div>
 </div>
 <script>
+
+
+
+window.signInWith = async function(provider) {
+    console.log("Kliknuto na:", provider);
+    if (!window.sb) {
+        console.log("window.sb je null, zkouším reinicializaci...");
+        if (window.supabase && window.SB_URL && window.SB_KEY) {
+            window.sb = window.supabase.createClient(window.SB_URL, window.SB_KEY);
+            console.log("window.sb úspěšně vytvořeno.");
+        } else {
+            console.error("Nelze vytvořit window.sb. Chybí window.supabase, SB_URL nebo SB_KEY.");
+            window.showToast('Chyba', 'Supabase klient nebyl inicializován.', 'error');
+            return;
+        }
+    }
+    try {
+        console.log("Spouštím signInWithOAuth pro:", provider);
+        const { error } = await window.sb.auth.signInWithOAuth({
+            provider: provider,
+            options: { redirectTo: window.location.origin }
+        });
+        if (error) throw error;
+        console.log("signInWithOAuth úspěšně zavoláno.");
+    } catch (e) {
+        console.error("Chyba při signInWithOAuth:", e);
+        window.showToast('Chyba přihlášení', e.message, 'error');
+    }
+};
+
+
+
+
 // === GLOBÁLNÍ PROMĚNNÉ ===
 window.SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
 window.SB_KEY = "sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc";
