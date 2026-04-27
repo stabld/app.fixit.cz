@@ -1412,17 +1412,28 @@ window.escapeHtml = function(value) {
 
 window.renderMessage = function(m, boxId) {
     const box=document.getElementById(boxId);if(!box)return;
-    const myRole=window.APP_ROLE||"";
-    const myName=(document.getElementById("user-name")?.innerText||"").trim();
-    const msgName=(m.sender_name||"").trim();
-    const roleMatch=!!(myRole&&m.sender_role&&m.sender_role===myRole);
-    const nameMatch=!!(myName&&msgName&&msgName===myName);
-    const idMatch=!!(window.APP_USER&&m.sender_id&&String(m.sender_id)===String(window.APP_USER.id));
-    const isMe=m.sender_role?roleMatch:(msgName?nameMatch:idMatch);
+    const myUserId = window.APP_USER?.id ? String(window.APP_USER.id) : "";
+    const senderId = m?.sender_id ? String(m.sender_id) : "";
+    const senderRole = (m?.sender_role || "").trim();
+    const myRole = (window.APP_ROLE || "").trim();
+    const senderName = (m?.sender_name || "").trim();
+    const myName = (document.getElementById("user-name")?.innerText || "").trim();
+
+    let isMe = false;
+    if (myUserId && senderId) {
+        isMe = myUserId === senderId;
+    } else if (senderRole && myRole && senderName && myName) {
+        isMe = senderRole === myRole && senderName === myName;
+    } else if (senderRole && myRole) {
+        isMe = senderRole === myRole;
+    } else if (senderName && myName) {
+        isMe = senderName === myName;
+    }
+
     const time=new Date(m.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
     box.querySelector(".text-center")?.remove();
     const d=document.createElement("div");
-    const safeSender = window.escapeHtml(m.sender_name||(isMe?"Já":"Uživatel"));
+    const safeSender = window.escapeHtml(senderName || (isMe?"Já":"Uživatel"));
     const safeText = window.escapeHtml(m.text || "").replace(/\n/g, "<br>");
     d.className="flex "+(isMe?"justify-end":"justify-start");
     d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2") + '">' + safeSender + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + safeText + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
@@ -1444,26 +1455,32 @@ window.subscribeMessages = function(requestId) {
 window.sendMsg = async function() {
     const inp=document.getElementById("msg-input");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId)return;
+    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const msgBase={conversation_id:window.activeChatId,sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name").innerText,text:txt};
+    const userNameEl = document.getElementById("user-name");
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
     window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"customer",created_at:new Date().toISOString()},"chat-msgs");
     if(window.sb){
         const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"customer"});
-        if(error)await window.sb.from("messages").insert(msgBase);
+        if(error){
+            window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
+        }
     }
 };
 
 window.sendMsgC = async function() {
     const inp=document.getElementById("msg-input-c");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId)return;
+    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const msgBase={conversation_id:window.activeChatId,sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name").innerText,text:txt};
+    const userNameEl = document.getElementById("user-name");
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
     window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"craftsman",created_at:new Date().toISOString()},"chat-msgs-c");
     if(window.sb){
         const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"craftsman"});
-        if(error)await window.sb.from("messages").insert(msgBase);
+        if(error){
+            window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
+        }
     }
 };
 
