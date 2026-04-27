@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixit â€“ ProfesionĂˇlnĂ­ Ĺ™emesla</title>
-    <meta name="description" content="Fixit â€“ NajdÄ›te ovÄ›Ĺ™enĂ©ho Ĺ™emeslnĂ­ka ve vaĹˇem okolĂ­ rychle a jednoduĹˇe.">
+    <title>Fixit – Profesionální řemesla</title>
+    <meta name="description" content="Fixit – Najděte ověřeného řemeslníka ve vašem okolí rychle a jednoduše.">
     <meta name="theme-color" content="#f59e0b">
-    <!-- Favicon jako inline SVG pĹ™es data URI -->
+    <!-- Favicon jako inline SVG přes data URI -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5L90 27.5V72.5L50 95L10 72.5V27.5L50 5Z' fill='%23f59e0b'/%3E%3Ccircle cx='50' cy='47' r='16' fill='white'/%3E%3Cpath d='M40 57 L28 69 L44 64 Z' fill='white'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23f59e0b'/%3E%3Cpath d='M50 10L85 30V70L50 90L15 70V30L50 10Z' fill='white' opacity='0.25'/%3E%3Ccircle cx='50' cy='47' r='16' fill='white'/%3E%3Cpath d='M40 57 L28 69 L44 64 Z' fill='white'/%3E%3C/svg%3E">
     <!-- PWA manifest inline -->
@@ -130,7 +130,7 @@
             .grid.grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
             /* Jobs grid */
             .grid.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-            /* PoptĂˇvka form */
+            /* Poptávka form */
             #view-new .grid { grid-template-columns: 1fr !important; }
             /* Modals */
             .max-w-3xl, .max-w-lg, .max-w-md { max-width: calc(100vw - 2rem) !important; }
@@ -145,9 +145,17 @@
         }
     </style>
     <script>
-        if (localStorage.getItem("color-theme") === "dark" || (!("color-theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-            document.documentElement.classList.add("dark");
-        } else { document.documentElement.classList.remove("dark"); }
+        (function () {
+            var storedTheme = null;
+            try { storedTheme = window.localStorage ? localStorage.getItem("color-theme") : null; } catch (e) { storedTheme = null; }
+            var prefersDark = false;
+            try { prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; } catch (e) { prefersDark = false; }
+            if (storedTheme === "dark" || (!storedTheme && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+        })();
     </script>
 </head>
 <body class="antialiased bg-slate-50 text-slate-900 dark:bg-fixit-dark dark:text-white">
@@ -155,7 +163,7 @@
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
 
-<!-- LOADER - stejnĂ˝ jako na webu -->
+<!-- LOADER - stejný jako na webu -->
 <div id="loader" style="position:fixed;inset:0;z-index:99999;background:#020617;min-height:100vh;min-height:-webkit-fill-available;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;transition:opacity 0.6s ease,transform 0.6s ease;">
     <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
         <path id="loader-hex" d="M50 10L85 30V70L50 90L15 70V30L50 10Z" fill="none" stroke="#f59e0b" stroke-width="3" style="stroke-dasharray:300;stroke-dashoffset:300;animation:loader-draw 1s ease forwards 0.2s;"/>
@@ -163,7 +171,7 @@
         <path d="M40 58 L30 68 L45 64 Z" fill="#f59e0b"/>
     </svg>
     <div style="color:white;font-weight:800;font-size:1.875rem;letter-spacing:-0.025em;opacity:0;animation:loader-fadein-up 0.5s ease forwards 0.8s;">Fixit</div>
-    <div style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;animation:loader-fadein-up 0.5s ease forwards 1.1s;">ProfesionĂˇlnĂ­ Ĺ™emesla v BrnÄ›</div>
+    <div style="color:#94a3b8;font-size:0.875rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;opacity:0;animation:loader-fadein-up 0.5s ease forwards 1.1s;">Profesionální řemesla v Brně</div>
 </div>
 
 <!-- AUTH SCREEN -->
@@ -176,26 +184,26 @@
             <span class="font-extrabold text-4xl tracking-tighter dark:text-white">Fixit</span>
         </div>
         <div id="view-role-select" class="hidden">
-            <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center dark:text-white">VĂ­tejte v aplikaci</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit pouĹľĂ­vat</p>
+            <h2 class="text-2xl md:text-3xl font-extrabold mb-2 text-center dark:text-white">Vítejte v aplikaci</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-center mb-10 text-lg">Vyberte, jak chcete Fixit používat</p>
             <div class="grid md:grid-cols-2 gap-6">
                 <button onclick="window.goToAuth('customer')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center">
                     <div class="w-20 h-20 bg-white dark:bg-slate-700 text-fixit-500 rounded-2xl flex items-center justify-center text-4xl group-hover:bg-fixit-500 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-house-chimney-window"></i></div>
-                    <div><h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptĂˇvajĂ­cĂ­</h3><p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">PotĹ™ebuji opravit nÄ›co doma a hledĂˇm ovÄ›Ĺ™enĂ©ho profĂ­ka.</p></div>
+                    <div><h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako poptávající</h3><p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Potřebuji opravit něco doma a hledám ověřeného profíka.</p></div>
                 </button>
                 <button onclick="window.goToAuth('craftsman')" class="group bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-fixit-500 rounded-[2rem] p-8 flex flex-col items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-xl text-center">
                     <div class="w-20 h-20 bg-white dark:bg-slate-700 text-slate-400 group-hover:bg-fixit-500 group-hover:text-white transition-all rounded-2xl flex items-center justify-center text-3xl shadow-sm"><i class="fa-solid fa-toolbox"></i></div>
-                    <div><h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako Ĺ™emeslnĂ­k</h3><p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profĂ­k a chci zĂ­skat pĹ™Ă­stup k novĂ˝m zakĂˇzkĂˇm.</p></div>
+                    <div><h3 class="font-extrabold text-xl text-slate-900 dark:text-white mb-2">Vstoupit jako řemeslník</h3><p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Jsem profík a chci získat přístup k novým zakázkám.</p></div>
                 </button>
             </div>
         </div>
         <div id="view-auth-form" class="hidden max-w-md mx-auto relative">
-            <button onclick="window.backToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 mb-5 flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> ZpÄ›t</button>
+            <button onclick="window.backToRoles()" class="text-sm font-bold text-slate-500 hover:text-fixit-500 mb-5 flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Zpět</button>
             <div class="bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-500/30 rounded-xl p-3 mb-6 flex items-center justify-center gap-2 text-fixit-700 dark:text-fixit-400 font-bold text-sm">
-                <i id="role-icon" class="fa-solid fa-house"></i><span id="role-text">ZĂˇkaznĂ­k</span>
+                <i id="role-icon" class="fa-solid fa-house"></i><span id="role-text">Zákazník</span>
             </div>
             <div class="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex relative mb-6">
-                <button onclick="window.switchTab('login')" id="btn-login" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 dark:text-white transition-colors">PĹ™ihlĂˇĹˇenĂ­</button>
+                <button onclick="window.switchTab('login')" id="btn-login" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 dark:text-white transition-colors">Přihlášení</button>
                 <button onclick="window.switchTab('register')" id="btn-reg" class="flex-1 py-2.5 text-sm font-bold rounded-xl z-10 text-slate-500 transition-colors">Registrace</button>
                 <div id="tab-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-all duration-300"></div>
             </div>
@@ -207,24 +215,24 @@
                     <input type="password" id="log-pass" placeholder="Heslo" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
                 </div>
                 <div class="flex items-center justify-between mt-4 mb-2">
-                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded" style="accent-color:#f59e0b"><span class="text-sm font-bold text-slate-600 dark:text-slate-400">Zapamatovat si mÄ›</span></label>
-                    <button onclick="window.switchTab('forgot')" class="text-sm text-fixit-500 hover:text-fixit-600 font-bold transition">ZapomenutĂ© heslo?</button>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded" style="accent-color:#f59e0b"><span class="text-sm font-bold text-slate-600 dark:text-slate-400">Zapamatovat si mě</span></label>
+                    <button onclick="window.switchTab('forgot')" class="text-sm text-fixit-500 hover:text-fixit-600 font-bold transition">Zapomenuté heslo?</button>
                 </div>
-                <button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">PĹ™ihlĂˇsit se</button>
+                <button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">Přihlásit se</button>
             </div>
             <div id="form-reg" class="hidden">
                 <div class="space-y-3">
-                    <input type="text" id="reg-name" placeholder="JmĂ©no a pĹ™Ă­jmenĂ­" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                    <input type="text" id="reg-name" placeholder="Jméno a příjmení" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
                     <input type="email" id="reg-email" placeholder="E-mail" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
-                    <input type="password" id="reg-pass" placeholder="Heslo (min. 6 znakĹŻ)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+                    <input type="password" id="reg-pass" placeholder="Heslo (min. 6 znaků)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
                 </div>
-                <button onclick="window.doRegister()" id="btn-do-reg" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-4 transition shadow-lg">VytvoĹ™it ĂşÄŤet</button>
+                <button onclick="window.doRegister()" id="btn-do-reg" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-4 transition shadow-lg">Vytvořit účet</button>
             </div>
             <div id="form-forgot" class="hidden fade-up">
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 text-center font-medium">Zadejte svĹŻj e-mail a my vĂˇm zaĹˇleme odkaz pro obnovenĂ­ hesla.</p>
-                <input type="email" id="forgot-email" placeholder="VĂˇĹˇ e-mail" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white mb-3">
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 text-center font-medium">Zadejte svůj e-mail a my vám zašleme odkaz pro obnovení hesla.</p>
+                <input type="email" id="forgot-email" placeholder="Váš e-mail" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white mb-3">
                 <button onclick="window.doResetPassword()" id="btn-do-forgot" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3.5 rounded-xl transition shadow-lg">Odeslat odkaz</button>
-                <button onclick="window.switchTab('login')" class="w-full mt-3 text-sm text-slate-500 hover:text-fixit-500 font-bold transition">ZpÄ›t na pĹ™ihlĂˇĹˇenĂ­</button>
+                <button onclick="window.switchTab('login')" class="w-full mt-3 text-sm text-slate-500 hover:text-fixit-500 font-bold transition">Zpět na přihlášení</button>
             </div>
         </div>
     </div>
@@ -242,16 +250,16 @@
             <nav class="p-3 space-y-1 mt-3" id="sidebar-nav"></nav>
         </div>
         <div class="p-4 border-t border-slate-200 dark:border-slate-800">
-            <button onclick="window.doLogout()" class="w-full mb-3 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> OdhlĂˇsit se</button>
-            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-fixit-500 transition" onclick="window.goTab('profile','MĹŻj profil')">
+            <button onclick="window.doLogout()" class="w-full mb-3 px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button>
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-fixit-500 transition" onclick="window.goTab('profile','Můj profil')">
                 <img id="user-avatar" src="" class="w-10 h-10 rounded-full bg-slate-200 shrink-0">
-                <div class="truncate"><p class="text-sm font-bold dark:text-white leading-tight truncate" id="user-name">UĹľivatel</p><p class="text-xs text-slate-500" id="user-role-lbl">Role</p></div>
+                <div class="truncate"><p class="text-sm font-bold dark:text-white leading-tight truncate" id="user-name">Uživatel</p><p class="text-xs text-slate-500" id="user-role-lbl">Role</p></div>
             </div>
         </div>
     </aside>
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-fixit-dark">
         <header class="h-16 glass-panel border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-40 flex-shrink-0">
-            <h1 class="text-xl font-extrabold dark:text-white" id="page-title">NĂˇstÄ›nka</h1>
+            <h1 class="text-xl font-extrabold dark:text-white" id="page-title">Nástěnka</h1>
             <div class="flex items-center gap-3">
                 <div id="notif-bell" class="relative">
                     <button id="notif-btn" onclick="window.toggleNotifDropdown()" class="w-9 h-9 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">
@@ -260,10 +268,10 @@
                     <span id="notif-badge"></span>
                     <div id="notif-dropdown">
                         <div style="padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;">
-                            <span style="font-weight:800;font-size:14px;" class="dark:text-white flex-1">OznĂˇmenĂ­</span>
-                            <button onclick="window.clearNotifs()" style="font-size:11px;font-weight:700;color:#f59e0b;margin-left:auto;">OznaÄŤit vĹˇe pĹ™eÄŤtenĂ©</button>
+                            <span style="font-weight:800;font-size:14px;" class="dark:text-white flex-1">Oznámení</span>
+                            <button onclick="window.clearNotifs()" style="font-size:11px;font-weight:700;color:#f59e0b;margin-left:auto;">Označit vše přečtené</button>
                         </div>
-                        <div id="notif-list"><div id="notif-empty" style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa-regular fa-bell-slash text-2xl mb-2 block opacity-40"></i>Ĺ˝ĂˇdnĂˇ oznĂˇmenĂ­</div></div>
+                        <div id="notif-list"><div id="notif-empty" style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa-regular fa-bell-slash text-2xl mb-2 block opacity-40"></i>Žádná oznámení</div></div>
                     </div>
                 </div>
                 <button id="theme-toggle" class="w-9 h-9 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">
@@ -279,22 +287,22 @@
         <div id="bottom-nav-items" class="flex w-full items-center h-16"></div>
     </nav>
 
-    <!-- MODAL: NABĂŤDKY -->
+    <!-- MODAL: NABÍDKY -->
     <div id="offers-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
             <div class="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
-                <div><h3 class="font-extrabold dark:text-white">NabĂ­dky Ĺ™emeslnĂ­kĹŻ</h3><p class="text-sm text-slate-500" id="offers-modal-title"></p></div>
+                <div><h3 class="font-extrabold dark:text-white">Nabídky řemeslníků</h3><p class="text-sm text-slate-500" id="offers-modal-title"></p></div>
                 <button onclick="window.closeOffersModal()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
             </div>
             <div id="offers-modal-list" class="flex-1 overflow-y-auto p-6 space-y-4 hide-scroll"></div>
         </div>
     </div>
 
-    <!-- MODAL: DETAIL PRO ĹEMESLNĂŤKA -->
+    <!-- MODAL: DETAIL PRO ŘEMESLNÍKA -->
     <div id="craftsman-offer-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden relative">
             <div class="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
-                <h3 class="text-xl font-black dark:text-white">Detail poptĂˇvky</h3>
+                <h3 class="text-xl font-black dark:text-white">Detail poptávky</h3>
                 <button onclick="window.closeOfferModal()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto p-6 md:p-8 hide-scroll">
@@ -312,28 +320,28 @@
                     </div>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-inner">
-                    <h4 class="font-extrabold text-lg dark:text-white mb-5 flex items-center gap-3"><i class="fa-solid fa-file-signature text-fixit-500"></i> VaĹˇe nabĂ­dka pro zĂˇkaznĂ­ka</h4>
+                    <h4 class="font-extrabold text-lg dark:text-white mb-5 flex items-center gap-3"><i class="fa-solid fa-file-signature text-fixit-500"></i> Vaše nabídka pro zákazníka</h4>
                     <div class="space-y-5">
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">OdhadovanĂˇ cena (KÄŤ) nebo "Dohodou"</label><input type="text" id="co-price" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="NapĹ™. 1500 KÄŤ, nebo Dohodou..."></div>
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">ZprĂˇva pro zĂˇkaznĂ­ka</label><textarea id="co-msg" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm resize-none" placeholder="DobrĂ˝ den, mohu pĹ™ijet zĂ­tra odpoledne..."></textarea></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Odhadovaná cena (Kč) nebo "Dohodou"</label><input type="text" id="co-price" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. 1500 Kč, nebo Dohodou..."></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Zpráva pro zákazníka</label><textarea id="co-msg" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm resize-none" placeholder="Dobrý den, mohu přijet zítra odpoledne..."></textarea></div>
                     </div>
                 </div>
             </div>
             <div class="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#0f172a]">
-                <button id="co-submit-btn" onclick="window.submitCraftsmanOffer()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Odeslat nabĂ­dku zĂˇkaznĂ­kovi</button>
+                <button id="co-submit-btn" onclick="window.submitCraftsmanOffer()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Odeslat nabídku zákazníkovi</button>
             </div>
             <input type="hidden" id="co-req-id">
             <input type="hidden" id="co-req-title">
         </div>
     </div>
 
-    <!-- MODAL: HODNOCENĂŤ -->
+    <!-- MODAL: HODNOCENÍ -->
     <div id="rating-modal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md flex flex-col overflow-hidden">
             <div class="p-8 text-center">
                 <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-star"></i></div>
-                <h3 class="text-2xl font-black dark:text-white mb-2">HodnocenĂ­ prĂˇce</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Jak jste byli spokojeni s odvedenou pracĂ­?</p>
+                <h3 class="text-2xl font-black dark:text-white mb-2">Hodnocení práce</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Jak jste byli spokojeni s odvedenou prací?</p>
                 <div class="flex justify-center gap-2 mb-6" id="star-rating-container">
                     <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(1)"></i>
                     <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(2)"></i>
@@ -341,9 +349,9 @@
                     <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(4)"></i>
                     <i class="fa-solid fa-star text-4xl cursor-pointer text-yellow-400 hover:scale-110 transition" onclick="window.setRating(5)"></i>
                 </div>
-                <textarea id="rating-comment" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-inner resize-none mb-6" placeholder="NapiĹˇte krĂˇtkou recenzi... (volitelnĂ©)"></textarea>
+                <textarea id="rating-comment" rows="3" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-inner resize-none mb-6" placeholder="Napište krátkou recenzi... (volitelné)"></textarea>
                 <div class="flex gap-3">
-                    <button onclick="window.closeRatingModal()" class="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">ZruĹˇit</button>
+                    <button onclick="window.closeRatingModal()" class="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Zrušit</button>
                     <button id="btn-submit-rating" onclick="window.submitRating()" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold transition shadow-lg">Odeslat</button>
                 </div>
                 <input type="hidden" id="rating-req-index">
@@ -352,14 +360,14 @@
         </div>
     </div>
 
-    <!-- MODAL: POTVRZENĂŤ SMAZĂNĂŤ -->
+    <!-- MODAL: POTVRZENÍ SMAZÁNÍ -->
     <div id="confirm-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-sm p-8 text-center">
             <div class="w-14 h-14 bg-red-100 dark:bg-red-500/20 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-trash-can"></i></div>
-            <h3 class="text-xl font-black dark:text-white mb-2">Smazat poptĂˇvku?</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Tato akce je nevratnĂˇ. VĹˇechny nabĂ­dky a zprĂˇvy budou smazĂˇny.</p>
+            <h3 class="text-xl font-black dark:text-white mb-2">Smazat poptávku?</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Tato akce je nevratná. Všechny nabídky a zprávy budou smazány.</p>
             <div class="flex gap-3">
-                <button onclick="window.closeConfirmModal()" class="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">ZruĹˇit</button>
+                <button onclick="window.closeConfirmModal()" class="flex-1 py-3.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Zrušit</button>
                 <button onclick="window.doConfirmDelete()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3.5 rounded-xl font-bold transition shadow-lg">Smazat</button>
             </div>
         </div>
@@ -371,7 +379,7 @@
     </div>
 </div>
 <script>
-// === GLOBĂLNĂŤ PROMÄšNNĂ‰ ===
+// === GLOBÁLNÍ PROMĚNNÉ ===
 window.SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
 window.SB_KEY = "sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc";
 window.sb = null;
@@ -389,6 +397,13 @@ window._notifCount = 0;
 window._notifItems = [];
 window._pendingDelete = null;
 window._marketMap = null;
+
+window.safeStorageGet = function(key) {
+    try { return window.localStorage ? localStorage.getItem(key) : null; } catch (e) { return null; }
+};
+window.safeStorageSet = function(key, value) {
+    try { if (window.localStorage) localStorage.setItem(key, value); } catch (e) {}
+};
 
 // === LOADER ===
 (function() {
@@ -412,7 +427,7 @@ window.addEventListener('load', async () => {
         if (session && session.user) {
             window.APP_USER = session.user;
             window.APP_ROLE = session.user.user_metadata?.role || "customer";
-            const name = session.user.user_metadata?.full_name || "UĹľivatel";
+            const name = session.user.user_metadata?.full_name || "Uživatel";
             const authEl = document.getElementById("auth-screen");
             if (authEl) authEl.classList.add("hidden");
             const appEl = document.getElementById("main-app");
@@ -477,7 +492,7 @@ window.clearNotifs = function() {
     const badge = document.getElementById("notif-badge");
     if (badge) badge.classList.remove("visible","shake");
     const list = document.getElementById("notif-list");
-    if (list) list.innerHTML = '<div id="notif-empty" style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa-regular fa-bell-slash text-2xl mb-2 block opacity-40"></i>Ĺ˝ĂˇdnĂˇ oznĂˇmenĂ­</div>';
+    if (list) list.innerHTML = '<div id="notif-empty" style="padding:24px 16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fa-regular fa-bell-slash text-2xl mb-2 block opacity-40"></i>Žádná oznámení</div>';
     window._notifItems = [];
 };
 window.toggleNotifDropdown = function() {
@@ -508,10 +523,10 @@ window.extractPhotoFromDesc = function(rawDesc) {
     return { desc: rawDesc, photo: null, mime: null };
 };
 
-// === KRĂSNĂ‰ KARTY ===
+// === KRÁSNÉ KARTY ===
 window.createBeautifulCard = function(req, isMarket, i) {
     try {
-        const statusMap = { waiting:"HledĂˇme profĂ­ka", active:"ProbĂ­hĂˇ oprava", done:"DokonÄŤeno" };
+        const statusMap = { waiting:"Hledáme profíka", active:"Probíhá oprava", done:"Dokončeno" };
         const badgeMap = { waiting:"status-waiting", active:"status-active", done:"status-done" };
         let rawDesc = req.description || req.popis || "";
         let extracted = window.extractPhotoFromDesc(rawDesc);
@@ -523,10 +538,10 @@ window.createBeautifulCard = function(req, isMarket, i) {
             const pts = mainDesc.split("---");
             mainDesc = pts[0].trim();
             if (pts.length > 1) {
-                let rawDetails = pts[1].replace("đź“‹ DOPLĹ‡UJĂŤCĂŤ INFORMACE:", "").trim();
+                let rawDetails = pts[1].replace("📋 DOPLŇUJÍCÍ INFORMACE:", "").trim();
                 const detailItems = rawDetails.split(/\r?\n/).map(l => l.trim()).filter(l => l);
                 if (detailItems.length > 0) {
-                    detailsHtml = '<div class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-700/50"><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">DoplĹujĂ­cĂ­ informace</p><div class="flex flex-wrap gap-2">' +
+                    detailsHtml = '<div class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-700/50"><p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Doplňující informace</p><div class="flex flex-wrap gap-2">' +
                         detailItems.map(item => '<div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300">' + item + '</div>').join('') +
                         '</div></div>';
                 }
@@ -538,31 +553,31 @@ window.createBeautifulCard = function(req, isMarket, i) {
                 '<div class="absolute top-0 left-0 w-1.5 h-full ' + (req.status==='done'?'bg-slate-300 dark:bg-slate-700':'bg-fixit-500') + '"></div>' +
                 '<div class="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity z-10"><button onclick="window.deleteRequest(' + i + ',' + (req.sbId||'null') + ')" class="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all shadow-sm"><i class="fa-solid fa-trash-can text-sm"></i></button></div>' +
                 '<div class="pl-2"><div class="flex items-center gap-3 mb-3 pr-10"><span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wide"><i class="fa-solid fa-tag mr-1.5 opacity-70"></i>' + req.kat + '</span><span class="text-[11px] text-slate-400 font-bold uppercase tracking-wide"><i class="fa-regular fa-clock mr-1.5 opacity-70"></i>' + req.time + '</span></div>' +
-                '<div class="flex items-start justify-between gap-4 mb-4"><h4 class="text-xl md:text-2xl font-extrabold dark:text-white leading-tight">' + req.title + '</h4><span class="status-badge ' + (badgeMap[req.status]||'status-waiting') + ' shrink-0">' + (statusMap[req.status]||'ÄŚekĂˇ') + '</span></div>' +
+                '<div class="flex items-start justify-between gap-4 mb-4"><h4 class="text-xl md:text-2xl font-extrabold dark:text-white leading-tight">' + req.title + '</h4><span class="status-badge ' + (badgeMap[req.status]||'status-waiting') + ' shrink-0">' + (statusMap[req.status]||'Čeká') + '</span></div>' +
                 '<div class="flex flex-col md:flex-row gap-5 mb-2">' + photoHtml + '<div class="flex-1 min-w-0"><p class="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">' + mainDesc + '</p></div></div>' +
                 detailsHtml +
                 '<div class="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">' +
-                '<button onclick="window.loadOffersForRequest(' + (req.sbId||0) + ',\'' + (req.title||'').replace(/'/g,"\\'") + '\')" class="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-md">Zobrazit nabĂ­dky Ĺ™emeslnĂ­kĹŻ</button>' +
-                (req.status==='active' ? '<button onclick="window.openRatingModal(' + i + ',' + (req.sbId||'null') + ')" class="px-6 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-check mr-2"></i>OznaÄŤit hotovo</button>' : '') +
+                '<button onclick="window.loadOffersForRequest(' + (req.sbId||0) + ',\'' + (req.title||'').replace(/'/g,"\\'") + '\')" class="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform shadow-md">Zobrazit nabídky řemeslníků</button>' +
+                (req.status==='active' ? '<button onclick="window.openRatingModal(' + i + ',' + (req.sbId||'null') + ')" class="px-6 py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-check mr-2"></i>Označit hotovo</button>' : '') +
                 '</div></div></div>';
         } else {
-            const iconMap = {"InstalatĂ©rstvĂ­":"fa-faucet-drip","ElektrikĂˇĹ™":"fa-bolt","MalĂ­Ĺ™":"fa-paint-roller","TesaĹ™":"fa-door-open","ZĂˇmeÄŤnĂ­k":"fa-lock","default":"fa-screwdriver-wrench"};
-            const reqCat = req.category||"OstatnĂ­";
-            const reqUrg = req.urgency||"StĹ™ednĂ­";
+            const iconMap = {"Instalatérství":"fa-faucet-drip","Elektrikář":"fa-bolt","Malíř":"fa-paint-roller","Tesař":"fa-door-open","Zámečník":"fa-lock","default":"fa-screwdriver-wrench"};
+            const reqCat = req.category||"Ostatní";
+            const reqUrg = req.urgency||"Střední";
             return '<div class="market-item bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 p-6 hover:border-fixit-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer fade-up overflow-hidden relative group" data-kat="' + reqCat + '" style="animation-delay:' + (i*60) + 'ms">' +
                 '<div class="absolute top-0 left-0 w-1.5 h-full bg-fixit-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>' +
                 '<div class="pl-2"><div class="flex items-start gap-5"><div class="w-14 h-14 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-inner border border-fixit-100 dark:border-fixit-500/20"><i class="fa-solid ' + (iconMap[reqCat]||iconMap.default) + '"></i></div>' +
-                '<div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-3 mb-2"><h4 class="text-xl font-extrabold dark:text-white leading-tight">' + req.title + '</h4><span class="status-badge ' + (reqUrg==="VysokĂˇ"?"bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400":"status-waiting") + ' shrink-0">' + reqUrg + '</span></div>' +
-                '<div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-4"><span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-tag mr-1.5 opacity-70"></i>' + reqCat + '</span><span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-user mr-1.5 opacity-70"></i>' + (req.customer_name||'ZĂˇkaznĂ­k') + '</span><span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-2 py-1 rounded"><i class="fa-solid fa-coins mr-1.5"></i>' + (req.price_estimate||'Dohodou') + '</span></div>' +
+                '<div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-3 mb-2"><h4 class="text-xl font-extrabold dark:text-white leading-tight">' + req.title + '</h4><span class="status-badge ' + (reqUrg==="Vysoká"?"bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400":"status-waiting") + ' shrink-0">' + reqUrg + '</span></div>' +
+                '<div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-4"><span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-tag mr-1.5 opacity-70"></i>' + reqCat + '</span><span class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded"><i class="fa-solid fa-user mr-1.5 opacity-70"></i>' + (req.customer_name||'Zákazník') + '</span><span class="bg-fixit-50 dark:bg-fixit-500/10 text-fixit-600 dark:text-fixit-400 px-2 py-1 rounded"><i class="fa-solid fa-coins mr-1.5"></i>' + (req.price_estimate||'Dohodou') + '</span></div>' +
                 '<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">' + mainDesc + '</p>' +
                 detailsHtml +
-                '<div class="flex gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800"><button onclick="window.openOfferModal(' + i + ')" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Podat nabĂ­dku zĂˇkaznĂ­kovi</button><button class="w-12 h-12 border-2 border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 hover:bg-fixit-50 dark:hover:bg-fixit-500/10 transition-colors"><i class="fa-regular fa-bookmark"></i></button></div>' +
+                '<div class="flex gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800"><button onclick="window.openOfferModal(' + i + ')" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Podat nabídku zákazníkovi</button><button class="w-12 h-12 border-2 border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-fixit-500 hover:border-fixit-500 hover:bg-fixit-50 dark:hover:bg-fixit-500/10 transition-colors"><i class="fa-regular fa-bookmark"></i></button></div>' +
                 '</div></div></div></div>';
         }
-    } catch(err) { return '<div class="p-4 bg-red-50 text-red-500 rounded-xl">Chyba vykreslenĂ­ karty.</div>'; }
+    } catch(err) { return '<div class="p-4 bg-red-50 text-red-500 rounded-xl">Chyba vykreslení karty.</div>'; }
 };
 
-// === HODNOCENĂŤ ===
+// === HODNOCENÍ ===
 window.openRatingModal = function(index, sbId) {
     document.getElementById("rating-req-index").value = index;
     document.getElementById("rating-req-sbid").value = sbId;
@@ -588,7 +603,7 @@ window.submitRating = async function() {
     const comment = document.getElementById("rating-comment").value.trim();
     const btn = document.getElementById("btn-submit-rating");
     const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>UklĂˇdĂˇm...'; btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám...'; btn.disabled = true;
     if (sbId !== "null" && window.sb) {
         try { await window.sb.from("requests").update({ status: "done" }).eq("id", sbId); } catch(e) {}
     }
@@ -596,7 +611,7 @@ window.submitRating = async function() {
     window.refreshRequestsList(); window.refreshDashboard();
     btn.innerHTML = orig; btn.disabled = false;
     window.closeRatingModal();
-    window.showToast("Hotovo! â­", "HodnocenĂ­ bylo odeslĂˇno. DÄ›kujeme!", "success");
+    window.showToast("Hotovo! ⭐", "Hodnocení bylo odesláno. Děkujeme!", "success");
 };
 
 // === CONFIRM MODAL ===
@@ -621,7 +636,7 @@ window.doConfirmDelete = function() {
 window.goToAuth = function(role) {
     window.APP_ROLE = role;
     document.getElementById("role-icon").className = role === "customer" ? "fa-solid fa-house" : "fa-solid fa-toolbox";
-    document.getElementById("role-text").innerText = role === "customer" ? "ZĂˇkaznĂ­k" : "ĹemeslnĂ­k";
+    document.getElementById("role-text").innerText = role === "customer" ? "Zákazník" : "Řemeslník";
     document.getElementById("view-role-select").classList.add("hidden");
     document.getElementById("view-auth-form").classList.remove("hidden");
     window.switchTab("login"); window.clearMsg();
@@ -646,43 +661,43 @@ window.showOk = function(m) { const e = document.getElementById("auth-ok"); e.in
 window.clearMsg = function() { document.getElementById("auth-error").classList.add("hidden"); document.getElementById("auth-ok").classList.add("hidden"); };
 
 window.doRegister = async function() {
-    if (!window.sb) return window.showErr("Chyba pĹ™ipojenĂ­.");
+    if (!window.sb) return window.showErr("Chyba připojení.");
     const btn = document.getElementById("btn-do-reg");
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>VytvĂˇĹ™Ă­m...'; btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Vytvářím...'; btn.disabled = true;
     try {
         const { error } = await window.sb.auth.signUp({ email: document.getElementById("reg-email").value, password: document.getElementById("reg-pass").value, options: { data: { full_name: document.getElementById("reg-name").value, role: window.APP_ROLE } } });
         if (error) throw error;
-        window.showOk("ĂšÄŤet vytvoĹ™en! NynĂ­ se pĹ™ihlaste.");
+        window.showOk("Účet vytvořen! Nyní se přihlaste.");
         setTimeout(() => window.switchTab("login"), 1800);
     } catch(e) { window.showErr("Chyba: " + e.message); }
-    finally { btn.innerHTML = "VytvoĹ™it ĂşÄŤet"; btn.disabled = false; }
+    finally { btn.innerHTML = "Vytvořit účet"; btn.disabled = false; }
 };
 
 window.doLogin = async function() {
-    if (!window.sb) return window.showErr("Chyba pĹ™ipojenĂ­.");
+    if (!window.sb) return window.showErr("Chyba připojení.");
     const btn = document.getElementById("btn-do-login");
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>PĹ™ihlaĹˇuji...'; btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Přihlašuji...'; btn.disabled = true;
     try {
         const { data, error } = await window.sb.auth.signInWithPassword({ email: document.getElementById("log-email").value, password: document.getElementById("log-pass").value });
         if (error) throw error;
-        window.showOk("PĹ™ihlĂˇĹˇeno! SpouĹˇtĂ­m aplikaci...");
+        window.showOk("Přihlášeno! Spouštím aplikaci...");
         window.APP_USER = data.user;
-        const name = data.user.user_metadata?.full_name || "UĹľivatel";
+        const name = data.user.user_metadata?.full_name || "Uživatel";
         setTimeout(() => window.launchApp(window.APP_ROLE, name), 900);
-    } catch(e) { window.showErr("Ĺ patnĂ˝ e-mail nebo heslo."); }
-    finally { btn.innerHTML = "PĹ™ihlĂˇsit se"; btn.disabled = false; }
+    } catch(e) { window.showErr("Špatný e-mail nebo heslo."); }
+    finally { btn.innerHTML = "Přihlásit se"; btn.disabled = false; }
 };
 
 window.doResetPassword = async function() {
-    if (!window.sb) return window.showErr("Chyba pĹ™ipojenĂ­.");
+    if (!window.sb) return window.showErr("Chyba připojení.");
     const email = document.getElementById("forgot-email").value.trim();
-    if (!email) return window.showErr("Zadejte prosĂ­m svĹŻj e-mail.");
+    if (!email) return window.showErr("Zadejte prosím svůj e-mail.");
     const btn = document.getElementById("btn-do-forgot");
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>OdesĂ­lĂˇm...'; btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Odesílám...'; btn.disabled = true;
     try {
         const { error } = await window.sb.auth.resetPasswordForEmail(email);
         if (error) throw error;
-        window.showOk("Odkaz pro obnovu hesla byl odeslĂˇn.");
+        window.showOk("Odkaz pro obnovu hesla byl odeslán.");
         setTimeout(() => window.switchTab("login"), 4000);
     } catch(e) { window.showErr("Chyba: " + e.message); }
     finally { btn.innerHTML = "Odeslat odkaz"; btn.disabled = false; }
@@ -706,14 +721,29 @@ window.initApp = function(role, name) {
     const avatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role==="customer"?"f59e0b":"0f172a");
     const el = (id) => document.getElementById(id);
     if(el("user-name")) el("user-name").innerText = name;
-    if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"ZĂˇkaznĂ­k":"ĹemeslnĂ­k";
+    if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
     const savedAv = window.APP_USER?.user_metadata?.avatar_url;
     const displayAv = savedAv ? (savedAv + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
     if(el("user-avatar")) el("user-avatar").src = displayAv;
     const tt = el("theme-toggle");
-    const ui = () => { const d = document.documentElement.classList.contains("dark"); el("theme-toggle-dark-icon").classList.toggle("hidden",d); el("theme-toggle-light-icon").classList.toggle("hidden",!d); };
+    const ui = () => {
+        const d = document.documentElement.classList.contains("dark");
+        if (el("theme-toggle-dark-icon")) el("theme-toggle-dark-icon").classList.toggle("hidden", d);
+        if (el("theme-toggle-light-icon")) el("theme-toggle-light-icon").classList.toggle("hidden", !d);
+    };
     ui();
-    if(tt) tt.addEventListener("click", () => { document.documentElement.classList.toggle("dark"); localStorage.setItem("color-theme", document.documentElement.classList.contains("dark")?"dark":"light"); ui(); });
+    if (tt && !tt.dataset.boundTheme) {
+        tt.dataset.boundTheme = "1";
+        tt.addEventListener("click", () => {
+            document.documentElement.classList.toggle("dark");
+            try {
+                if (window.localStorage) {
+                    window.safeStorageSet("color-theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
+                }
+            } catch (e) {}
+            ui();
+        });
+    }
     if (role === "customer") window.initCustomer(name); else window.initCraftsman(name);
     setTimeout(() => {
         if(window.APP_USER) {
@@ -730,14 +760,14 @@ window.initApp = function(role, name) {
             const displayAvatar = savedAvatar ? (savedAvatar + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
             if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
             if(el("user-avatar")) el("user-avatar").src = displayAvatar;
-            if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"ZĂˇkaznĂ­k":"ĹemeslnĂ­k";
+            if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
         }
     }, 100);
     setTimeout(async () => {
         if (role==="customer") { await window.loadCustomerRequestsFromDB(); await window.loadCustomerConversations(); }
         else { await window.loadCraftsmanJobsFromDB(); await window.loadCraftsmanConversations(); await window.loadMarketFromDB(); }
     }, 500);
-    setTimeout(() => window.showToast("VĂ­tej, " + name + "! đź‘‹", "PĹ™ihlĂˇĹˇen jako " + (role==="customer"?"ZĂˇkaznĂ­k":"ĹemeslnĂ­k") + ".", "success"), 600);
+    setTimeout(() => window.showToast("Vítej, " + name + "! 👋", "Přihlášen jako " + (role==="customer"?"Zákazník":"Řemeslník") + ".", "success"), 600);
 };
 
 // === PROFIL ===
@@ -745,9 +775,9 @@ window._profilePhotoBase64 = null;
 
 window.handleProfilePhoto = async function(input) {
     const file = input.files[0]; if (!file) return;
-    if (file.size > 10000000) { window.showToast("Fotka je pĹ™Ă­liĹˇ velkĂˇ", "MaximĂˇlnĂ­ velikost je 10 MB.", "error"); return; }
+    if (file.size > 10000000) { window.showToast("Fotka je příliš velká", "Maximální velikost je 10 MB.", "error"); return; }
 
-    // 1. PĹ™eveÄŹ na JPEG pĹ™es canvas (Ĺ™eĹˇĂ­ HEIC, WebP, i vĹˇechny mobilnĂ­ formĂˇty)
+    // 1. Převeď na JPEG přes canvas (řeší HEIC, WebP, i všechny mobilní formáty)
     const compressedBlob = await new Promise(function(resolve) {
         const fr = new FileReader();
         fr.onload = function(e) {
@@ -758,11 +788,11 @@ window.handleProfilePhoto = async function(input) {
                 const canvas = document.createElement("canvas");
                 canvas.width=w; canvas.height=h;
                 canvas.getContext("2d").drawImage(img,0,0,w,h);
-                // Zobraz nĂˇhled
+                // Zobraz náhled
                 const preview = canvas.toDataURL("image/jpeg", 0.9);
                 document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=preview; el.style.objectFit="cover"; });
                 document.getElementById("user-avatar").src = preview;
-                // VraĹĄ blob pro upload
+                // Vrať blob pro upload
                 canvas.toBlob(function(blob){ resolve(blob); }, "image/jpeg", 0.9);
             };
             img.onerror = function() { resolve(null); };
@@ -772,12 +802,12 @@ window.handleProfilePhoto = async function(input) {
         fr.readAsDataURL(file);
     });
 
-    if (!compressedBlob) { window.showToast("Chyba", "NepodaĹ™ilo se naÄŤĂ­st obrĂˇzek.", "error"); return; }
+    if (!compressedBlob) { window.showToast("Chyba", "Nepodařilo se načíst obrázek.", "error"); return; }
 
-    // 2. Upload - vĹľdy jako JPEG, pevnĂ˝ nĂˇzev podle user ID
+    // 2. Upload - vždy jako JPEG, pevný název podle user ID
     if (!window.sb || !window.APP_USER) { window._profilePhotoBlob = compressedBlob; return; }
 
-    window.showToast("NahrĂˇvĂˇm...", "UklĂˇdĂˇm profilovou fotku.", "info");
+    window.showToast("Nahrávám...", "Ukládám profilovou fotku.", "info");
     try {
         const path = window.APP_USER.id + ".jpg";
         const { error: upErr } = await window.sb.storage
@@ -786,7 +816,7 @@ window.handleProfilePhoto = async function(input) {
         if (upErr) throw new Error(upErr.message);
 
         const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
-        // URL bez cache-busting - prohlĂ­ĹľeÄŤ dostane vĹľdy ÄŤerstvou verzi dĂ­ky upsert
+        // URL bez cache-busting - prohlížeč dostane vždy čerstvou verzi díky upsert
         const publicUrl = urlData.publicUrl;
 
         const { error: metaErr } = await window.sb.auth.updateUser({ data: { avatar_url: publicUrl } });
@@ -795,14 +825,14 @@ window.handleProfilePhoto = async function(input) {
         const { data: fresh } = await window.sb.auth.getUser();
         if (fresh?.user) window.APP_USER = fresh.user;
 
-        // Aktualizuj UI - pĹ™idej cache-buster do img src (ne do uloĹľenĂ©ho URL)
+        // Aktualizuj UI - přidej cache-buster do img src (ne do uloženého URL)
         const displayUrl = publicUrl + "?v=" + Date.now();
         document.getElementById("user-avatar").src = displayUrl;
         document.querySelectorAll("#prof-avatar-img").forEach(function(el){ el.src=displayUrl; });
-        // VyÄŤisti cache pro sebe
+        // Vyčisti cache pro sebe
         if (window.APP_USER) delete window._avatarCache[window.APP_USER.id];
         window._profilePhotoBlob = null;
-        window.showToast("Fotka nahrĂˇna! đź“¸", "ProfilovĂˇ fotka byla ĂşspÄ›ĹˇnÄ› uloĹľena.", "success");
+        window.showToast("Fotka nahrána! 📸", "Profilová fotka byla úspěšně uložena.", "success");
     } catch(err) {
         window._profilePhotoBlob = compressedBlob;
         window.showToast("Chyba fotky", err.message, "error");
@@ -812,7 +842,7 @@ window.handleProfilePhoto = async function(input) {
 window.saveProfile = async function(btnNode) {
     if (!window.sb || !window.APP_USER) return;
     const orig = btnNode.innerHTML;
-    btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>UklĂˇdĂˇm...'; btnNode.disabled = true;
+    btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám...'; btnNode.disabled = true;
     try {
         const updateData = {
             full_name: document.getElementById("prof-name").value.trim(),
@@ -821,24 +851,24 @@ window.saveProfile = async function(btnNode) {
             bio: document.getElementById("prof-bio")?.value.trim()||""
         };
 
-        // Pokud fotka ÄŤekĂˇ na upload (pĹ™edchozĂ­ pokus selhal)
+        // Pokud fotka čeká na upload (předchozí pokus selhal)
         if (window._profilePhotoBlob) {
-            btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>NahrĂˇvĂˇm fotku...';
+            btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Nahrávám fotku...';
             const path = window.APP_USER.id + ".jpg";
             const { error: upErr } = await window.sb.storage.from("avatars").upload(path, window._profilePhotoBlob, { upsert: true, contentType: "image/jpeg" });
-            if (upErr) throw new Error("Chyba nahrĂˇvĂˇnĂ­ fotky: " + upErr.message);
+            if (upErr) throw new Error("Chyba nahrávání fotky: " + upErr.message);
             const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
             updateData.avatar_url = urlData.publicUrl;
             window._profilePhotoBlob = null;
         }
 
-        btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>UklĂˇdĂˇm profil...';
+        btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám profil...';
 
-        // UloĹľ metadata
+        // Ulož metadata
         const { data, error } = await window.sb.auth.updateUser({ data: updateData });
         if (error) throw error;
 
-        // NaÄŤti ÄŤerstvĂˇ data ze serveru (updateUser nÄ›kdy nevrĂˇtĂ­ vĹˇe)
+        // Načti čerstvá data ze serveru (updateUser někdy nevrátí vše)
         const { data: freshData } = await window.sb.auth.getUser();
         const freshUser = freshData?.user || data.user;
         window.APP_USER = freshUser;
@@ -851,9 +881,9 @@ window.saveProfile = async function(btnNode) {
         document.getElementById("user-avatar").src = displayUrl;
         document.querySelectorAll("#prof-avatar-img").forEach(function(img) { img.src = displayUrl; });
 
-        window.showToast("Profil uloĹľen! âś…", "VaĹˇe zmÄ›ny byly ĂşspÄ›ĹˇnÄ› uloĹľeny.", "success");
+        window.showToast("Profil uložen! ✅", "Vaše změny byly úspěšně uloženy.", "success");
     } catch(e) {
-        window.showToast("Chyba uklĂˇdĂˇnĂ­", e.message, "error");
+        window.showToast("Chyba ukládání", e.message, "error");
     }
     finally { btnNode.innerHTML = orig; btnNode.disabled = false; }
 };
@@ -892,7 +922,7 @@ window.processPopt = async function(text) {
     const loading = document.getElementById("popt-loading");
     const replyArea = document.getElementById("popt-reply-area");
     loading.classList.remove("hidden"); replyArea.classList.add("hidden");
-    const sp = 'Jsi BoĹ™ek, profesionĂˇlnĂ­ technik. VytvoĹ™ zadĂˇnĂ­ pro Ĺ™emeslnĂ­ka.\nODPOVĂŤDEJ PĹESNÄš V TOMTO JSON FORMĂTU BEZ DALĹ ĂŤHO TEXTU:\n{"status":"question","message":"otĂˇzka"} nebo {"status":"done","nazev":"titulek","kategorie":"obor","popis":"popis","nalehavost":"VysokĂˇ/StĹ™ednĂ­/NĂ­zkĂˇ","odhad_ceny":"cena KÄŤ","rada":"rada"}';
+    const sp = 'Jsi Bořek, profesionální technik. Vytvoř zadání pro řemeslníka.\nODPOVÍDEJ PŘESNĚ V TOMTO JSON FORMÁTU BEZ DALŠÍHO TEXTU:\n{"status":"question","message":"otázka"} nebo {"status":"done","nazev":"titulek","kategorie":"obor","popis":"popis","nalehavost":"Vysoká/Střední/Nízká","odhad_ceny":"cena Kč","rada":"rada"}';
     let parts = [{text}];
     if (window.poptBase64 && window.poptMime) parts.push({inlineData:{mimeType:window.poptMime,data:window.poptBase64}});
     try {
@@ -917,10 +947,10 @@ window.processPopt = async function(text) {
 
 window.startAI = function() {
     const txt = document.getElementById("popt-input").value.trim();
-    if(!txt&&!window.poptBase64){window.showToast("ChybĂ­ popis","PopiĹˇte zĂˇvadu nebo nahrajte fotku.","error");return;}
+    if(!txt&&!window.poptBase64){window.showToast("Chybí popis","Popište závadu nebo nahrajte fotku.","error");return;}
     document.getElementById("popt-form").classList.add("hidden");
     document.getElementById("popt-chat").classList.remove("hidden");
-    window.poptHistoryText = txt||"PosĂ­lĂˇm fotografii k analĂ˝ze.";
+    window.poptHistoryText = txt||"Posílám fotografii k analýze.";
     window.appendChat("user",window.poptHistoryText);
     window.processPopt(window.poptHistoryText);
 };
@@ -928,7 +958,7 @@ window.replyAI = function() {
     const inp=document.getElementById("popt-reply");
     const txt=inp.value.trim(); if(!txt)return;
     window.appendChat("user",txt);
-    window.poptHistoryText+="\nUpĹ™esnÄ›nĂ­ od uĹľivatele: "+txt;
+    window.poptHistoryText+="\nUpřesnění od uživatele: "+txt;
     inp.value=""; window.processPopt(window.poptHistoryText);
 };
 window.showFinalizeForm = function() {
@@ -939,13 +969,13 @@ window.showFinalizeForm = function() {
 
 // === PUBLISH REQUEST ===
 window.publishRequest = async function(btnNode) {
-    let orig = "ZveĹ™ejnit poptĂˇvku na Fixit";
+    let orig = "Zveřejnit poptávku na Fixit";
     try {
-        if(btnNode&&btnNode.tagName){orig=btnNode.innerHTML;btnNode.innerHTML='<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>ZpracovĂˇvĂˇm...';btnNode.disabled=true;}
+        if(btnNode&&btnNode.tagName){orig=btnNode.innerHTML;btnNode.innerHTML='<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Zpracovávám...';btnNode.disabled=true;}
         const getText=(id,def)=>{const el=document.getElementById(id);return el?el.innerText.trim():def;};
         const getValue=(id,def)=>{const el=document.getElementById(id);return el?el.value.trim():def;};
-        const title=getText("r-nazev","NovĂˇ poptĂˇvka"),kat=getText("r-kat","OstatnĂ­"),popis=getText("r-popis",""),nal=getText("r-nal","StĹ™ednĂ­"),cena=getText("r-cena","Dohodou");
-        const street=getValue("f-street",""),city=getValue("f-city",""),phone=getValue("f-phone",""),timeframe=getValue("f-timeframe","BÄ›hem nÄ›kolika dnĹŻ"),property=getValue("f-property","Byt"),parking=getValue("f-parking","BezproblĂ©movĂ©"),budget=getValue("f-budget","");
+        const title=getText("r-nazev","Nová poptávka"),kat=getText("r-kat","Ostatní"),popis=getText("r-popis",""),nal=getText("r-nal","Střední"),cena=getText("r-cena","Dohodou");
+        const street=getValue("f-street",""),city=getValue("f-city",""),phone=getValue("f-phone",""),timeframe=getValue("f-timeframe","Během několika dnů"),property=getValue("f-property","Byt"),parking=getValue("f-parking","Bezproblémové"),budget=getValue("f-budget","");
 
         const highlightError = (id) => {
             const el=document.getElementById(id); if(!el)return; el.focus();
@@ -954,31 +984,31 @@ window.publishRequest = async function(btnNode) {
         };
 
         if(!street||!city||!phone){
-            window.showToast("ChybĂ­ kontaktnĂ­ Ăşdaje","VyplĹte ulici, mÄ›sto a telefonnĂ­ ÄŤĂ­slo.","error");
+            window.showToast("Chybí kontaktní údaje","Vyplňte ulici, město a telefonní číslo.","error");
             if(!street)highlightError("f-street"); else if(!city)highlightError("f-city"); else highlightError("f-phone");
             if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;} return;
         }
-        if(street.length<5||!/[a-zA-ZĂˇÄŤÄŹĂ©Ä›Ă­ĹĂłĹ™ĹˇĹĄĂşĹŻĂ˝ĹľĂÄŚÄŽĂ‰ÄšĂŤĹ‡Ă“ĹĹ Ĺ¤ĂšĹ®ĂťĹ˝]/.test(street)||!/\d/.test(street)){
-            window.showToast("NeplatnĂˇ adresa","Zadejte ulici i ÄŤĂ­slo popisnĂ©, napĹ™. Masarykova 15.","error");
+        if(street.length<5||!/[a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(street)||!/\d/.test(street)){
+            window.showToast("Neplatná adresa","Zadejte ulici i číslo popisné, např. Masarykova 15.","error");
             highlightError("f-street"); if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;} return;
         }
         if(city.length<2||/\d/.test(city)){
-            window.showToast("NeplatnĂ© mÄ›sto","Zadejte nĂˇzev mÄ›sta bez ÄŤĂ­sel.","error");
+            window.showToast("Neplatné město","Zadejte název města bez čísel.","error");
             highlightError("f-city"); if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;} return;
         }
         const phoneDigits=phone.replace(/\D/g,"");
         if(!/^[+]?[\d\s\-().]{7,20}$/.test(phone)||phoneDigits.length<9){
-            window.showToast("NeplatnĂ© telefonnĂ­ ÄŤĂ­slo","Zadejte ÄŤĂ­slo ve formĂˇtu +420 123 456 789.","error");
+            window.showToast("Neplatné telefonní číslo","Zadejte číslo ve formátu +420 123 456 789.","error");
             highlightError("f-phone"); if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;} return;
         }
 
-        const detailInfo = ["đź“Ť Adresa: "+street+", "+city,"đź“ž Telefon: "+phone,"đź“… TermĂ­n: "+timeframe,"đźŹ  Typ objektu: "+property,"đźš— ParkovĂˇnĂ­: "+parking,...(budget?["đź’° RozpoÄŤet: "+budget]:[])].join('\n');
-        let finalPopis=popis+"\n\n---\nđź“‹ DOPLĹ‡UJĂŤCĂŤ INFORMACE:\n"+detailInfo;
+        const detailInfo = ["📍 Adresa: "+street+", "+city,"📞 Telefon: "+phone,"📅 Termín: "+timeframe,"🏠 Typ objektu: "+property,"🚗 Parkování: "+parking,...(budget?["💰 Rozpočet: "+budget]:[])].join('\n');
+        let finalPopis=popis+"\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n"+detailInfo;
         if(window.poptBase64&&window.poptMime) finalPopis+="\n||PHOTO||"+window.poptBase64+"||MIME||"+window.poptMime;
 
         let sbId=null;
         if(window.sb&&window.APP_USER){
-            const cName=document.getElementById("user-name").textContent||"ZĂˇkaznĂ­k";
+            const cName=document.getElementById("user-name").textContent||"Zákazník";
             const {data,error}=await window.sb.from("requests").insert({customer_id:window.APP_USER.id,customer_name:cName,title,category:kat,description:finalPopis,urgency:nal,price_estimate:cena,status:"waiting"}).select();
             if(!error&&data&&data.length>0) sbId=data[0].id;
         }
@@ -994,8 +1024,8 @@ window.publishRequest = async function(btnNode) {
         document.getElementById("btn-show-finalize").classList.remove("hidden");
         document.getElementById("popt-form").classList.remove("hidden");
         if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;}
-        window.showToast("PoptĂˇvka zveĹ™ejnÄ›na! đźŽ‰","ĹemeslnĂ­ci budou brzy kontaktovat.","success");
-        window.goTab("requests","Moje poptĂˇvky");
+        window.showToast("Poptávka zveřejněna! 🎉","Řemeslníci budou brzy kontaktovat.","success");
+        window.goTab("requests","Moje poptávky");
     } catch(err) {
         window.showToast("Chyba","Nastala chyba: "+err.message,"error");
         if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;}
@@ -1013,43 +1043,43 @@ window._doDeleteRequest = async function(index, sbId) {
     }
     window.STATE.requests.splice(index,1);
     window.refreshRequestsList(); window.refreshDashboard();
-    window.showToast("SmazĂˇno","PoptĂˇvka byla ĂşspÄ›ĹˇnÄ› smazĂˇna.","info");
+    window.showToast("Smazáno","Poptávka byla úspěšně smazána.","info");
 };
 
 // === CUSTOMER INIT ===
 window.initCustomer = function(name) {
-    window.buildNav([{id:"dash",icon:"fa-house",label:"NĂˇstÄ›nka"},{id:"requests",icon:"fa-list-check",label:"Moje poptĂˇvky"},{id:"messages",icon:"fa-comment-dots",label:"ZprĂˇvy"},{id:"payments",icon:"fa-shield-halved",label:"Platby & Escrow"},{id:"profile",icon:"fa-user",label:"MĹŻj profil"}]);
-    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'NovĂˇ poptĂˇvka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-hard-hat"></i> <span>NovĂˇ poptĂˇvka</span></button>';
+    window.buildNav([{id:"dash",icon:"fa-house",label:"Nástěnka"},{id:"requests",icon:"fa-list-check",label:"Moje poptávky"},{id:"messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"payments",icon:"fa-shield-halved",label:"Platby & Escrow"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
+    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-hard-hat"></i> <span>Nová poptávka</span></button>';
     document.getElementById("main-content").innerHTML = window.customerHTML(name);
-    window.goTab("dash","NĂˇstÄ›nka");
+    window.goTab("dash","Nástěnka");
 };
 
 window.customerHTML = function(name) {
     const first = name.split(" ")[0];
     return `
     <div id="view-dash" class="hidden fade-up">
-        <div class="mb-10"><h2 class="text-3xl font-extrabold mb-2 dark:text-white">VĂ­tejte, ${first} đź‘‹</h2><p class="text-slate-500 text-lg">PĹ™ehled vaĹˇich aktivit na platformÄ› Fixit.</p></div>
+        <div class="mb-10"><h2 class="text-3xl font-extrabold mb-2 dark:text-white">Vítejte, ${first} 👋</h2><p class="text-slate-500 text-lg">Přehled vašich aktivit na platformě Fixit.</p></div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">AktivnĂ­</p><p class="text-4xl font-black text-fixit-500" id="stat-active">0</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Aktivní</p><p class="text-4xl font-black text-fixit-500" id="stat-active">0</p></div>
             <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Celkem</p><p class="text-4xl font-black dark:text-white" id="stat-total">0</p></div>
-            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">ZprĂˇvy</p><p class="text-4xl font-black dark:text-white" id="stat-msgs">0</p></div>
-            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">V Escrow</p><p class="text-4xl font-black dark:text-white" id="stat-escrow">0 KÄŤ</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Zprávy</p><p class="text-4xl font-black dark:text-white" id="stat-msgs">0</p></div>
+            <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">V Escrow</p><p class="text-4xl font-black dark:text-white" id="stat-escrow">0 Kč</p></div>
         </div>
         <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-8">
-            <h3 class="text-xl font-extrabold mb-6 dark:text-white">PoslednĂ­ poptĂˇvky</h3>
-            <div id="dash-requests-list"><p class="text-slate-400 text-center py-8">ZatĂ­m ĹľĂˇdnĂ© poptĂˇvky. <button onclick="window.goTab('new','NovĂˇ poptĂˇvka')" class="text-fixit-500 font-bold hover:underline">VytvoĹ™it prvnĂ­ â†’</button></p></div>
+            <h3 class="text-xl font-extrabold mb-6 dark:text-white">Poslední poptávky</h3>
+            <div id="dash-requests-list"><p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="window.goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p></div>
         </div>
     </div>
     <div id="view-requests" class="hidden fade-up">
-        <div class="flex items-center justify-between mb-8"><h2 class="text-3xl font-extrabold dark:text-white">Moje poptĂˇvky</h2><button onclick="window.goTab('new','NovĂˇ poptĂˇvka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> NovĂˇ</button></div>
-        <div id="requests-list" class="space-y-5"><div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">ZatĂ­m zde nic nenĂ­.</p><button onclick="window.goTab('new','NovĂˇ poptĂˇvka')" class="mt-4 text-fixit-500 font-bold hover:underline text-sm">VytvoĹ™it prvnĂ­ poptĂˇvku â†’</button></div></div>
+        <div class="flex items-center justify-between mb-8"><h2 class="text-3xl font-extrabold dark:text-white">Moje poptávky</h2><button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová</button></div>
+        <div id="requests-list" class="space-y-5"><div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">Zatím zde nic není.</p><button onclick="window.goTab('new','Nová poptávka')" class="mt-4 text-fixit-500 font-bold hover:underline text-sm">Vytvořit první poptávku →</button></div></div>
     </div>
     <div id="view-messages" class="hidden fade-up">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">ZprĂˇvy</h2>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
         <div id="chat-container-customer" class="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div id="conv-panel-customer" class="chat-conv-panel w-80 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col bg-slate-50/50 dark:bg-transparent">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
-                <div id="conv-list" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Ĺ˝ĂˇdnĂ© konverzace</div></div>
+                <div id="conv-list" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Žádné konverzace</div></div>
             </div>
             <div id="msg-panel-customer" class="chat-msg-panel flex-1 flex flex-col relative">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-white/50 dark:bg-transparent backdrop-blur-md z-10">
@@ -1058,24 +1088,24 @@ window.customerHTML = function(name) {
                     <p class="font-extrabold dark:text-white text-sm flex-1 truncate" id="chat-partner-name">Vyberte konverzaci</p>
                 </div>
                 <div id="chat-msgs" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3"></div>
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-slate-50 dark:bg-transparent"><input type="text" id="msg-input" placeholder="NapiĹˇte zprĂˇvu..." onkeypress="if(event.key==='Enter')window.sendMsg()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><button onclick="window.sendMsg()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-11 h-11 rounded-2xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button></div>
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-slate-50 dark:bg-transparent"><input type="text" id="msg-input" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')window.sendMsg()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><button onclick="window.sendMsg()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-11 h-11 rounded-2xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button></div>
             </div>
         </div>
     </div>
     <div id="view-payments" class="hidden fade-up max-w-4xl">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Platby & Escrow</h2>
-        <div class="bg-gradient-to-br from-fixit-500 to-fixit-600 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/10 text-9xl"><i class="fa-solid fa-shield-halved"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-80 mb-2 relative z-10">PenĂ­ze v bezpeÄŤnĂ© ĂşschovÄ›</p><p class="text-5xl font-black mb-4 relative z-10">0 KÄŤ</p><p class="text-sm opacity-90 relative z-10">PenĂ­ze jsou zablokovĂˇny u Fixit do vaĹˇeho potvrzenĂ­ o dokonÄŤenĂ­ opravy.</p></div>
-        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">ZatĂ­m neprobÄ›hly ĹľĂˇdnĂ© platby.</div>
+        <div class="bg-gradient-to-br from-fixit-500 to-fixit-600 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/10 text-9xl"><i class="fa-solid fa-shield-halved"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-80 mb-2 relative z-10">Peníze v bezpečné úschově</p><p class="text-5xl font-black mb-4 relative z-10">0 Kč</p><p class="text-sm opacity-90 relative z-10">Peníze jsou zablokovány u Fixit do vašeho potvrzení o dokončení opravy.</p></div>
+        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné platby.</div>
     </div>
     <div id="view-profile" class="hidden fade-up max-w-4xl mx-auto">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">MĹŻj profil</h2>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Můj profil</h2>
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="flex flex-col items-center gap-3 shrink-0">
                     <div class="relative group">
                         <img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover">
                         <label for="prof-avatar-input" class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>ZmÄ›nit</span>
+                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>Změnit</span>
                         </label>
                         <input type="file" id="prof-avatar-input" accept="image/*" class="hidden" onchange="window.handleProfilePhoto(this)">
                         <label for="prof-avatar-input" class="absolute -bottom-1 -right-1 w-9 h-9 bg-fixit-500 hover:bg-fixit-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition">
@@ -1087,16 +1117,16 @@ window.customerHTML = function(name) {
                 </div>
                 <div class="flex-1 space-y-5">
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">JmĂ©no a pĹ™Ă­jmenĂ­</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze zmÄ›nit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
                     </div>
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">TelefonnĂ­ ÄŤĂ­slo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">MÄ›sto</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="NapĹ™. Brno"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div>
                     </div>
                     <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
-                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">UloĹľit zmÄ›ny v profilu</button>
-                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> OdhlĂˇsit se</button>
+                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button>
+                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button>
                     </div>
                 </div>
             </div>
@@ -1105,36 +1135,36 @@ window.customerHTML = function(name) {
     <div id="view-new" class="hidden fade-up max-w-5xl mx-auto w-full">
         <div class="bg-white dark:bg-[#0f172a] p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-200 dark:border-slate-800 relative overflow-hidden">
             <div class="absolute top-[-20%] right-[-10%] w-96 h-96 bg-fixit-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-            <div class="mb-10 flex items-center gap-5 relative z-10 border-b border-slate-100 dark:border-slate-800 pb-6"><div class="w-16 h-16 rounded-2xl bg-fixit-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-fixit-500/30"><i class="fa-solid fa-hard-hat text-2xl"></i></div><div><h3 class="text-2xl font-extrabold dark:text-white leading-tight">Asistent BoĹ™ek</h3><p class="text-fixit-600 dark:text-fixit-500 text-[11px] font-black uppercase tracking-widest mt-1">PĹ™Ă­prava zakĂˇzky s umÄ›lou inteligencĂ­</p></div></div>
+            <div class="mb-10 flex items-center gap-5 relative z-10 border-b border-slate-100 dark:border-slate-800 pb-6"><div class="w-16 h-16 rounded-2xl bg-fixit-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-fixit-500/30"><i class="fa-solid fa-hard-hat text-2xl"></i></div><div><h3 class="text-2xl font-extrabold dark:text-white leading-tight">Asistent Bořek</h3><p class="text-fixit-600 dark:text-fixit-500 text-[11px] font-black uppercase tracking-widest mt-1">Příprava zakázky s umělou inteligencí</p></div></div>
             <div id="popt-form" class="space-y-6 relative z-10">
                 <div class="grid md:grid-cols-2 gap-6">
-                    <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Co se pokazilo?</label><textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[180px] shadow-inner" placeholder="OpiĹˇte svĹŻj problĂ©m co nejpodrobnÄ›ji..."></textarea></div>
-                    <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotka zĂˇvady (volitelnĂ©)</label><div class="relative flex-1 min-h-[180px] group"><input type="file" accept="image/*" onchange="window.handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"><div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 group-hover:bg-fixit-50 dark:group-hover:bg-fixit-500/10 transition-all overflow-hidden relative z-10 shadow-inner"><i class="fa-solid fa-camera text-4xl mb-3 text-slate-300 dark:text-slate-500 group-hover:text-fixit-500 transition-colors"></i><p class="text-sm font-bold text-slate-500 group-hover:text-fixit-600 transition-colors">KliknÄ›te pro nahrĂˇnĂ­ fotky</p><img id="photo-preview" class="hidden absolute inset-0 w-full h-full object-cover cursor-pointer" onclick="window.openLightbox(this.src)"></div></div></div>
+                    <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Co se pokazilo?</label><textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[180px] shadow-inner" placeholder="Opište svůj problém co nejpodrobněji..."></textarea></div>
+                    <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotka závady (volitelné)</label><div class="relative flex-1 min-h-[180px] group"><input type="file" accept="image/*" onchange="window.handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"><div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 group-hover:bg-fixit-50 dark:group-hover:bg-fixit-500/10 transition-all overflow-hidden relative z-10 shadow-inner"><i class="fa-solid fa-camera text-4xl mb-3 text-slate-300 dark:text-slate-500 group-hover:text-fixit-500 transition-colors"></i><p class="text-sm font-bold text-slate-500 group-hover:text-fixit-600 transition-colors">Klikněte pro nahrání fotky</p><img id="photo-preview" class="hidden absolute inset-0 w-full h-full object-cover cursor-pointer" onclick="window.openLightbox(this.src)"></div></div></div>
                 </div>
-                <button onclick="window.startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl hover:-translate-y-1">Analyzovat problĂ©m s BoĹ™kem</button>
+                <button onclick="window.startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl hover:-translate-y-1">Analyzovat problém s Bořkem</button>
             </div>
             <div id="popt-chat" class="hidden flex flex-col gap-6 relative z-10">
                 <div id="popt-chat-msgs" class="flex flex-col gap-4 max-h-[400px] overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 hide-scroll shadow-inner"></div>
-                <div id="popt-reply-area" class="hidden flex gap-3"><input type="text" id="popt-reply" onkeypress="if(event.key==='Enter')window.replyAI()" class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="OdpovÄ›zte BoĹ™kovi..."><button onclick="window.replyAI()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-bold transition hover:scale-105 shadow-lg"><i class="fa-solid fa-paper-plane"></i></button></div>
+                <div id="popt-reply-area" class="hidden flex gap-3"><input type="text" id="popt-reply" onkeypress="if(event.key==='Enter')window.replyAI()" class="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Odpovězte Bořkovi..."><button onclick="window.replyAI()" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-bold transition hover:scale-105 shadow-lg"><i class="fa-solid fa-paper-plane"></i></button></div>
             </div>
-            <div id="popt-loading" class="hidden mt-12 text-center relative z-10 py-10"><div class="relative w-20 h-20 mx-auto mb-6"><div class="absolute inset-0 border-4 border-slate-100 dark:border-slate-800 rounded-full"></div><div class="absolute inset-0 border-4 border-fixit-500 rounded-full border-t-transparent animate-spin"></div><i class="fa-solid fa-microchip absolute inset-0 m-auto flex items-center justify-center text-2xl text-fixit-500" style="line-height:5rem"></i></div><p class="font-extrabold text-slate-600 dark:text-slate-300 text-lg">BoĹ™ek analyzuje data...</p><p class="text-slate-400 text-sm mt-2">VytvĂˇĹ™Ă­me profi zadĂˇnĂ­ pro Ĺ™emeslnĂ­ky.</p></div>
+            <div id="popt-loading" class="hidden mt-12 text-center relative z-10 py-10"><div class="relative w-20 h-20 mx-auto mb-6"><div class="absolute inset-0 border-4 border-slate-100 dark:border-slate-800 rounded-full"></div><div class="absolute inset-0 border-4 border-fixit-500 rounded-full border-t-transparent animate-spin"></div><i class="fa-solid fa-microchip absolute inset-0 m-auto flex items-center justify-center text-2xl text-fixit-500" style="line-height:5rem"></i></div><p class="font-extrabold text-slate-600 dark:text-slate-300 text-lg">Bořek analyzuje data...</p><p class="text-slate-400 text-sm mt-2">Vytváříme profi zadání pro řemeslníky.</p></div>
             <div id="popt-result" class="hidden mt-10 relative z-10">
-                <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-200 dark:border-fixit-500/30 rounded-2xl p-6 shadow-sm"><div class="flex gap-4"><div class="w-10 h-10 rounded-full bg-white dark:bg-fixit-500/20 text-fixit-500 flex items-center justify-center shrink-0 shadow-sm"><i class="fa-solid fa-lightbulb text-lg"></i></div><div><p class="font-black text-[11px] uppercase tracking-widest mb-1.5 text-fixit-700 dark:text-fixit-400">Rada od BoĹ™ka</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed"></p></div></div></div>
-                <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800"><div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30"><i class="fa-solid fa-check text-xl"></i></div><div><h3 class="text-2xl font-black dark:text-white">PoptĂˇvka pĹ™ipravena!</h3><p class="text-sm text-slate-500 mt-1">KliknutĂ­m na text nĂ­Ĺľe jej upravte.</p></div></div>
+                <div id="popt-tip" class="hidden mb-8 bg-fixit-50 dark:bg-fixit-500/10 border border-fixit-200 dark:border-fixit-500/30 rounded-2xl p-6 shadow-sm"><div class="flex gap-4"><div class="w-10 h-10 rounded-full bg-white dark:bg-fixit-500/20 text-fixit-500 flex items-center justify-center shrink-0 shadow-sm"><i class="fa-solid fa-lightbulb text-lg"></i></div><div><p class="font-black text-[11px] uppercase tracking-widest mb-1.5 text-fixit-700 dark:text-fixit-400">Rada od Bořka</p><p id="popt-tip-text" class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed"></p></div></div></div>
+                <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100 dark:border-slate-800"><div class="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30"><i class="fa-solid fa-check text-xl"></i></div><div><h3 class="text-2xl font-black dark:text-white">Poptávka připravena!</h3><p class="text-sm text-slate-500 mt-1">Kliknutím na text níže jej upravte.</p></div></div>
                 <div class="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-inner">
                     <div class="absolute top-0 left-0 w-2 h-full bg-fixit-500"></div>
                     <div class="flex flex-wrap gap-3 mb-6 pl-4"><span id="r-kat" contenteditable="true" class="status-badge bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-fixit-500 focus:outline-none cursor-text transition"></span><span id="r-nal" contenteditable="true" class="status-badge bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20 focus:outline-none cursor-text transition"></span><span id="r-cena" contenteditable="true" class="status-badge bg-fixit-50 dark:bg-fixit-500/10 text-fixit-700 dark:text-fixit-400 border border-fixit-200 dark:border-fixit-500/30 focus:outline-none cursor-text transition"></span></div>
                     <h4 id="r-nazev" contenteditable="true" class="text-3xl font-black mb-6 dark:text-white focus:outline-none rounded-xl px-4 py-2 -mx-4 hover:bg-white dark:hover:bg-slate-800 transition cursor-text pl-4">...</h4>
-                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-4">Popis pro Ĺ™emeslnĂ­ka</p>
+                    <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 pl-4">Popis pro řemeslníka</p>
                     <p id="r-popis" contenteditable="true" class="text-base text-slate-700 dark:text-slate-300 leading-relaxed focus:outline-none rounded-xl px-4 py-3 -mx-4 hover:bg-white dark:hover:bg-slate-800 transition cursor-text whitespace-pre-line min-h-[5rem] pl-4">...</p>
-                    <button id="btn-show-finalize" onclick="window.showFinalizeForm()" class="w-full mt-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg transition shadow-xl hover:scale-[1.02]">PokraÄŤovat k detailĹŻm adresy â†’</button>
+                    <button id="btn-show-finalize" onclick="window.showFinalizeForm()" class="w-full mt-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg transition shadow-xl hover:scale-[1.02]">Pokračovat k detailům adresy →</button>
                     <div id="popt-finalize" class="hidden mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 pl-4">
-                        <h4 class="text-xl font-black dark:text-white mb-6">DoplĹujĂ­cĂ­ Ăşdaje pro vĂ˝jezd</h4>
-                        <div class="grid md:grid-cols-3 gap-5 mb-5"><div class="md:col-span-2"><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Ulice a ÄŤĂ­slo popisnĂ© *</label><input type="text" id="f-street" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="NapĹ™. Masarykova 15"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">MÄ›sto *</label><input type="text" id="f-city" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="NapĹ™. Brno"></div></div>
-                        <div class="grid md:grid-cols-2 gap-5 mb-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">TelefonnĂ­ ÄŤĂ­slo *</label><input type="tel" id="f-phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">TermĂ­n</label><select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="HavarijnĂ­ stav (Co nejdĹ™Ă­ve)">HavarijnĂ­ stav (Co nejdĹ™Ă­ve)</option><option value="BÄ›hem nÄ›kolika dnĹŻ" selected>BÄ›hem nÄ›kolika dnĹŻ</option><option value="NespÄ›chĂˇ (do mÄ›sĂ­ce)">NespÄ›chĂˇ (do mÄ›sĂ­ce)</option></select></div></div>
-                        <div class="grid md:grid-cols-2 gap-5 mb-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Typ nemovitosti</label><select id="f-property" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="Byt">Byt</option><option value="RodinnĂ˝ dĹŻm">RodinnĂ˝ dĹŻm</option><option value="KomerÄŤnĂ­ prostor">KomerÄŤnĂ­ prostor</option></select></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">ParkovĂˇnĂ­</label><select id="f-parking" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="BezproblĂ©movĂ© (vlastnĂ­ pozemek / volnĂˇ ulice)">BezproblĂ©movĂ© (vlastnĂ­ / volnĂˇ ulice)</option><option value="PlacenĂ© zĂłny / modrĂ© zĂłny">PlacenĂ© / modrĂ© zĂłny</option><option value="Velmi ĹˇpatnĂ© parkovĂˇnĂ­">Velmi ĹˇpatnĂ© parkovĂˇnĂ­</option></select></div></div>
-                        <div class="mb-6"><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">VĂˇĹˇ rozpoÄŤet <span class="font-normal normal-case">(volitelnĂ©)</span></label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">KÄŤ</span><input type="text" id="f-budget" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-12 pr-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="NapĹ™. 2 000 â€“ 5 000"></div><p class="text-xs text-slate-400 mt-2">PomĹŻĹľe Ĺ™emeslnĂ­kĹŻm pĹ™ipravit realistickou nabĂ­dku.</p></div>
-                        <button onclick="window.publishRequest(this)" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-5 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">ZveĹ™ejnit poptĂˇvku na Fixit</button>
+                        <h4 class="text-xl font-black dark:text-white mb-6">Doplňující údaje pro výjezd</h4>
+                        <div class="grid md:grid-cols-3 gap-5 mb-5"><div class="md:col-span-2"><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Ulice a číslo popisné *</label><input type="text" id="f-street" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. Masarykova 15"></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město *</label><input type="text" id="f-city" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. Brno"></div></div>
+                        <div class="grid md:grid-cols-2 gap-5 mb-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo *</label><input type="tel" id="f-phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="+420 ..."></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Termín</label><select id="f-timeframe" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="Havarijní stav (Co nejdříve)">Havarijní stav (Co nejdříve)</option><option value="Během několika dnů" selected>Během několika dnů</option><option value="Nespěchá (do měsíce)">Nespěchá (do měsíce)</option></select></div></div>
+                        <div class="grid md:grid-cols-2 gap-5 mb-5"><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Typ nemovitosti</label><select id="f-property" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="Byt">Byt</option><option value="Rodinný dům">Rodinný dům</option><option value="Komerční prostor">Komerční prostor</option></select></div><div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Parkování</label><select id="f-parking" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><option value="Bezproblémové (vlastní pozemek / volná ulice)">Bezproblémové (vlastní / volná ulice)</option><option value="Placené zóny / modré zóny">Placené / modré zóny</option><option value="Velmi špatné parkování">Velmi špatné parkování</option></select></div></div>
+                        <div class="mb-6"><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Váš rozpočet <span class="font-normal normal-case">(volitelné)</span></label><div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">Kč</span><input type="text" id="f-budget" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-12 pr-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm" placeholder="Např. 2 000 – 5 000"></div><p class="text-xs text-slate-400 mt-2">Pomůže řemeslníkům připravit realistickou nabídku.</p></div>
+                        <button onclick="window.publishRequest(this)" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-5 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Zveřejnit poptávku na Fixit</button>
                     </div>
                 </div>
             </div>
@@ -1143,17 +1173,17 @@ window.customerHTML = function(name) {
 };
 
 window.initCraftsman = function(name) {
-    window.buildNav([{id:"market",icon:"fa-map-location-dot",label:"TrĹľiĹˇtÄ› zakĂˇzek"},{id:"jobs",icon:"fa-hammer",label:"Moje prĂˇce"},{id:"c-messages",icon:"fa-comment-dots",label:"ZprĂˇvy"},{id:"earnings",icon:"fa-wallet",label:"VĂ˝dÄ›lky"},{id:"profile",icon:"fa-user",label:"MĹŻj profil"}]);
+    window.buildNav([{id:"market",icon:"fa-map-location-dot",label:"Tržiště zakázek"},{id:"jobs",icon:"fa-hammer",label:"Moje práce"},{id:"c-messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"earnings",icon:"fa-wallet",label:"Výdělky"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
     document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nov\u00e1 popt\u00e1vka\')\" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105\"><i class=\"fa-solid fa-hard-hat\"></i> <span>Nov\u00e1 popt\u00e1vka</span></button>';
     document.getElementById("main-content").innerHTML = window.craftsmanHTML(name);
-    window.goTab("market","TrĹľiĹˇtÄ› zakĂˇzek");
+    window.goTab("market","Tržiště zakázek");
 };
 
 window.craftsmanHTML = function(name) {
     return `
     <div id="view-market" class="hidden fade-up">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-3xl font-extrabold dark:text-white">TrĹľiĹˇtÄ› zakĂˇzek</h2>
+            <h2 class="text-3xl font-extrabold dark:text-white">Tržiště zakázek</h2>
             <div class="flex items-center gap-2">
                 <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 flex gap-1 shadow-sm">
                     <button id="view-toggle-list" onclick="window.toggleMarketView('list')" class="px-4 py-2 rounded-lg text-sm font-bold bg-fixit-500 text-white transition"><i class="fa-solid fa-list mr-1.5"></i>Seznam</button>
@@ -1162,52 +1192,52 @@ window.craftsmanHTML = function(name) {
             </div>
         </div>
         <div class="flex gap-3 mb-8 overflow-x-auto hide-scroll pb-2">
-            <button onclick="window.filterMarket('all')" id="filter-all" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-fixit-500 text-white shadow-md transition hover:scale-105">VĹˇe</button>
-            <button onclick="window.filterMarket('InstalatĂ©rstvĂ­')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">InstalatĂ©rstvĂ­</button>
-            <button onclick="window.filterMarket('ElektrikĂˇĹ™')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">ElektrikĂˇĹ™</button>
-            <button onclick="window.filterMarket('MalĂ­Ĺ™')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">MalĂ­Ĺ™</button>
-            <button onclick="window.filterMarket('TesaĹ™')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">TesaĹ™</button>
-            <button onclick="window.filterMarket('ZĂˇmeÄŤnĂ­k')" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">ZĂˇmeÄŤnĂ­k</button>
+            <button onclick="window.filterMarket('all', this)" id="filter-all" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-fixit-500 text-white shadow-md transition hover:scale-105">Vše</button>
+            <button onclick="window.filterMarket('Instalatérství', this)" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Instalatérství</button>
+            <button onclick="window.filterMarket('Elektrikář', this)" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Elektrikář</button>
+            <button onclick="window.filterMarket('Malíř', this)" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Malíř</button>
+            <button onclick="window.filterMarket('Tesař', this)" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Tesař</button>
+            <button onclick="window.filterMarket('Zámečník', this)" class="filter-btn shrink-0 px-5 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105">Zámečník</button>
         </div>
-        <div id="market-list" class="space-y-5"><div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-circle-notch fa-spin text-5xl text-fixit-500 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">HledĂˇm novĂ© poptĂˇvky ve vaĹˇem okolĂ­...</p></div></div>
+        <div id="market-list" class="space-y-5"><div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-circle-notch fa-spin text-5xl text-fixit-500 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">Hledám nové poptávky ve vašem okolí...</p></div></div>
         <div id="market-map" class="hidden"></div>
     </div>
     <div id="view-jobs" class="hidden fade-up">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Moje prĂˇce</h2>
-        <div class="grid grid-cols-3 gap-5 mb-8"><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-fixit-500" id="jobs-active-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">AktivnĂ­</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black dark:text-white" id="jobs-done-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">DokonÄŤenĂ©</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-yellow-500" id="jobs-rating">5.0 â­</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">HodnocenĂ­</p></div></div>
-        <div id="my-jobs-list" class="space-y-4"><div class="text-center p-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-hammer text-5xl text-slate-300 dark:text-slate-600 mb-4 block"></i><p class="font-bold text-slate-500 text-lg">ZatĂ­m nemĂˇte ĹľĂˇdnĂ© aktivnĂ­ zakĂˇzky.</p></div></div>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Moje práce</h2>
+        <div class="grid grid-cols-3 gap-5 mb-8"><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-fixit-500" id="jobs-active-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Aktivní</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black dark:text-white" id="jobs-done-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Dokončené</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-yellow-500" id="jobs-rating">5.0 ⭐</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Hodnocení</p></div></div>
+        <div id="my-jobs-list" class="space-y-4"><div class="text-center p-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-hammer text-5xl text-slate-300 dark:text-slate-600 mb-4 block"></i><p class="font-bold text-slate-500 text-lg">Zatím nemáte žádné aktivní zakázky.</p></div></div>
     </div>
     <div id="view-c-messages" class="hidden fade-up max-w-4xl">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">ZprĂˇvy</h2>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
         <div id="chat-container-craftsman" class="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
             <div id="conv-panel-craftsman" class="chat-conv-panel w-80 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col bg-slate-50/50 dark:bg-transparent">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800"><p class="font-bold text-sm dark:text-white">Konverzace</p></div>
-                <div id="conv-list-c" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Ĺ˝ĂˇdnĂ© konverzace</div></div>
+                <div id="conv-list-c" class="flex-1 overflow-y-auto hide-scroll"><div class="p-8 text-center text-sm text-slate-400">Žádné konverzace</div></div>
             </div>
             <div id="msg-panel-craftsman" class="chat-msg-panel flex-1 flex flex-col relative">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-white/50 dark:bg-transparent backdrop-blur-md z-10">
                     <button onclick="window.showConvList('craftsman')" class="md:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0"><i class="fa-solid fa-arrow-left text-sm"></i></button>
-                    <p class="font-extrabold dark:text-white text-sm flex-1 truncate" id="chat-partner-name-c">ZprĂˇvy</p>
+                    <p class="font-extrabold dark:text-white text-sm flex-1 truncate" id="chat-partner-name-c">Zprávy</p>
                 </div>
                 <div id="chat-msgs-c" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3"></div>
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-slate-50 dark:bg-transparent"><input type="text" id="msg-input-c" placeholder="NapiĹˇte zprĂˇvu..." onkeypress="if(event.key==='Enter')window.sendMsgC()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><button onclick="window.sendMsgC()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-11 h-11 rounded-2xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button></div>
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2 bg-slate-50 dark:bg-transparent"><input type="text" id="msg-input-c" placeholder="Napište zprávu..." onkeypress="if(event.key==='Enter')window.sendMsgC()" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white shadow-sm"><button onclick="window.sendMsgC()" class="bg-fixit-500 hover:bg-fixit-600 text-white w-11 h-11 rounded-2xl flex items-center justify-center transition shrink-0"><i class="fa-solid fa-paper-plane text-sm"></i></button></div>
             </div>
         </div>
     </div>
     <div id="view-earnings" class="hidden fade-up max-w-3xl">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">VĂ˝dÄ›lky</h2>
-        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/5 text-9xl"><i class="fa-solid fa-wallet"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-60 mb-2 relative z-10">CelkovĂ© vĂ˝dÄ›lky pĹ™es Fixit</p><p class="text-5xl font-black mb-1 relative z-10">0 KÄŤ</p></div>
-        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">ZatĂ­m neprobÄ›hly ĹľĂˇdnĂ© vĂ˝platy.</div>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Výdělky</h2>
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/5 text-9xl"><i class="fa-solid fa-wallet"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-60 mb-2 relative z-10">Celkové výdělky přes Fixit</p><p class="text-5xl font-black mb-1 relative z-10">0 Kč</p></div>
+        <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné výplaty.</div>
     </div>
     <div id="view-profile" class="hidden fade-up max-w-4xl mx-auto">
-        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">MĹŻj profil</h2>
+        <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Můj profil</h2>
         <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8">
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="flex flex-col items-center gap-3 shrink-0">
                     <div class="relative group">
                         <img id="prof-avatar-img" src="" class="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-700 border-4 border-white dark:border-slate-800 shadow-lg object-cover">
                         <label for="prof-avatar-input" class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer">
-                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>ZmÄ›nit</span>
+                            <span class="text-white text-center text-xs font-bold leading-tight"><i class="fa-solid fa-camera text-xl mb-1 block"></i>Změnit</span>
                         </label>
                         <input type="file" id="prof-avatar-input" accept="image/*" class="hidden" onchange="window.handleProfilePhoto(this)">
                         <label for="prof-avatar-input" class="absolute -bottom-1 -right-1 w-9 h-9 bg-fixit-500 hover:bg-fixit-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition">
@@ -1219,17 +1249,17 @@ window.craftsmanHTML = function(name) {
                 </div>
                 <div class="flex-1 space-y-5">
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">JmĂ©no a pĹ™Ă­jmenĂ­</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze zmÄ›nit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Jméno a příjmení</label><input type="text" id="prof-name" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">E-mail (nelze změnit)</label><input type="email" id="prof-email" disabled class="w-full bg-slate-100 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm text-slate-500 cursor-not-allowed"></div>
                     </div>
                     <div class="grid md:grid-cols-2 gap-5">
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">TelefonnĂ­ ÄŤĂ­slo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
-                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">MÄ›sto / PĹŻsobnost</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="NapĹ™. Brno"></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Telefonní číslo</label><input type="tel" id="prof-phone" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="+420 ..."></div>
+                        <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">Město / Působnost</label><input type="text" id="prof-city" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white" placeholder="Např. Brno"></div>
                     </div>
-                    <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">O mnÄ› / Popis sluĹľeb</label><textarea id="prof-bio" rows="4" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white resize-none" placeholder="PopiĹˇte svĂ© zkuĹˇenosti, specializaci, reference..."></textarea></div>
+                    <div><label class="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2">O mně / Popis služeb</label><textarea id="prof-bio" rows="4" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white resize-none" placeholder="Popište své zkušenosti, specializaci, reference..."></textarea></div>
                     <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3">
-                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">UloĹľit zmÄ›ny v profilu</button>
-                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> OdhlĂˇsit se</button>
+                        <button onclick="window.saveProfile(this)" class="flex-1 bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition shadow-xl shadow-fixit-500/20 hover:-translate-y-1">Uložit změny v profilu</button>
+                        <button onclick="window.doLogout()" class="sm:w-auto px-8 py-4 rounded-2xl font-black text-lg transition border-2 border-red-200 dark:border-red-500/30 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-right-from-bracket"></i> Odhlásit se</button>
                     </div>
                 </div>
             </div>
@@ -1239,7 +1269,7 @@ window.craftsmanHTML = function(name) {
 
 window.buildNav = function(items) {
     document.getElementById("sidebar-nav").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>').join("");
-    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"DomĹŻ","requests":"PoptĂˇvky","messages":"ZprĂˇvy","payments":"Platby","profile":"Profil","market":"TrĹľiĹˇtÄ›","jobs":"PrĂˇce","c-messages":"ZprĂˇvy","earnings":"VĂ˝dÄ›lky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Poptávky","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
 };
 
 window.goTab = function(id, title) {
@@ -1281,14 +1311,14 @@ window.refreshDashboard = function() {
     const st=document.getElementById("stat-total");if(st)st.innerText=window.STATE.requests.length;
     const dl=document.getElementById("dash-requests-list");
     if(dl&&window.STATE.requests.length>0){
-        dl.innerHTML=window.STATE.requests.slice(0,3).map(r=>'<div class="flex items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0"><div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard-list"></i></div><div class="flex-1 min-w-0"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-500 mt-0.5">' + r.kat + ' â€˘ ' + r.time + '</p></div><span class="status-badge ' + (r.status==="done"?"status-done":r.status==="active"?"status-active":"status-waiting") + ' shrink-0">' + (r.status==="done"?"Hotovo":r.status==="active"?"ProbĂ­hĂˇ":"ÄŚekĂˇ") + '</span></div>').join("");
+        dl.innerHTML=window.STATE.requests.slice(0,3).map(r=>'<div class="flex items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800 last:border-0"><div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 rounded-xl flex items-center justify-center text-sm shrink-0"><i class="fa-solid fa-clipboard-list"></i></div><div class="flex-1 min-w-0"><p class="font-extrabold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-500 mt-0.5">' + r.kat + ' • ' + r.time + '</p></div><span class="status-badge ' + (r.status==="done"?"status-done":r.status==="active"?"status-active":"status-waiting") + ' shrink-0">' + (r.status==="done"?"Hotovo":r.status==="active"?"Probíhá":"Čeká") + '</span></div>').join("");
     } else if(dl){
-        dl.innerHTML='<p class="text-slate-400 text-center py-8">ZatĂ­m ĹľĂˇdnĂ© poptĂˇvky. <button onclick="window.goTab(\'new\',\'NovĂˇ poptĂˇvka\')" class="text-fixit-500 font-bold hover:underline">VytvoĹ™it prvnĂ­ â†’</button></p>';
+        dl.innerHTML='<p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="window.goTab(\'new\',\'Nová poptávka\')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p>';
     }
 };
 
 
-// === MOBILE CHAT PĹEPĂŤNĂNĂŤ ===
+// === MOBILE CHAT PŘEPÍNÁNÍ ===
 window.showConvList = function(role) {
     var convPanel = document.getElementById('conv-panel-' + role);
     var msgPanel = document.getElementById('msg-panel-' + role);
@@ -1316,13 +1346,13 @@ window.getUserAvatar = async function(userId, fallbackSeed, fallbackBg) {
     if (!userId || !window.sb) return fallback;
     if (window._avatarCache[userId]) return window._avatarCache[userId];
     try {
-        // NejdĹ™Ă­v zkus naÄŤĂ­st avatar_url z Supabase auth pro danĂ©ho uĹľivatele
-        // Pro vlastnĂ­ho usera mĂˇme data pĹ™Ă­mo
+        // Nejdřív zkus načíst avatar_url z Supabase auth pro daného uživatele
+        // Pro vlastního usera máme data přímo
         if (window.APP_USER && window.APP_USER.id === userId) {
             const url = window.APP_USER.user_metadata?.avatar_url;
             if (url) { window._avatarCache[userId] = url; return url; }
         }
-        // Pro cizĂ­ho uĹľivatele zkus Storage URL pĹ™Ă­mo (bez HEAD requestu)
+        // Pro cizího uživatele zkus Storage URL přímo (bez HEAD requestu)
         const { data } = window.sb.storage.from("avatars").getPublicUrl(userId + ".jpg");
         if (data?.publicUrl) {
             window._avatarCache[userId] = data.publicUrl;
@@ -1333,12 +1363,12 @@ window.getUserAvatar = async function(userId, fallbackSeed, fallbackBg) {
     return fallback;
 };
 
-// === ZPRĂVY ===
+// === ZPRÁVY ===
 window.openConversation = async function(requestId, partnerName, partnerSeed, partnerUserId) {
     window.activeChatId = String(requestId);
     const nameEl = document.getElementById("chat-partner-name")||document.getElementById("chat-partner-name-c");
     if(nameEl) nameEl.innerText = partnerName;
-    // Na mobilu pĹ™epni na chat panel
+    // Na mobilu přepni na chat panel
     var role = window.APP_ROLE === "customer" ? "customer" : "craftsman";
     window.showMsgPanel(role);
     const avatarEl = document.getElementById("chat-partner-avatar");
@@ -1348,7 +1378,7 @@ window.openConversation = async function(requestId, partnerName, partnerSeed, pa
         avatarEl.style.backgroundImage = "url(" + avUrl + ")";
         avatarEl.style.backgroundSize = "cover";
         avatarEl.style.backgroundPosition = "center";
-        // Aktualizuj i v seznamu konverzacĂ­
+        // Aktualizuj i v seznamu konverzací
         const cavEl = document.getElementById("cav-" + requestId);
         if(cavEl) cavEl.src = avUrl;
     }
@@ -1361,30 +1391,52 @@ window.openConversation = async function(requestId, partnerName, partnerSeed, pa
 window.loadMessages = async function(requestId) {
     const boxId = window.APP_ROLE==="customer"?"chat-msgs":"chat-msgs-c";
     const box = document.getElementById(boxId); if(!box)return;
-    box.innerHTML='<div class="text-center text-slate-400 text-sm py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-fixit-500 mb-3 block"></i>NaÄŤĂ­tĂˇm zprĂˇvy...</div>';
-    if(!window.sb){box.innerHTML='<div class="text-center text-slate-400 text-sm py-8">NepĹ™ipojeno.</div>';return;}
+    box.innerHTML='<div class="text-center text-slate-400 text-sm py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-fixit-500 mb-3 block"></i>Načítám zprávy...</div>';
+    if(!window.sb){box.innerHTML='<div class="text-center text-slate-400 text-sm py-8">Nepřipojeno.</div>';return;}
     const {data,error}=await window.sb.from("messages").select("*").eq("conversation_id",String(requestId)).order("created_at",{ascending:true});
-    if(error){box.innerHTML='<div class="text-center text-red-400 text-sm py-8">Chyba naÄŤĂ­tĂˇnĂ­.</div>';return;}
+    if(error){box.innerHTML='<div class="text-center text-red-400 text-sm py-8">Chyba načítání.</div>';return;}
     box.innerHTML="";
-    if(data.length===0){box.innerHTML='<div class="text-center text-slate-400 text-sm py-10"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>ZatĂ­m ĹľĂˇdnĂ© zprĂˇvy. NapiĹˇte prvnĂ­!</div>';return;}
+    if(data.length===0){box.innerHTML='<div class="text-center text-slate-400 text-sm py-10"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Zatím žádné zprávy. Napište první!</div>';return;}
     data.forEach(m=>window.renderMessage(m,boxId));
     box.scrollTop=box.scrollHeight;
 };
 
+window.escapeHtml = function(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+};
+
 window.renderMessage = function(m, boxId) {
     const box=document.getElementById(boxId);if(!box)return;
-    const myRole=window.APP_ROLE||"";
-    const myName=(document.getElementById("user-name")?.innerText||"").trim();
-    const msgName=(m.sender_name||"").trim();
-    const roleMatch=!!(myRole&&m.sender_role&&m.sender_role===myRole);
-    const nameMatch=!!(myName&&msgName&&msgName===myName);
-    const idMatch=!!(window.APP_USER&&m.sender_id&&String(m.sender_id)===String(window.APP_USER.id));
-    const isMe=m.sender_role?roleMatch:(msgName?nameMatch:idMatch);
+    const myUserId = window.APP_USER?.id ? String(window.APP_USER.id) : "";
+    const senderId = m?.sender_id ? String(m.sender_id) : "";
+    const senderRole = (m?.sender_role || "").trim();
+    const myRole = (window.APP_ROLE || "").trim();
+    const senderName = (m?.sender_name || "").trim();
+    const myName = (document.getElementById("user-name")?.innerText || "").trim();
+
+    let isMe = false;
+    if (myUserId && senderId) {
+        isMe = myUserId === senderId;
+    } else if (senderRole && myRole && senderName && myName) {
+        isMe = senderRole === myRole && senderName === myName;
+    } else if (senderRole && myRole) {
+        isMe = senderRole === myRole;
+    } else if (senderName && myName) {
+        isMe = senderName === myName;
+    }
+
     const time=new Date(m.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
     box.querySelector(".text-center")?.remove();
     const d=document.createElement("div");
+    const safeSender = window.escapeHtml(senderName || (isMe?"Já":"Uživatel"));
+    const safeText = window.escapeHtml(m.text || "").replace(/\n/g, "<br>");
     d.className="flex "+(isMe?"justify-end":"justify-start");
-    d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2") + '">' + (m.sender_name||(isMe?"JĂˇ":"UĹľivatel")) + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + m.text + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
+    d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2") + '">' + safeSender + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + safeText + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
     box.appendChild(d);box.scrollTop=box.scrollHeight;
 };
 
@@ -1395,7 +1447,7 @@ window.subscribeMessages = function(requestId) {
     window.msgSubscription=window.sb.channel("msgs-"+requestId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+requestId},payload=>{
         if(payload.new.sender_id!==window.APP_USER?.id){
             window.renderMessage(payload.new,boxId);
-            window.showToast("NovĂˇ zprĂˇva! đź’¬","ZprĂˇva od "+(payload.new.sender_name||"Ĺ™emeslnĂ­ka")+".","info");
+            window.showToast("Nová zpráva! 💬","Zpráva od "+(payload.new.sender_name||"řemeslníka")+".","info");
         }
     }).subscribe();
 };
@@ -1403,41 +1455,47 @@ window.subscribeMessages = function(requestId) {
 window.sendMsg = async function() {
     const inp=document.getElementById("msg-input");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId)return;
+    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const msgBase={conversation_id:window.activeChatId,sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name").innerText,text:txt};
+    const userNameEl = document.getElementById("user-name");
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
     window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"customer",created_at:new Date().toISOString()},"chat-msgs");
     if(window.sb){
         const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"customer"});
-        if(error)await window.sb.from("messages").insert(msgBase);
+        if(error){
+            window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
+        }
     }
 };
 
 window.sendMsgC = async function() {
     const inp=document.getElementById("msg-input-c");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId)return;
+    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const msgBase={conversation_id:window.activeChatId,sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name").innerText,text:txt};
+    const userNameEl = document.getElementById("user-name");
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
     window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"craftsman",created_at:new Date().toISOString()},"chat-msgs-c");
     if(window.sb){
         const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"craftsman"});
-        if(error)await window.sb.from("messages").insert(msgBase);
+        if(error){
+            window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
+        }
     }
 };
 
 window.loadCustomerConversations = async function() {
     const list=document.getElementById("conv-list");if(!list||!window.sb||!window.APP_USER)return;
     const {data:reqs}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Ĺ˝ĂˇdnĂ© zprĂˇvy.<br>VytvoĹ™te poptĂˇvku!</div>';return;}
-    // NaÄŤti avatary asynchronnÄ› a pak aktualizuj
+    if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Vytvořte poptávku!</div>';return;}
+    // Načti avatary asynchronně a pak aktualizuj
     list.innerHTML=reqs.map(r=>{
         const statusColor = r.status==='active' ? 'text-green-500' : r.status==='done' ? 'text-slate-400' : 'text-fixit-500';
         const statusDot = r.status==='active' ? '#22c55e' : r.status==='done' ? '#94a3b8' : '#f59e0b';
         const avatarSeed = (r.craftsman_name||'craftsman') + r.id;
-        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"ĹemeslnĂ­k").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\',' + (r.craftsman_id ? '\'' + r.craftsman_id + '\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-3 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
+        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\',' + (r.craftsman_id ? '\'' + r.craftsman_id + '\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-3 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
         '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + ' â€˘ <span class="' + statusColor + ' font-semibold">' + (r.status==="waiting"?"ÄŚekĂˇ na Ĺ™emeslnĂ­ka":r.status==="active"?"ProbĂ­hĂˇ":"Hotovo") + '</span></p></div>' +
+        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + ' • <span class="' + statusColor + ' font-semibold">' + (r.status==="waiting"?"Čeká na řemeslníka":r.status==="active"?"Probíhá":"Hotovo") + '</span></p></div>' +
         '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
         '</div>';
     }).join("");
@@ -1446,31 +1504,31 @@ window.loadCustomerConversations = async function() {
 window.loadCraftsmanConversations = async function() {
     const list=document.getElementById("conv-list-c");if(!list||!window.sb||!window.APP_USER)return;
     const {data:offers}=await window.sb.from("offers").select("*, requests(*)").eq("craftsman_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Ĺ˝ĂˇdnĂ© zprĂˇvy.<br>Podejte nabĂ­dku!</div>';return;}
+    if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Podejte nabídku!</div>';return;}
     list.innerHTML=offers.map(o=>{
         const statusColor = o.requests?.status==='active' ? 'text-green-500' : o.requests?.status==='done' ? 'text-slate-400' : 'text-fixit-500';
         const statusDot = o.requests?.status==='active' ? '#22c55e' : o.requests?.status==='done' ? '#94a3b8' : '#f59e0b';
         const avatarSeed = (o.requests?.customer_name||'customer') + o.request_id;
-        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + (o.requests?.customer_name||"ZĂˇkaznĂ­k").replace(/'/g,"\\'") + '\',\'customer' + o.request_id + '\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
+        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'") + '\',\'customer' + o.request_id + '\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
         '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + (o.requests?.title||"PoptĂˇvka") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.category||"") + ' â€˘ <span class="' + statusColor + ' font-semibold">' + (o.requests?.customer_name||"ZĂˇkaznĂ­k") + '</span></p></div>' +
+        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.category||"") + ' • <span class="' + statusColor + ' font-semibold">' + (o.requests?.customer_name||"Zákazník") + '</span></p></div>' +
         '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
         '</div>';
     }).join("");
 };
 
-// === MODAL PRO ĹEMESLNĂŤKA ===
+// === MODAL PRO ŘEMESLNÍKA ===
 window.openOfferModal = function(index) {
     const req=window.STATE.marketRequests[index];if(!req)return;
     document.getElementById("co-req-id").value=req.id;
     document.getElementById("co-req-title").value=req.title;
     document.getElementById("co-title").innerText=req.title;
-    document.getElementById("co-cat").innerText=req.category||"OstatnĂ­";
-    document.getElementById("co-urg").innerText=req.urgency||"StĹ™ednĂ­";
+    document.getElementById("co-cat").innerText=req.category||"Ostatní";
+    document.getElementById("co-urg").innerText=req.urgency||"Střední";
     let extracted=window.extractPhotoFromDesc(req.description);
     document.getElementById("co-desc").innerHTML=extracted.desc.replace(/\n/g,"<br>");
     document.getElementById("co-price").value=req.price_estimate||"Dohodou";
-    document.getElementById("co-msg").value='DobrĂ˝ den, mĂˇm zĂˇjem o vaĹˇi zakĂˇzku "' + req.title + '". MĂˇm ÄŤas a vybavenĂ­, mohu pomoci.';
+    document.getElementById("co-msg").value='Dobrý den, mám zájem o vaši zakázku "' + req.title + '". Mám čas a vybavení, mohu pomoci.';
     const photoWrap=document.getElementById("co-photo-wrap"),photoImg=document.getElementById("co-photo");
     if(extracted.photo){photoImg.src="data:"+(extracted.mime||"image/jpeg")+";base64,"+extracted.photo;photoWrap.classList.remove("hidden");}
     else photoWrap.classList.add("hidden");
@@ -1489,29 +1547,29 @@ window.submitCraftsmanOffer = async function() {
     const title=document.getElementById("co-req-title").value;
     const price=document.getElementById("co-price").value.trim();
     const msg=document.getElementById("co-msg").value.trim();
-    if(!msg){window.showToast("ChybĂ­ zprĂˇva","NapiĹˇte zĂˇkaznĂ­kovi alespoĹ krĂˇtkou zprĂˇvu.","error");return;}
-    if(!window.sb||!window.APP_USER){window.showToast("NepĹ™ihlĂˇĹˇen","MusĂ­te se nejprve pĹ™ihlĂˇsit.","error");return;}
-    btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>OdesĂ­lĂˇm...';btn.disabled=true;
+    if(!msg){window.showToast("Chybí zpráva","Napište zákazníkovi alespoň krátkou zprávu.","error");return;}
+    if(!window.sb||!window.APP_USER){window.showToast("Nepřihlášen","Musíte se nejprve přihlásit.","error");return;}
+    btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Odesílám...';btn.disabled=true;
     try {
         const {error}=await window.sb.from("offers").insert({request_id:requestId,craftsman_id:window.APP_USER.id,craftsman_name:document.getElementById("user-name").innerText,message:msg,price:price||"Dohodou",status:"pending"});
         if(error)throw error;
-        btn.innerHTML='<i class="fa-solid fa-check mr-2"></i>OdeslĂˇno!';
+        btn.innerHTML='<i class="fa-solid fa-check mr-2"></i>Odesláno!';
         btn.className=btn.className.replace("bg-fixit-500 hover:bg-fixit-600","bg-green-500");
-        window.showToast("NabĂ­dka odeslĂˇna! đźŽ‰","ZĂˇkaznĂ­k obdrĹľĂ­ vaĹˇi nabĂ­dku co nejdĹ™Ă­ve.","success");
+        window.showToast("Nabídka odeslána! 🎉","Zákazník obdrží vaši nabídku co nejdříve.","success");
         window.STATE.craftJobs.push({title,requestId,status:"pending",time:new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})});
         window.refreshCraftsmanJobs();window.activeChatId=String(requestId);
-        setTimeout(()=>{window.closeOfferModal();btn.innerHTML=orig;btn.disabled=false;btn.className=btn.className.replace("bg-green-500","bg-fixit-500 hover:bg-fixit-600");window.goTab("c-messages","ZprĂˇvy");window.openConversation(requestId,"ZĂˇkaznĂ­k","customer"+requestId);},1000);
-    } catch(e){btn.innerHTML=orig;btn.disabled=false;window.showToast("Chyba odesĂ­lĂˇnĂ­",e.message,"error");}
+        setTimeout(()=>{window.closeOfferModal();btn.innerHTML=orig;btn.disabled=false;btn.className=btn.className.replace("bg-green-500","bg-fixit-500 hover:bg-fixit-600");window.goTab("c-messages","Zprávy");window.openConversation(requestId,"Zákazník","customer"+requestId);},1000);
+    } catch(e){btn.innerHTML=orig;btn.disabled=false;window.showToast("Chyba odesílání",e.message,"error");}
 };
 
-// === NABĂŤDKY PRO ZĂKAZNĂŤKA ===
+// === NABÍDKY PRO ZÁKAZNÍKA ===
 window.loadOffersForRequest = async function(requestId, requestTitle) {
     if(!window.sb)return;
     const {data:offers}=await window.sb.from("offers").select("*").eq("request_id",requestId).order("created_at",{ascending:false});
     document.getElementById("offers-modal-title").innerText=requestTitle;
     const modalList=document.getElementById("offers-modal-list");
-    if(!offers||offers.length===0){modalList.innerHTML='<div class="text-center text-slate-400 py-12"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i><p>ZatĂ­m ĹľĂˇdnĂ© nabĂ­dky.</p></div>';}
-    else{modalList.innerHTML=offers.map(o=>'<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">PĹ™ijmout a zahĂˇjit zprĂˇvy</button></div>').join("");}
+    if(!offers||offers.length===0){modalList.innerHTML='<div class="text-center text-slate-400 py-12"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i><p>Zatím žádné nabídky.</p></div>';}
+    else{modalList.innerHTML=offers.map(o=>'<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Přijmout a zahájit zprávy</button></div>').join("");}
     const modal=document.getElementById("offers-modal");modal.classList.remove("hidden");void modal.offsetWidth;modal.classList.add("opacity-100");
 };
 
@@ -1519,11 +1577,11 @@ window.acceptOffer = async function(offerId, requestId, craftsmanName) {
     if(!window.sb)return;
     await window.sb.from("offers").update({status:"accepted"}).eq("id",offerId);
     await window.sb.from("requests").update({status:"active",craftsman_name:craftsmanName}).eq("id",requestId);
-    window.showToast("NabĂ­dka pĹ™ijata! âś…","Zahajujete spoluprĂˇci s "+craftsmanName+".","success");
+    window.showToast("Nabídka přijata! ✅","Zahajujete spolupráci s "+craftsmanName+".","success");
     const req=window.STATE.requests.find(r=>r.sbId===requestId);if(req){req.status="active";req.craftsman_name=craftsmanName;}
     window.refreshRequestsList();window.refreshDashboard();
     window.activeChatId=String(requestId);
-    window.goTab("messages","ZprĂˇvy");
+    window.goTab("messages","Zprávy");
     setTimeout(()=>window.openConversation(requestId,craftsmanName,"craftsman"+requestId),300);
 };
 
@@ -1541,10 +1599,10 @@ window.refreshCraftsmanJobs = function() {
     window.STATE.craftJobs.forEach(job=>{
         const d=document.createElement("div");
         d.className="bg-white dark:bg-[#0f172a] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm fade-up";
-        let badge='<span class="status-badge status-waiting">ÄŚekĂˇm na odpovÄ›ÄŹ</span>';
-        if(job.status==="accepted"||job.status==="active")badge='<span class="status-badge status-active">AktivnĂ­ zakĂˇzka</span>';
-        if(job.status==="done"||job.status==="completed")badge='<span class="status-badge status-done">DokonÄŤeno</span>';
-        d.innerHTML='<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">' + job.title + '</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">' + job.time + '</p></div>' + badge + '</div><button onclick="window.activeChatId=\'' + job.requestId + '\'; window.goTab(\'c-messages\',\'ZprĂˇvy\'); setTimeout(()=>window.openConversation(\'' + job.requestId + '\',\'ZĂˇkaznĂ­k\',\'customer' + job.requestId + '\'),300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zĂˇkaznĂ­kovi</button>';
+        let badge='<span class="status-badge status-waiting">Čekám na odpověď</span>';
+        if(job.status==="accepted"||job.status==="active")badge='<span class="status-badge status-active">Aktivní zakázka</span>';
+        if(job.status==="done"||job.status==="completed")badge='<span class="status-badge status-done">Dokončeno</span>';
+        d.innerHTML='<div class="flex items-start justify-between mb-4"><div><h4 class="font-extrabold text-lg dark:text-white leading-tight">' + job.title + '</h4><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">' + job.time + '</p></div>' + badge + '</div><button onclick="window.activeChatId=\'' + job.requestId + '\'; window.goTab(\'c-messages\',\'Zprávy\'); setTimeout(()=>window.openConversation(\'' + job.requestId + '\',\'Zákazník\',\'customer' + job.requestId + '\'),300);" class="text-sm font-bold text-fixit-500 hover:text-fixit-600 transition flex items-center gap-2"><i class="fa-regular fa-comment-dots"></i> Napsat zákazníkovi</button>';
         list.appendChild(d);
     });
 };
@@ -1555,7 +1613,7 @@ window.loadCraftsmanJobsFromDB = async function() {
     if(data&&data.length>0){
         window.STATE.craftJobs=data.map(o=>{
             let s=o.status;if(o.requests?.status==="done")s="done";
-            return {title:o.requests?.title||"ZakĂˇzka",requestId:o.request_id,status:s,time:new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})};
+            return {title:o.requests?.title||"Zakázka",requestId:o.request_id,status:s,time:new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})};
         });
         window.refreshCraftsmanJobs();
     }
@@ -1573,9 +1631,9 @@ window.loadCustomerRequestsFromDB = async function() {
 window.loadMarketFromDB = async function() {
     const list=document.getElementById("market-list");if(!list||!window.sb)return;
     const {data,error}=await window.sb.from("requests").select("*").eq("status","waiting").order("created_at",{ascending:false});
-    if(error||!data||data.length===0){list.innerHTML='<div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-inbox text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">ZatĂ­m ĹľĂˇdnĂ© poptĂˇvky ve vaĹˇem okolĂ­.</p></div>';return;}
+    if(error||!data||data.length===0){list.innerHTML='<div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-inbox text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">Zatím žádné poptávky ve vašem okolí.</p></div>';return;}
     window.STATE.marketRequests=data;
-    list.innerHTML=data.map((r,i)=>window.createBeautifulCard({id:r.id,sbId:r.id,title:r.title,kat:r.category||"OstatnĂ­",popis:r.description||"",time:new Date(r.created_at).toLocaleDateString("cs"),status:r.status,urgency:r.urgency||"StĹ™ednĂ­",category:r.category,customer_name:r.customer_name||"ZĂˇkaznĂ­k",price_estimate:r.price_estimate||"Dohodou"},true,i)).join("");
+    list.innerHTML=data.map((r,i)=>window.createBeautifulCard({id:r.id,sbId:r.id,title:r.title,kat:r.category||"Ostatní",popis:r.description||"",time:new Date(r.created_at).toLocaleDateString("cs"),status:r.status,urgency:r.urgency||"Střední",category:r.category,customer_name:r.customer_name||"Zákazník",price_estimate:r.price_estimate||"Dohodou"},true,i)).join("");
 };
 
 // === MAPA ===
@@ -1598,21 +1656,21 @@ window.toggleMarketView = function(mode) {
 window.initMarketMap = async function() {
     const mapEl=document.getElementById("market-map");if(!mapEl)return;
     if(window._marketMap){window._marketMap.eachLayer(l=>{if(l instanceof L.Marker)window._marketMap.removeLayer(l);});}
-    else{window._marketMap=L.map("market-map").setView([49.8,15.5],8);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"Â© OpenStreetMap",maxZoom:18}).addTo(window._marketMap);}
+    else{window._marketMap=L.map("market-map").setView([49.8,15.5],8);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:18}).addTo(window._marketMap);}
     const requests=window.STATE.marketRequests||[];
     if(requests.length===0)return;
     const pinIcon=L.divIcon({className:"",html:'<div style="background:#f59e0b;color:white;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(245,158,11,0.45);border:2px solid white;"><i class="fa-solid fa-hammer" style="transform:rotate(45deg);font-size:13px;"></i></div>',iconSize:[36,36],iconAnchor:[18,36],popupAnchor:[0,-38]});
     const bounds=[];
     for(const r of requests){
-        const addrMatch=(r.description||"").match(/Adresa:\s*([^\nđź“žđź“…đźŹ đźš—]+)/);
-        const addr=addrMatch?addrMatch[1].trim():(r.category+", ÄŚeskĂˇ republika");
+        const addrMatch=(r.description||"").match(/Adresa:\s*([^\n📞📅🏠🚗]+)/);
+        const addr=addrMatch?addrMatch[1].trim():(r.category+", Česká republika");
         try{
-            const resp=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(addr+", ÄŚeskĂˇ republika")+"&limit=1",{headers:{"Accept-Language":"cs"}});
+            const resp=await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(addr+", Česká republika")+"&limit=1",{headers:{"Accept-Language":"cs"}});
             const geo=await resp.json();
             if(geo&&geo.length>0){
                 const lat=parseFloat(geo[0].lat),lon=parseFloat(geo[0].lon);bounds.push([lat,lon]);
-                const urgencyColor=r.urgency==="VysokĂˇ"?"#ef4444":r.urgency==="NĂ­zkĂˇ"?"#22c55e":"#f59e0b";
-                const popup=L.popup({maxWidth:280,minWidth:220}).setContent('<div class="fixit-pin-popup"><span class="cat-badge">'+(r.category||"OstatnĂ­")+'</span><p class="title">'+(r.title||"PoptĂˇvka")+'</p><p class="addr"><i class="fa-solid fa-location-dot" style="color:#f59e0b;margin-right:4px"></i>'+addr+'</p><div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:700;color:'+urgencyColor+';background:'+urgencyColor+'18;padding:3px 8px;border-radius:6px;">'+(r.urgency||"StĹ™ednĂ­")+' priorita</span>'+(r.price_estimate?'<span style="font-size:11px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:3px 8px;border-radius:6px;">'+r.price_estimate+'</span>':'')+'</div><button class="offer-btn" onclick="window.openOfferModal('+r.id+',\\"'+(r.title||"").replace(/"/g,"")+'\\""); document.querySelectorAll(\".leaflet-popup-close-button\").forEach(b=>b.click());">Poslat nabĂ­dku â†’</button></div>');
+                const urgencyColor=r.urgency==="Vysoká"?"#ef4444":r.urgency==="Nízká"?"#22c55e":"#f59e0b";
+                const popup=L.popup({maxWidth:280,minWidth:220}).setContent('<div class="fixit-pin-popup"><span class="cat-badge">'+(r.category||"Ostatní")+'</span><p class="title">'+(r.title||"Poptávka")+'</p><p class="addr"><i class="fa-solid fa-location-dot" style="color:#f59e0b;margin-right:4px"></i>'+addr+'</p><div style="display:flex;gap:8px;margin-bottom:10px"><span style="font-size:11px;font-weight:700;color:'+urgencyColor+';background:'+urgencyColor+'18;padding:3px 8px;border-radius:6px;">'+(r.urgency||"Střední")+' priorita</span>'+(r.price_estimate?'<span style="font-size:11px;font-weight:700;color:#0f172a;background:#f1f5f9;padding:3px 8px;border-radius:6px;">'+r.price_estimate+'</span>':'')+'</div><button class="offer-btn" onclick="window.openOfferModal('+r.id+',\\"'+(r.title||"").replace(/"/g,"")+'\\""); document.querySelectorAll(\".leaflet-popup-close-button\").forEach(b=>b.click());">Poslat nabídku →</button></div>');
                 L.marker([lat,lon],{icon:pinIcon}).addTo(window._marketMap).bindPopup(popup);
             }
         }catch(e){}
@@ -1621,10 +1679,25 @@ window.initMarketMap = async function() {
     setTimeout(()=>window._marketMap&&window._marketMap.invalidateSize(),100);
 };
 
-window.filterMarket = function(kat) {
-    document.querySelectorAll(".filter-btn").forEach(b=>{b.className=b.className.replace("bg-fixit-500 text-white shadow-md hover:scale-105","bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105");});
-    event.target.className=event.target.className.replace("bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-fixit-500 transition hover:scale-105","bg-fixit-500 text-white shadow-md hover:scale-105 transition");
-    document.querySelectorAll(".market-item").forEach(item=>{item.style.display=(kat==="all"||item.dataset.kat===kat)?"":"none";});
+window.filterMarket = function(kat, triggerEl) {
+    const activeBtn = triggerEl || document.activeElement;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-fixit-500','text-white','shadow-md');
+        btn.classList.add('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
+    });
+    if (activeBtn && activeBtn.classList && activeBtn.classList.contains('filter-btn')) {
+        activeBtn.classList.add('bg-fixit-500','text-white','shadow-md');
+        activeBtn.classList.remove('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
+    }
+    const data = Array.isArray(window.STATE?.marketRequests) ? window.STATE.marketRequests : [];
+    const filtered = kat === 'all' ? data : data.filter(r => (r.category || '').trim() === kat);
+    const list = document.getElementById('market-list');
+    if (!list) return;
+    if (!filtered.length) {
+        list.innerHTML = '<div class="text-center text-slate-400 py-10">Žádné poptávky v této kategorii.</div>';
+        return;
+    }
+    list.innerHTML = filtered.map((req, i) => window.createMarketCard(req, i)).join('');
 };
 
 // === LIGHTBOX ===
