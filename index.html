@@ -390,6 +390,22 @@
     </div>
 </div>
 <script>
+
+window.signInWith = async function(provider) {
+    if (!window.sb) {
+        alert("Chyba: Supabase není inicializováno");
+        return;
+    }
+    await window.sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: window.location.origin } });
+};
+
+window.clearMsgNotif = function() {
+    window.msgNotifCount = 0;
+    const badge = document.getElementById('sidebar-msg-badge');
+    if (badge) badge.classList.add('hidden');
+};
+
+
 // === GLOBÁLNÍ PROMĚNNÉ ===
 window.SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
 window.SB_KEY = "sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc";
