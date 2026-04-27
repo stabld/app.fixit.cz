@@ -492,28 +492,32 @@ window.showToast = function(title, message, type) {
 };
 
 // === NOTIFIKACE ===
+
 window.addNotif = function(title, message) {
-    window._notifCount++;
-    window._notifItems.unshift({ title, message, time: new Date().toLocaleTimeString("cs", {hour:"2-digit",minute:"2-digit"}) });
-    if (window._notifItems.length > 10) window._notifItems.pop();
-    const badge = document.getElementById("notif-badge");
+    window.notifCount++;
+    window.notifItems.unshift({ title, message, time: new Date().toLocaleTimeString('cs', {hour:'2-digit', minute:'2-digit'}) });
+    if (window.notifItems.length > 10) window.notifItems.pop();
+    const badge = document.getElementById('notif-badge');
     if (badge) {
-        badge.innerText = window._notifCount > 9 ? "9+" : window._notifCount;
-        badge.classList.add("visible");
-        badge.classList.remove("shake");
-        void badge.offsetWidth;
-        badge.classList.add("shake");
+        badge.innerText = window.notifCount > 9 ? '9+' : window.notifCount;
+        badge.classList.add('visible');
+        badge.classList.remove('shake'); void badge.offsetWidth; badge.classList.add('shake');
     }
-    const list = document.getElementById("notif-list");
+    const sidebarBadge = document.getElementById('sidebar-msg-badge');
+    if (sidebarBadge) {
+        window.msgNotifCount = (window.msgNotifCount || 0) + 1;
+        sidebarBadge.innerText = window.msgNotifCount > 9 ? '9+' : window.msgNotifCount;
+        sidebarBadge.classList.remove('hidden');
+    }
+    const list = document.getElementById('notif-list');
     if (list) {
-        const empty = document.getElementById("notif-empty");
-        if (empty) empty.remove();
-        const item = document.createElement("div");
-        item.className = "notif-item";
-        item.innerHTML = '<div class="notif-dot"></div><div><div class="notif-item-title">' + title + '</div><div class="notif-item-msg">' + (message||"") + '</div></div><div style="margin-left:auto;font-size:11px;color:#94a3b8;flex-shrink:0;">' + window._notifItems[0].time + '</div>';
+        const empty = document.getElementById('notif-empty'); if (empty) empty.remove();
+        const item = document.createElement('div'); item.className = 'notif-item';
+        item.innerHTML = `<div class="notif-dot"></div><div><div class="notif-item-title">${title}</div><div class="notif-item-msg">${message}</div></div><div style="margin-left:auto;font-size:11px;color:#94a3b8;flex-shrink:0">${window.notifItems[0].time}</div>`;
         list.insertBefore(item, list.firstChild);
     }
 };
+
 window.clearNotifs = function() {
     window._notifCount = 0;
     const badge = document.getElementById("notif-badge");
