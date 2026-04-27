@@ -15,19 +15,20 @@
     <meta name="apple-mobile-web-app-title" content="Fixit">
     <script src="https://cdn.tailwindcss.com">
 window.signInWith = async function(provider) {
-    alert("Debug: Kliknuto na " + provider);
+    console.log("Přihlašuji přes:", provider);
     if (!window.sb) {
         if (window.supabase && window.SB_URL && window.SB_KEY) {
             window.sb = window.supabase.createClient(window.SB_URL, window.SB_KEY);
         } else {
-            alert("Chyba: window.sb není inicializováno");
+            alert("Chyba: Supabase není inicializováno");
             return;
         }
     }
     try {
-        await window.sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: window.location.origin } });
+        const { error } = await window.sb.auth.signInWithOAuth({ provider: provider });
+        if (error) throw error;
     } catch (e) {
-        alert("Chyba auth: " + e.message);
+        alert("Chyba: " + e.message);
     }
 };
 </script>
@@ -235,18 +236,18 @@ window.signInWith = async function(provider) {
                     <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded" style="accent-color:#f59e0b"><span class="text-sm font-bold text-slate-600 dark:text-slate-400">Zapamatovat si mě</span></label>
                     <button onclick="window.switchTab('forgot')" class="text-sm text-fixit-500 hover:text-fixit-600 font-bold transition">Zapomenuté heslo?</button>
                 </div>
-                <button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">Přihlásit se</button>
+                
 <div class="mt-6">
     <div class="relative mb-6">
         <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div>
         <div class="relative flex justify-center text-sm"><span class="px-2 bg-white dark:bg-slate-900 text-slate-500">nebo se přihlaste přes</span></div>
     </div>
     <div class="grid grid-cols-2 gap-3">
-        <button onclick="window.signInWith('google')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-google text-lg"></i></button>
-        <button onclick="window.signInWith('facebook')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-facebook text-lg text-blue-600"></i></button>
+        <button type="button" onclick="window.signInWith('google')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-google text-lg"></i></button>
+        <button type="button" onclick="window.signInWith('facebook')" class="flex justify-center items-center py-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"><i class="fa-brands fa-facebook text-lg text-blue-600"></i></button>
     </div>
 </div>
-
+<button onclick="window.doLogin()" id="btn-do-login" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white font-bold py-3.5 rounded-xl mt-2 transition shadow-lg">Přihlásit se</button>
             </div>
             <div id="form-reg" class="hidden">
                 <div class="space-y-3">
@@ -407,14 +408,6 @@ window.signInWith = async function(provider) {
     </div>
 </div>
 <script>
-
-window.clearMsgNotif = function() {
-    window.msgNotifCount = 0;
-    const badge = document.getElementById('sidebar-msg-badge');
-    if (badge) badge.classList.add('hidden');
-};
-
-
 // === GLOBÁLNÍ PROMĚNNÉ ===
 window.SB_URL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
 window.SB_KEY = "sb_publishable_OehKo_l9qTAp-xfmlHpzOA_OYBp4ouc";
@@ -502,13 +495,6 @@ window.showToast = function(title, message, type) {
 
 // === NOTIFIKACE ===
 window.addNotif = function(title, message) {
-    const sidebarBadge = document.getElementById('sidebar-msg-badge');
-    if (sidebarBadge) {
-        window.msgNotifCount = (window.msgNotifCount || 0) + 1;
-        sidebarBadge.innerText = window.msgNotifCount;
-        sidebarBadge.classList.remove('hidden');
-    }
-
     window._notifCount++;
     window._notifItems.unshift({ title, message, time: new Date().toLocaleTimeString("cs", {hour:"2-digit",minute:"2-digit"}) });
     if (window._notifItems.length > 10) window._notifItems.pop();
