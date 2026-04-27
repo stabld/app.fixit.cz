@@ -1414,7 +1414,7 @@ window.renderMessage = function(m, boxId) {
     const box=document.getElementById(boxId);if(!box)return;
     const myUserId = window.APP_USER?.id ? String(window.APP_USER.id) : "";
     const senderId = m?.sender_id ? String(m.sender_id) : "";
-    const senderRole = (m?.sender_role || "").trim();
+    const senderRole = (m?.senderrole || "").trim();
     const myRole = (window.APP_ROLE || "").trim();
     const senderName = (m?.sender_name || "").trim();
     const myName = (document.getElementById("user-name")?.innerText || "").trim();
@@ -1459,9 +1459,9 @@ window.sendMsg = async function() {
     inp.value="";
     const userNameEl = document.getElementById("user-name");
     const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
-    window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"customer",created_at:new Date().toISOString()},"chat-msgs");
+    window.renderMessage({...msgBase,senderrole:window.APP_ROLE||"customer",created_at:new Date().toISOString()},"chat-msgs");
     if(window.sb){
-        const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"customer"});
+        const {error}=await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"customer"});
         if(error){
             window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
         }
@@ -1475,9 +1475,9 @@ window.sendMsgC = async function() {
     inp.value="";
     const userNameEl = document.getElementById("user-name");
     const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
-    window.renderMessage({...msgBase,sender_role:window.APP_ROLE||"craftsman",created_at:new Date().toISOString()},"chat-msgs-c");
+    window.renderMessage({...msgBase,senderrole:window.APP_ROLE||"craftsman",created_at:new Date().toISOString()},"chat-msgs-c");
     if(window.sb){
-        const {error}=await window.sb.from("messages").insert({...msgBase,sender_role:window.APP_ROLE||"craftsman"});
+        const {error}=await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"craftsman"});
         if(error){
             window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
         }
