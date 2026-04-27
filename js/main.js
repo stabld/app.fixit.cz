@@ -1,3 +1,54 @@
+// === GLOBÁLNÍ PROMĚNNÉ ===
+window.SBURL = "https://iyvvwsnhezjrjrkscbyc.supabase.co";
+window.SBKEY = "sbp_publishable0ehKol9qTAp-xfmlHpzOAOYBp4ouc";
+window.sb = null;
+try { if (window.supabase) window.sb = window.supabase.createClient(window.SBURL, window.SBKEY); } catch(e) {}
+window.APP_ROLE = "customer";
+window.APP_USER = null;
+window.STATE = { requests: [], craftJobs: [], marketRequests: [] };
+window.activeChatId = null;
+window.msgSubscription = null;
+window.notifCount = 0;
+window.notifItems = [];
+window.pendingDelete = null;
+window.marketMap = null;
+
+// === LOADER ===
+function hideLoader() {
+    const loader = document.getElementById("loader");
+    if (loader) {
+        loader.style.opacity = "0";
+        loader.style.transform = "scale(1.05)";
+        loader.style.pointerEvents = "none";
+        setTimeout(() => { if (loader.parentNode) loader.remove(); }, 600);
+    }
+}
+setTimeout(hideLoader, 4000);
+window.addEventListener("load", function() { setTimeout(hideLoader, 1800); });
+
+// === SESSION CHECK ===
+window.addEventListener("load", async function() {
+    if (!window.sb) {
+        hideLoader();
+        document.getElementById("view-role-select")?.classList.remove("hidden");
+        return;
+    }
+    const { data: { session } } = await window.sb.auth.getSession();
+    if (session && session.user) {
+        window.APP_USER = session.user;
+        window.APP_ROLE = session.user.user_metadata?.role || "customer";
+        const name = session.user.user_metadata?.fullname || "Uživatel";
+        document.getElementById("auth-screen")?.classList.add("hidden");
+        const appEl = document.getElementById("main-app");
+        if (appEl) { appEl.classList.remove("hidden"); appEl.style.opacity = 1; }
+        window.initApp(window.APP_ROLE, name);
+    } else {
+        hideLoader();
+        document.getElementById("view-role-select")?.classList.remove("hidden");
+    }
+});
+
+// === ZBYTEK (tvůj stávající kód) ===
 window.initApp = function(role, name) {
     window.APP_ROLE = role;
     document.getElementById("user-name").innerText = name || "Uživatel";
@@ -62,20 +113,3 @@ window.goToAuth = function(role) {
     document.getElementById("role-text").innerText = role === "craftsman" ? "Řemeslník" : "Zákazník";
     window.switchTab("login");
 };
-
-window.addEventListener("load", async function() {
-    if(!window.sb) return;
-    const { data: { session } } = await window.sb.auth.getSession();
-    if(session && session.user){
-        window.APP_USER = session.user;
-        window.APP_ROLE = session.user.user_metadata?.role || "customer";
-        const name = session.user.user_metadata?.fullname || "Uživatel";
-        const authEl = document.getElementById("auth-screen");
-        if(authEl) authEl.classList.add("hidden");
-        const appEl = document.getElementById("main-app");
-        if(appEl) { appEl.classList.remove("hidden"); appEl.style.opacity = 1; }
-        window.initApp(window.APP_ROLE, name);
-    } else {
-        document.getElementById("view-role-select")?.classList.remove("hidden");
-    }
-});
