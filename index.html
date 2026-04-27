@@ -1479,6 +1479,13 @@ window.subscribeMessages = function(requestId) {
         if(payload.new.sender_id!==window.APP_USER?.id){
             window.renderMessage(payload.new,boxId);
             window.showToast("Nová zpráva! 💬","Zpráva od "+(payload.new.sender_name||"řemeslníka")+".","info");
+            window.addNotif("Nová zpráva! 💬", "Zpráva od " + (payload.new.sender_name || "řemeslníka"));
+            const sidebarBadge = document.getElementById("sidebar-msg-badge");
+            if (sidebarBadge) {
+                window.msgNotifCount = (window.msgNotifCount || 0) + 1;
+                sidebarBadge.innerText = window.msgNotifCount > 9 ? "9+" : window.msgNotifCount;
+                sidebarBadge.classList.remove("hidden");
+            }
         }
     }).subscribe();
 };
