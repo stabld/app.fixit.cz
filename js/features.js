@@ -256,6 +256,8 @@ window.publishRequest = async function(btnNode) {
             const {data,error}=await window.sb.from("requests").insert({customer_id:window.APP_USER.id,customer_name:cName,title,category:kat,description:finalPopis,urgency:nal,price_estimate:cena,status:"waiting"}).select();
             if(!error&&data&&data.length>0) sbId=data[0].id;
         }
+        if (!window.STATE) window.STATE = { requests: [], craftJobs: [], marketRequests: [] };
+        if (!window.STATE.requests) window.STATE.requests = [];
         window.STATE.requests.unshift({sbId,title,kat,popis:finalPopis,time:new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:"waiting",photo:window.poptBase64,mime:window.poptMime});
         window.refreshRequestsList(); window.refreshDashboard(); window.poptHistoryText=""; window.poptBase64=null; window.poptMime=null;
         ["popt-input","f-street","f-city","f-phone","f-budget"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
