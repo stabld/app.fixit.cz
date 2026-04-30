@@ -34,6 +34,10 @@ window.showToast = function(title, message, type) {
 };
 
 window.addNotif = function(title, message) {
+    // Přidaná pojistka:
+    if (!window.notifCount) window.notifCount = 0;
+    if (!window.notifItems) window.notifItems = [];
+
     window.notifCount++;
     window.notifItems.unshift({ title, message, time: new Date().toLocaleTimeString('cs', {hour:'2-digit', minute:'2-digit'}) });
     if (window.notifItems.length > 10) window.notifItems.pop();
