@@ -185,4 +185,46 @@ window.loadCraftsmanConversations = async function() {
         '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
         '</div>';
     }).join("");
+    // === GLOBÁLNÍ NOTIFIKACE NA POZADÍ ===
+window.initGlobalNotifications = function() {
+    if (!window.sb || !window.APP_USER) return;
+
+    // Pokud už nasloucháme, zrušíme staré spojení (prevence duplicit)
+    if (window.globalNotifSub) {
+        try { window.sb.removeChannel(window.globalNotifSub); } catch(e){}
+    }
+
+    // Vytvoříme globální kanál pro notifikace na pozadí
+    window.globalNotifSub = window.sb.channel('global-notifs')
+        // 1. Naslouchání na NOVÉ ZPRÁVY
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            const msg = payload.new;
+            // Pokud zprávu poslal někdo jiný a nemáme zrovna otevřený tento konkrétní chat
+            if (msg.sender_id !== window.APP_USER.id) {
+                if (window.activeChatId !== String(msg.conversation_id)) {
+                    window.showToast("Nová zpráva! 💬", "Napsal vám: " + (msg.sender_name || "Uživatel"), "info");
+                    // Refreshneme seznam konverzací, aby se ukázala nahoře
+                    if (window.APP_ROLE === "customer" && window.loadCustomerConversations) window.loadCustomerConversations();
+                    else if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
+                }
+            }
+        })
+        // 2. Naslouchání na NOVÉ NABÍDKY OD ŘEMESLNÍKŮ (Pro zákazníka)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'offers' }, payload => {
+            const offer = payload.new;
+            if (window.APP_ROLE === "customer") {
+                window.showToast("Nová nabídka! 🎉", "Řemeslník " + (offer.craftsman_name || "") + " má zájem o vaši zakázku.", "success");
+                if (window.loadCustomerRequestsFromDB) window.loadCustomerRequestsFromDB();
+            }
+        })
+        // 3. Naslouchání na PŘIJATÉ NABÍDKY (Pro řemeslníka)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'offers' }, payload => {
+            const offer = payload.new;
+            if (window.APP_ROLE === "craftsman" && offer.craftsman_id === window.APP_USER.id && offer.status === "accepted") {
+                window.showToast("Nabídka přijata! ✅", "Zákazník přijal vaši nabídku. Můžete začít komunikovat.", "success");
+                if (window.loadCraftsmanJobsFromDB) window.loadCraftsmanJobsFromDB();
+                if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
+            }
+        })
+        .subscribe();
 };
