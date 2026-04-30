@@ -1,4 +1,4 @@
-// === START APLIKACE ===
+// === START APLIKACE A KONTROLA SESSION ===
 window.addEventListener('load', async () => {
     if (window.sb) {
         const { data: { session } } = await window.sb.auth.getSession();
@@ -9,45 +9,63 @@ window.addEventListener('load', async () => {
             const authEl = document.getElementById("auth-screen");
             if (authEl) authEl.classList.add("hidden");
             const appEl = document.getElementById("main-app");
-            appEl.classList.remove("hidden"); appEl.style.opacity = "1";
-            if (window.initApp) window.initApp(window.APP_ROLE, name);
+            if (appEl) {
+                appEl.classList.remove("hidden");
+                appEl.style.opacity = "1";
+            }
+            window.initApp(window.APP_ROLE, name);
         } else {
-            document.getElementById("view-role-select").classList.remove("hidden");
+            const roleSelect = document.getElementById("view-role-select");
+            if (roleSelect) roleSelect.classList.remove("hidden");
         }
     } else {
-        document.getElementById("view-role-select").classList.remove("hidden");
+        const roleSelect = document.getElementById("view-role-select");
+        if (roleSelect) roleSelect.classList.remove("hidden");
     }
 });
 
+// === HLAVNÍ INICIALIZACE MODULŮ ===
 window.initApp = function(role, name) {
     const avatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role==="customer"?"f59e0b":"0f172a");
     const el = (id) => document.getElementById(id);
+    
+    // Nastavení jména a role v UI
     if(el("user-name")) el("user-name").innerText = name;
     if(el("user-role-lbl")) el("user-role-lbl").innerText = role==="customer"?"Zákazník":"Řemeslník";
     
+    // Avatar
     const savedAv = window.APP_USER?.user_metadata?.avatar_url;
     const displayAv = savedAv ? (savedAv + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
     if(el("user-avatar")) el("user-avatar").src = displayAv;
     
+    // Theme Toggle (Dark/Light mode)
     const tt = el("theme-toggle");
-    const ui = () => {
+    const uiTheme = () => {
         const d = document.documentElement.classList.contains("dark");
         if (el("theme-toggle-dark-icon")) el("theme-toggle-dark-icon").classList.toggle("hidden", d);
         if (el("theme-toggle-light-icon")) el("theme-toggle-light-icon").classList.toggle("hidden", !d);
     };
-    ui();
+    uiTheme();
+
     if (tt && !tt.dataset.boundTheme) {
         tt.dataset.boundTheme = "1";
         tt.addEventListener("click", () => {
             document.documentElement.classList.toggle("dark");
-            try { if (window.localStorage) window.safeStorageSet("color-theme", document.documentElement.classList.contains("dark") ? "dark" : "light"); } catch (e) {}
-            ui();
+            try { 
+                if (window.localStorage) window.safeStorageSet("color-theme", document.documentElement.classList.contains("dark") ? "dark" : "light"); 
+            } catch (e) {}
+            uiTheme();
         });
     }
 
-    if (role === "customer" && window.initCustomer) window.initCustomer(name); 
-    else if (window.initCraftsman) window.initCraftsman(name);
+    // Inicializace HTML šablon (Dashboard, Poptávky atd.)
+    if (role === "customer" && window.initCustomer) {
+        window.initCustomer(name);
+    } else if (window.initCraftsman) {
+        window.initCraftsman(name);
+    }
 
+    // Vyplnění dat do nastavení profilu
     setTimeout(() => {
         if(window.APP_USER) {
             const meta = window.APP_USER.user_metadata || {};
@@ -59,13 +77,14 @@ window.initApp = function(role, name) {
                 else if(id==="prof-city") pel.value = meta.city||"";
                 else if(id==="prof-bio") pel.value = meta.bio||"";
             });
-            const savedAvatar = window.APP_USER?.user_metadata?.avatar_url;
-            const displayAvatar = savedAvatar ? (savedAvatar + "?v=" + (window.APP_USER?.updated_at||Date.now())) : avatarUrl;
-            if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
-            if(el("user-avatar")) el("user-avatar").src = displayAvatar;
+            if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAv;
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
-            setTimeout(async () => {
-        if (role==="customer") { 
+        }
+    }, 100);
+
+    // Načtení dat z databáze a aktivace Realtime notifikací
+    setTimeout(async () => {
+        if (role === "customer") { 
             if (window.loadCustomerRequestsFromDB) await window.loadCustomerRequestsFromDB(); 
             if (window.loadCustomerConversations) await window.loadCustomerConversations(); 
         } else { 
@@ -74,25 +93,16 @@ window.initApp = function(role, name) {
             if (window.loadMarketFromDB) await window.loadMarketFromDB(); 
         }
         
-        // ---- TENTO JEDEN ŘÁDEK PŘIDEJ SEM ----
-        if (window.initGlobalNotifications) window.initGlobalNotifications();
+        // !!! AKTIVACE NOTIFIKACÍ NA POZADÍ !!!
+        if (window.initGlobalNotifications) {
+            console.log("Systém: Zapínám globální realtime notifikace.");
+            window.initGlobalNotifications();
+        }
 
     }, 500);
-        }
-    }, 100);
 
-    setTimeout(async () => {
-        if (role==="customer") { 
-            if (window.loadCustomerRequestsFromDB) await window.loadCustomerRequestsFromDB(); 
-            if (window.loadCustomerConversations) await window.loadCustomerConversations(); 
-        } else { 
-            if (window.loadCraftsmanJobsFromDB) await window.loadCraftsmanJobsFromDB(); 
-            if (window.loadCraftsmanConversations) await window.loadCraftsmanConversations(); 
-            if (window.loadMarketFromDB) await window.loadMarketFromDB(); 
-        }
-    }, 500);
-
+    // Uvítací zpráva
     if (window.showToast) {
-        setTimeout(() => window.showToast("Vítej, " + name + "! 👋", "Přihlášen jako " + (role==="customer"?"Zákazník":"Řemeslník") + ".", "success"), 600);
+        setTimeout(() => window.showToast("Vítej zpět, " + name + "! 👋", "Aplikace je připravena.", "success"), 600);
     }
 };
