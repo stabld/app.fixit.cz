@@ -64,6 +64,20 @@ window.initApp = function(role, name) {
             if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAvatar;
             if(el("user-avatar")) el("user-avatar").src = displayAvatar;
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
+            setTimeout(async () => {
+        if (role==="customer") { 
+            if (window.loadCustomerRequestsFromDB) await window.loadCustomerRequestsFromDB(); 
+            if (window.loadCustomerConversations) await window.loadCustomerConversations(); 
+        } else { 
+            if (window.loadCraftsmanJobsFromDB) await window.loadCraftsmanJobsFromDB(); 
+            if (window.loadCraftsmanConversations) await window.loadCraftsmanConversations(); 
+            if (window.loadMarketFromDB) await window.loadMarketFromDB(); 
+        }
+        
+        // ---- TENTO JEDEN ŘÁDEK PŘIDEJ SEM ----
+        if (window.initGlobalNotifications) window.initGlobalNotifications();
+
+    }, 500);
         }
     }, 100);
 
