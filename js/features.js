@@ -173,6 +173,7 @@ window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
     return data.text;
 };
 
+// VYLEPŠENÍ 1: Komprese nahrávaných fotek pro AI Bořka
 window.handlePhoto = async function(input) {
     const files = Array.from(input.files).slice(0, 5);
     if (!files.length) return;
@@ -186,18 +187,34 @@ window.handlePhoto = async function(input) {
     zone.classList.add("hidden");
 
     for (let file of files) {
-        const reader = new FileReader();
-        const result = await new Promise(res => {
-            reader.onload = e => res(e.target.result);
+        const compressedBase64 = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX = 800; 
+                    let w = img.width, h = img.height;
+                    if(w>h){if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}} else {if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}}
+                    const canvas = document.createElement("canvas");
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL("image/jpeg", 0.8)); // Zkomprimuje a zmenší
+                };
+                img.onerror = () => resolve(null);
+                img.src = e.target.result;
+            };
+            reader.onerror = () => resolve(null);
             reader.readAsDataURL(file);
         });
-        window.poptPhotos.push({ base64: result.split(",")[1], mime: file.type });
-        
-        const img = document.createElement("img");
-        img.src = result;
-        img.className = "w-full h-20 object-cover rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 pointer-events-auto cursor-pointer";
-        img.onclick = (e) => { e.stopPropagation(); window.openLightbox(img.src); };
-        gallery.appendChild(img);
+
+        if (compressedBase64) {
+            window.poptPhotos.push({ base64: compressedBase64.split(",")[1], mime: "image/jpeg" });
+            const imgEl = document.createElement("img");
+            imgEl.src = compressedBase64;
+            imgEl.className = "w-full h-20 object-cover rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 pointer-events-auto cursor-pointer hover:opacity-80 transition";
+            imgEl.onclick = (e) => { e.stopPropagation(); window.openLightbox(imgEl.src); };
+            gallery.appendChild(imgEl);
+        }
     }
 };
 
@@ -314,7 +331,14 @@ window.publishRequest = async function(btnNode) {
     } catch(err) { window.showToast("Chyba","Nastala chyba: "+err.message,"error"); if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;} }
 };
 
+// VYLEPŠENÍ 2: Kontrola, jestli má řemeslník profil, než pošle nabídku
 window.openOfferModal = function(index) {
+    if (!window.APP_USER || !window.APP_USER.user_metadata || !window.APP_USER.user_metadata.full_name) {
+        window.showToast("Vyplňte si profil", "Než začnete posílat nabídky, uložte si svůj profil a jméno.", "error");
+        window.goTab("profile", "Můj profil");
+        return;
+    }
+
     const req=window.STATE.marketRequests[index];if(!req)return;
     document.getElementById("co-req-id").value=req.id;
     document.getElementById("co-req-title").value=req.title;
