@@ -83,7 +83,20 @@ window.customerHTML = function(name) {
             <div id="popt-form" class="space-y-6 relative z-10">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Co se pokazilo?</label><textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[180px] shadow-inner" placeholder="Opište svůj problém co nejpodrobněji..."></textarea></div>
-                    <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotka závady (volitelné)</label><div class="relative flex-1 min-h-[180px] group"><input type="file" accept="image/*" onchange="window.handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"><div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 group-hover:bg-fixit-50 dark:group-hover:bg-fixit-500/10 transition-all overflow-hidden relative z-10 shadow-inner"><i class="fa-solid fa-camera text-4xl mb-3 text-slate-300 dark:text-slate-500 group-hover:text-fixit-500 transition-colors"></i><p class="text-sm font-bold text-slate-500 group-hover:text-fixit-600 transition-colors">Klikněte pro nahrání fotky</p><img id="photo-preview" class="hidden absolute inset-0 w-full h-full object-cover cursor-pointer" onclick="window.openLightbox(this.src)"></div></div></div>
+                    
+                    <div class="flex flex-col">
+                        <label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotky závady (až 5 fotek)</label>
+                        <div class="relative flex-1 min-h-[180px] group">
+                            <input type="file" accept="image/*" multiple onchange="window.handlePhoto(this)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-40">
+                            <div id="photo-zone" class="w-full h-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 group-hover:border-fixit-500 group-hover:bg-fixit-50 dark:group-hover:bg-fixit-500/10 transition-all overflow-hidden relative z-10 shadow-inner">
+                                <i class="fa-solid fa-camera text-4xl mb-3 text-slate-300 dark:text-slate-500 group-hover:text-fixit-500 transition-colors"></i>
+                                <p class="text-sm font-bold text-slate-500 group-hover:text-fixit-600 transition-colors">Klikněte pro nahrání</p>
+                                <p class="text-xs text-slate-400 mt-1">Max. 5 fotek</p>
+                            </div>
+                            <div id="photo-gallery" class="hidden absolute inset-0 z-30 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 overflow-y-auto grid grid-cols-2 gap-2 content-start pointer-events-none"></div>
+                        </div>
+                    </div>
+
                 </div>
                 <button onclick="window.startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl hover:-translate-y-1">Analyzovat problém s Bořkem</button>
             </div>
