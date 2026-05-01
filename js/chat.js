@@ -86,17 +86,8 @@ window.escapeHtml = function(value) {
 window.renderMessage = function(m, boxId) {
     const box=document.getElementById(boxId);if(!box)return;
     const myUserId = window.APP_USER?.id ? String(window.APP_USER.id) : "";
-    const senderId = m?.sender_id ? String(m.sender_id) : "";
-    const senderRole = (m?.senderrole || "").trim();
-    const myRole = (window.APP_ROLE || "").trim();
     const senderName = (m?.sender_name || "").trim();
-    const myName = (document.getElementById("user-name")?.innerText || "").trim();
-
-    let isMe = false;
-    if (myUserId && senderId) { isMe = myUserId === senderId; } 
-    else if (senderRole && myRole && senderName && myName) { isMe = senderRole === myRole && senderName === myName; } 
-    else if (senderRole && myRole) { isMe = senderRole === myRole; } 
-    else if (senderName && myName) { isMe = senderName === myName; }
+    const isMe = myUserId && m?.sender_id ? String(myUserId) === String(m.sender_id) : false;
 
     const time=new Date(m.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"});
     box.querySelector(".text-center")?.remove();
@@ -108,6 +99,7 @@ window.renderMessage = function(m, boxId) {
     box.appendChild(d);box.scrollTop=box.scrollHeight;
 };
 
+// OPRAVENÁ FUNKCE KTERÁ BYLA USEKNUTÁ
 window.subscribeMessages = function(requestId) {
     if(window.msgSubscription){try{window.sb.removeChannel(window.msgSubscription);}catch(e){}}
     if(!window.sb)return;
@@ -117,12 +109,6 @@ window.subscribeMessages = function(requestId) {
             window.renderMessage(payload.new,boxId);
             window.showToast("Nová zpráva! 💬","Zpráva od "+(payload.new.sender_name||"řemeslníka")+".","info");
             window.addNotif("Nová zpráva! 💬", "Zpráva od " + (payload.new.sender_name || "řemeslníka"));
-            const sidebarBadge = document.getElementById("sidebar-msg-badge");
-            if (sidebarBadge) {
-                window.msgNotifCount = (window.msgNotifCount || 0) + 1;
-                sidebarBadge.innerText = window.msgNotifCount > 9 ? "9+" : window.msgNotifCount;
-                sidebarBadge.classList.remove("hidden");
-            }
         }
     }).subscribe();
 };
@@ -130,43 +116,32 @@ window.subscribeMessages = function(requestId) {
 window.sendMsg = async function() {
     const inp=document.getElementById("msg-input");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
+    if(!window.activeChatId){ window.showToast("Vyberte konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const userNameEl = document.getElementById("user-name");
-    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
-    window.renderMessage({...msgBase,senderrole:window.APP_ROLE||"customer",created_at:new Date().toISOString()},"chat-msgs");
-    if(window.sb){
-        const {error}=await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"customer"});
-        if(error) window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
-    }
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name")?.innerText || "Uživatel",text:txt};
+    window.renderMessage({...msgBase,created_at:new Date().toISOString()},"chat-msgs");
+    if(window.sb) await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"customer"});
 };
 
 window.sendMsgC = async function() {
     const inp=document.getElementById("msg-input-c");
     const txt=inp?.value?.trim();if(!txt)return;
-    if(!window.activeChatId){ window.showToast("Nejprve otevřete konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
+    if(!window.activeChatId){ window.showToast("Vyberte konverzaci", "Vyberte vlevo konkrétní chat.", "info"); return; }
     inp.value="";
-    const userNameEl = document.getElementById("user-name");
-    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:userNameEl?userNameEl.innerText:"Uživatel",text:txt};
-    window.renderMessage({...msgBase,senderrole:window.APP_ROLE||"craftsman",created_at:new Date().toISOString()},"chat-msgs-c");
-    if(window.sb){
-        const {error}=await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"craftsman"});
-        if(error) window.showToast("Zprávu se nepodařilo uložit", error.message || "Zkuste to prosím znovu.", "error");
-    }
+    const msgBase={conversation_id:String(window.activeChatId),sender_id:window.APP_USER?.id,sender_name:document.getElementById("user-name")?.innerText || "Uživatel",text:txt};
+    window.renderMessage({...msgBase,created_at:new Date().toISOString()},"chat-msgs-c");
+    if(window.sb) await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"craftsman"});
 };
 
 window.loadCustomerConversations = async function() {
     const list=document.getElementById("conv-list");if(!list||!window.sb||!window.APP_USER)return;
     const {data:reqs}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Vytvořte poptávku!</div>';return;}
+    if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';return;}
     list.innerHTML=reqs.map(r=>{
-        const statusColor = r.status==='active' ? 'text-green-500' : r.status==='done' ? 'text-slate-400' : 'text-fixit-500';
         const statusDot = r.status==='active' ? '#22c55e' : r.status==='done' ? '#94a3b8' : '#f59e0b';
-        const avatarSeed = (r.craftsman_name||'craftsman') + r.id;
-        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\'") + '\',\'craftsman' + r.id + '\',' + (r.craftsman_id ? '\'' + r.craftsman_id + '\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-3 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
-        '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + ' • <span class="' + statusColor + ' font-semibold">' + (r.status==="waiting"?"Čeká na řemeslníka":r.status==="active"?"Probíhá":"Hotovo") + '</span></p></div>' +
-        '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
+        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\\\'") + '\\',\\'craftsman' + r.id + '\\',' + (r.craftsman_id ? '\\'' + r.craftsman_id + '\\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">' +
+        '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(r.craftsman_name||'c') + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
+        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + '</p></div>' +
         '</div>';
     }).join("");
 };
@@ -174,54 +149,42 @@ window.loadCustomerConversations = async function() {
 window.loadCraftsmanConversations = async function() {
     const list=document.getElementById("conv-list-c");if(!list||!window.sb||!window.APP_USER)return;
     const {data:offers}=await window.sb.from("offers").select("*, requests(*)").eq("craftsman_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400"><i class="fa-regular fa-comments text-4xl mb-3 block opacity-50"></i>Žádné zprávy.<br>Podejte nabídku!</div>';return;}
+    if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';return;}
     list.innerHTML=offers.map(o=>{
-        const statusColor = o.requests?.status==='active' ? 'text-green-500' : o.requests?.status==='done' ? 'text-slate-400' : 'text-fixit-500';
         const statusDot = o.requests?.status==='active' ? '#22c55e' : o.requests?.status==='done' ? '#94a3b8' : '#f59e0b';
-        const avatarSeed = (o.requests?.customer_name||'customer') + o.request_id;
-        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\'") + '\',\'customer' + o.request_id + '\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 border-l-transparent transition-all duration-150 flex items-center gap-3">' +
-        '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(avatarSeed) + '&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.category||"") + ' • <span class="' + statusColor + ' font-semibold">' + (o.requests?.customer_name||"Zákazník") + '</span></p></div>' +
-        '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0"></i>' +
+        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\\\'") + '\\',\\'customer' + o.request_id + '\\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">' +
+        '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.requests?.customer_name||'u') + '&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
+        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.customer_name||"Zákazník") + '</p></div>' +
         '</div>';
     }).join("");
-    // === GLOBÁLNÍ NOTIFIKACE NA POZADÍ ===
+};
+
+// === GLOBÁLNÍ NOTIFIKACE ===
 window.initGlobalNotifications = function() {
     if (!window.sb || !window.APP_USER) return;
+    if (window.globalNotifSub) { try { window.sb.removeChannel(window.globalNotifSub); } catch(e){} }
 
-    // Pokud už nasloucháme, zrušíme staré spojení (prevence duplicit)
-    if (window.globalNotifSub) {
-        try { window.sb.removeChannel(window.globalNotifSub); } catch(e){}
-    }
-
-    // Vytvoříme globální kanál pro notifikace na pozadí
     window.globalNotifSub = window.sb.channel('global-notifs')
-        // 1. Naslouchání na NOVÉ ZPRÁVY
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
-            // Pokud zprávu poslal někdo jiný a nemáme zrovna otevřený tento konkrétní chat
-            if (msg.sender_id !== window.APP_USER.id) {
-                if (window.activeChatId !== String(msg.conversation_id)) {
-                    window.showToast("Nová zpráva! 💬", "Napsal vám: " + (msg.sender_name || "Uživatel"), "info");
-                    // Refreshneme seznam konverzací, aby se ukázala nahoře
-                    if (window.APP_ROLE === "customer" && window.loadCustomerConversations) window.loadCustomerConversations();
-                    else if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
-                }
+            if (msg.sender_id !== window.APP_USER.id && window.activeChatId !== String(msg.conversation_id)) {
+                window.showToast("Nová zpráva! 💬", "Napsal vám: " + (msg.sender_name || "Uživatel"), "info");
+                window.addNotif("Nová zpráva! 💬", "Zpráva od: " + msg.sender_name);
+                if (window.APP_ROLE === "customer") window.loadCustomerConversations();
+                else window.loadCraftsmanConversations();
             }
         })
-        // 2. Naslouchání na NOVÉ NABÍDKY OD ŘEMESLNÍKŮ (Pro zákazníka)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'offers' }, payload => {
-            const offer = payload.new;
             if (window.APP_ROLE === "customer") {
-                window.showToast("Nová nabídka! 🎉", "Řemeslník " + (offer.craftsman_name || "") + " má zájem o vaši zakázku.", "success");
+                window.showToast("Nová nabídka! 🎉", "Řemeslník " + (payload.new.craftsman_name || "") + " má zájem.", "success");
+                window.addNotif("Nová nabídka! 🎉", payload.new.craftsman_name + " poslal nabídku.");
                 if (window.loadCustomerRequestsFromDB) window.loadCustomerRequestsFromDB();
             }
         })
-        // 3. Naslouchání na PŘIJATÉ NABÍDKY (Pro řemeslníka)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'offers' }, payload => {
-            const offer = payload.new;
-            if (window.APP_ROLE === "craftsman" && offer.craftsman_id === window.APP_USER.id && offer.status === "accepted") {
-                window.showToast("Nabídka přijata! ✅", "Zákazník přijal vaši nabídku. Můžete začít komunikovat.", "success");
+            if (window.APP_ROLE === "craftsman" && payload.new.craftsman_id === window.APP_USER.id && payload.new.status === "accepted") {
+                window.showToast("Nabídka přijata! ✅", "Zákazník přijal vaši nabídku.", "success");
+                window.addNotif("Nabídka přijata! ✅", "Můžete začít komunikovat.");
                 if (window.loadCraftsmanJobsFromDB) window.loadCraftsmanJobsFromDB();
                 if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
             }
