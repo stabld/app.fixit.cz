@@ -154,6 +154,7 @@ window.craftsmanHTML = function(name) {
             <div id="msg-panel-craftsman" class="chat-msg-panel flex-1 flex flex-col relative">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3 bg-white/50 dark:bg-transparent backdrop-blur-md z-10">
                     <button onclick="window.showConvList('craftsman')" class="md:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+                    <div id="chat-partner-avatar" class="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center shrink-0"></div>
                     <p class="font-extrabold dark:text-white text-sm flex-1 truncate" id="chat-partner-name-c">Zprávy</p>
                 </div>
                 <div id="chat-msgs-c" class="flex-1 overflow-y-auto hide-scroll p-4 flex flex-col gap-3"></div>
