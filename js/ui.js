@@ -34,25 +34,32 @@ window.showToast = function(title, message, type) {
 };
 
 window.addNotif = function(title, message) {
-    // Přidaná pojistka:
     if (!window.notifCount) window.notifCount = 0;
     if (!window.notifItems) window.notifItems = [];
 
     window.notifCount++;
     window.notifItems.unshift({ title, message, time: new Date().toLocaleTimeString('cs', {hour:'2-digit', minute:'2-digit'}) });
     if (window.notifItems.length > 10) window.notifItems.pop();
+    
+    // Zvoneček nahoře
     const badge = document.getElementById('notif-badge');
     if (badge) {
         badge.innerText = window.notifCount > 9 ? '9+' : window.notifCount;
         badge.classList.add('visible');
         badge.classList.remove('shake'); void badge.offsetWidth; badge.classList.add('shake');
     }
+    
+    // Bublinky u "Zpráv" (v menu a na mobilu dole)
     const sidebarBadge = document.getElementById('sidebar-msg-badge');
-    if (sidebarBadge) {
+    const bottomBadge = document.getElementById('bottom-msg-badge');
+    if (sidebarBadge || bottomBadge) {
         window.msgNotifCount = (window.msgNotifCount || 0) + 1;
-        sidebarBadge.innerText = window.msgNotifCount > 9 ? '9+' : window.msgNotifCount;
-        sidebarBadge.classList.remove('hidden');
+        const txt = window.msgNotifCount > 9 ? '9+' : window.msgNotifCount;
+        if(sidebarBadge) { sidebarBadge.innerText = txt; sidebarBadge.classList.remove('hidden'); }
+        if(bottomBadge) { bottomBadge.innerText = txt; bottomBadge.classList.remove('hidden'); }
     }
+    
+    // Seznam oznámení
     const list = document.getElementById('notif-list');
     if (list) {
         const empty = document.getElementById('notif-empty'); if (empty) empty.remove();
@@ -173,20 +180,35 @@ window.initCustomer = function(name) {
 
 window.initCraftsman = function(name) {
     window.buildNav([{id:"market",icon:"fa-map-location-dot",label:"Tržiště zakázek"},{id:"jobs",icon:"fa-hammer",label:"Moje práce"},{id:"c-messages",icon:"fa-comment-dots",label:"Zprávy"},{id:"earnings",icon:"fa-wallet",label:"Výdělky"},{id:"profile",icon:"fa-user",label:"Můj profil"}]);
-    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nov\u00e1 popt\u00e1vka\')\" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105\"><i class=\"fa-solid fa-hard-hat\"></i> <span>Nov\u00e1 popt\u00e1vka</span></button>';
+    document.getElementById("header-cta").innerHTML = '<button onclick="window.goTab(\'new\',\'Nov\u00e1 popt\u00e1vka\')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-hard-hat"></i> <span>Nov\u00e1 popt\u00e1vka</span></button>';
     if (window.craftsmanHTML) { document.getElementById("main-content").innerHTML = window.craftsmanHTML(name); }
     window.goTab("market","Tržiště zakázek");
 };
 
+// Generování menu - S přidanou HTML strukturou pro bublinku
 window.buildNav = function(items) {
-    document.getElementById("sidebar-nav").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + '</button>').join("");
-    document.getElementById("bottom-nav-items").innerHTML = items.map(item => '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Poptávky","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span></button>').join("");
+    document.getElementById("sidebar-nav").innerHTML = items.map(item => {
+        let badgeHtml = '';
+        if (item.id === 'messages' || item.id === 'c-messages') {
+            badgeHtml = '<span id="sidebar-msg-badge" class="hidden ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full"></span>';
+        }
+        return '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="nav-' + item.id + '" class="nav-item w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl font-bold transition hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 text-sm"><i class="fa-solid ' + item.icon + ' w-5 text-center text-lg"></i> ' + item.label + badgeHtml + '</button>';
+    }).join("");
+    
+    document.getElementById("bottom-nav-items").innerHTML = items.map(item => {
+        let bBadge = '';
+        if (item.id === 'messages' || item.id === 'c-messages') {
+            bBadge = '<span id="bottom-msg-badge" class="hidden absolute top-0 right-2 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full"></span>';
+        }
+        return '<button onclick="window.goTab(\'' + item.id + '\',\'' + item.label + '\')" id="bnav-' + item.id + '" class="flex-1 relative flex flex-col items-center justify-center gap-1 py-1.5 text-slate-400 hover:text-fixit-500 transition min-w-0 px-0.5"><i class="fa-solid ' + item.icon + ' text-lg"></i><span class="text-[9px] font-bold leading-tight truncate max-w-full text-center">' + ({"dash":"Domů","requests":"Poptávky","messages":"Zprávy","payments":"Platby","profile":"Profil","market":"Tržiště","jobs":"Práce","c-messages":"Zprávy","earnings":"Výdělky"}[item.id]||item.label.split(" ")[0]) + '</span>' + bBadge + '</button>';
+    }).join("");
 };
 
 window.goTab = function(id, title) {
     document.querySelectorAll('[id^="view-"]').forEach(el => { el.classList.add("hidden"); el.classList.remove("fade-up"); });
     document.querySelectorAll(".nav-item").forEach(el => { el.classList.remove("active","text-slate-900","dark:text-white"); el.classList.add("text-slate-600","dark:text-slate-400"); });
     document.querySelectorAll('[id^="bnav-"]').forEach(el => { el.classList.remove("text-fixit-500"); el.classList.add("text-slate-400"); });
+    
     const view = document.getElementById("view-"+id);
     if(view){view.classList.remove("hidden");void view.offsetWidth;view.classList.add("fade-up");}
     const sideBtn = document.getElementById("nav-"+id);
@@ -194,10 +216,14 @@ window.goTab = function(id, title) {
     const botBtn = document.getElementById("bnav-"+id);
     if(botBtn){botBtn.classList.remove("text-slate-400");botBtn.classList.add("text-fixit-500");}
     if(title) document.getElementById("page-title").innerText = title;
-    if(id==="messages") window.loadCustomerConversations();
-    if(id==="c-messages") window.loadCraftsmanConversations();
+    
+    // ZMIZÍ BUBLINA: Jakmile uživatel otevře zprávy, počitadlo notifikací zpráv se vynuluje.
+    if(id==="messages" || id==="c-messages") window.clearMsgNotif();
+    
+    if(id==="messages" && window.loadCustomerConversations) window.loadCustomerConversations();
+    if(id==="c-messages" && window.loadCraftsmanConversations) window.loadCraftsmanConversations();
     if(id==="market") {
-        window.loadMarketFromDB();
+        if(window.loadMarketFromDB) window.loadMarketFromDB();
         const mapEl=document.getElementById("market-map"),listEl=document.getElementById("market-list");
         if(mapEl&&listEl){mapEl.classList.add("hidden");listEl.classList.remove("hidden");}
         if(window._marketMap){window._marketMap.remove();window._marketMap=null;}
