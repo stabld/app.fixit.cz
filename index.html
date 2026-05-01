@@ -287,6 +287,24 @@
             </div>
         </div>
     </div>
+    <div id="forgot-pw-modal" class="hidden fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-8 relative">
+            <button onclick="window.closeForgotPw()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fa-solid fa-times"></i></button>
+            <h3 class="text-2xl font-black mb-2 dark:text-white">Zapomenuté heslo</h3>
+            <p class="text-slate-500 text-sm mb-6">Zadejte svůj e-mail a my vám pošleme odkaz pro nastavení nového hesla.</p>
+            <input type="email" id="forgot-pw-email" placeholder="vas@email.cz" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm mb-4 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+            <button id="btn-send-reset" onclick="window.sendResetLink()" class="w-full bg-fixit-500 hover:bg-fixit-600 text-white py-3.5 rounded-xl font-bold transition shadow-md">Odeslat odkaz</button>
+        </div>
+    </div>
+
+    <div id="new-pw-modal" class="hidden fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-[#0f172a] rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-8 relative">
+            <h3 class="text-2xl font-black mb-2 dark:text-white">Nové heslo</h3>
+            <p class="text-slate-500 text-sm mb-6">Zadejte své nové heslo. Musí mít alespoň 6 znaků.</p>
+            <input type="password" id="new-pw-input" placeholder="Nové heslo (min. 6 znaků)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-3.5 text-sm mb-4 focus:ring-2 focus:ring-fixit-500 outline-none dark:text-white">
+            <button id="btn-save-new-pw" onclick="window.saveNewPassword()" class="w-full bg-green-500 hover:bg-green-600 text-white py-3.5 rounded-xl font-bold transition shadow-md">Uložit heslo a přihlásit</button>
+        </div>
+    </div>
 </div>
 
 <script src="js/config.js"></script>
