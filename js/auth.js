@@ -79,6 +79,83 @@ window.doResetPassword = async function() {
 
 window.doLogout = async function() { if(window.sb) await window.sb.auth.signOut(); window.location.reload(); };
 
+// === OTEVÍRÁNÍ A ZAVÍRÁNÍ OKEN PRO HESLO ===
+window.openForgotPw = function() {
+    // Schováme případné přihlašovací okno
+    const authModal = document.getElementById("auth-modal");
+    if(authModal) authModal.classList.add("hidden");
+    
+    const m = document.getElementById("forgot-pw-modal");
+    m.classList.remove("hidden"); void m.offsetWidth; m.classList.add("opacity-100");
+};
+
+window.closeForgotPw = function() {
+    const m = document.getElementById("forgot-pw-modal");
+    if(m){ m.classList.remove("opacity-100"); setTimeout(() => m.classList.add("hidden"), 300); }
+};
+
+// === 1. ODESLÁNÍ E-MAILU S ODKAZEM ===
+window.sendResetLink = async function() {
+    const email = document.getElementById("forgot-pw-email").value.trim();
+    if (!email) { window.showToast("Chyba", "Zadejte svůj e-mail.", "error"); return; }
+    
+    const btn = document.getElementById("btn-send-reset");
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Odesílám...'; btn.disabled = true;
+
+    try {
+        // Zavolá Supabase, aby odeslal e-mail. Po kliknutí uživatele přesměruje zpět na web.
+        const { data, error } = await window.sb.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname,
+        });
+        
+        if (error) throw error;
+        
+        window.closeForgotPw();
+        window.showToast("Odesláno! 📧", "Zkontrolujte si e-mail (i složku Spam).", "success");
+    } catch(e) {
+        window.showToast("Chyba", e.message, "error");
+    } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+    }
+};
+
+// === 2. ODCHYCENÍ KLIKNUTÍ NA E-MAIL (Změna hesla) ===
+// Nasloucháme, jestli se aplikace nespustila kvůli kliknutí na odkaz "Obnovit heslo"
+if (window.sb) {
+    window.sb.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+            // Uživatel kliknul na odkaz v e-mailu a je "speciálně" dočasně přihlášený pro změnu hesla
+            const m = document.getElementById("new-pw-modal");
+            m.classList.remove("hidden"); void m.offsetWidth; m.classList.add("opacity-100");
+        }
+    });
+}
+
+// === 3. ULOŽENÍ NOVÉHO HESLA ===
+window.saveNewPassword = async function() {
+    const pw = document.getElementById("new-pw-input").value;
+    if (pw.length < 6) { window.showToast("Příliš krátké", "Heslo musí mít alespoň 6 znaků.", "error"); return; }
+    
+    const btn = document.getElementById("btn-save-new-pw");
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám...'; btn.disabled = true;
+
+    try {
+        const { data, error } = await window.sb.auth.updateUser({ password: pw });
+        if (error) throw error;
+        
+        const m = document.getElementById("new-pw-modal");
+        m.classList.remove("opacity-100"); setTimeout(() => m.classList.add("hidden"), 300);
+        
+        window.showToast("Heslo změněno! ✅", "Nyní používáte nové heslo.", "success");
+    } catch (e) {
+        window.showToast("Chyba", "Nepodařilo se změnit heslo: " + e.message, "error");
+    } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+    }
+};
+
 window.launchApp = function(role, name) {
     const as = document.getElementById("auth-screen");
     as.style.opacity = "0"; as.style.transition = "opacity 0.4s";
