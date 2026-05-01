@@ -143,6 +143,22 @@ window.saveProfile = async function(btnNode) {
         const name = freshUser.user_metadata?.full_name || updateData.full_name;
         const savedAvatarUrl = freshUser.user_metadata?.avatar_url || updateData.avatar_url;
         const displayUrl = savedAvatarUrl || ("https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a"));
+        
+        // --- TADY BYLA CHYBA: ODESLÁNÍ DO NOVÉ VEŘEJNÉ TABULKY ---
+        try {
+            await window.sb.from('public_profiles').upsert({
+                id: window.APP_USER.id,
+                full_name: name,
+                avatar_url: displayUrl,
+                role: window.APP_ROLE,
+                city: updateData.city,
+                bio: updateData.bio
+            });
+        } catch (dbErr) {
+            console.error("Nepodařilo se uložit veřejný profil:", dbErr);
+        }
+        // --------------------------------------------------------
+
         document.getElementById("user-name").innerText = name;
         document.getElementById("user-avatar").src = displayUrl;
         document.querySelectorAll("#prof-avatar-img").forEach(function(img) { img.src = displayUrl; });
@@ -327,16 +343,15 @@ window.loadOffersForRequest = async function(requestId, requestTitle) {
     }
     const modal=document.getElementById("offers-modal");modal.classList.remove("hidden");void modal.offsetWidth;modal.classList.add("opacity-100");
 };
-// Funkce pro samotné odmítnutí
+
 window.rejectOffer = async function(btnNode, offerId, requestId, requestTitle) {
     if(!window.sb) return;
     btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
     btnNode.disabled = true;
-    
     try {
         await window.sb.from("offers").update({status: "rejected"}).eq("id", offerId);
         window.showToast("Nabídka skryta", "Řemeslník byl odmítnut.", "info");
-        window.loadOffersForRequest(requestId, requestTitle); // Okamžitě aktualizuje seznam
+        window.loadOffersForRequest(requestId, requestTitle);
     } catch(e) {
         window.showToast("Chyba", "Nepodařilo se odmítnout nabídku.", "error");
         btnNode.innerHTML = '<i class="fa-solid fa-times text-lg"></i>';
@@ -439,6 +454,25 @@ window.initMarketMap = async function() {
     if(bounds.length>0)window._marketMap.fitBounds(bounds,{padding:[40,40],maxZoom:13});
     setTimeout(()=>window._marketMap&&window._marketMap.invalidateSize(),100);
 };
+
+window.filterMarket = function(kat, triggerEl) {
+    const activeBtn = triggerEl || document.activeElement;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-fixit-500','text-white','shadow-md');
+        btn.classList.add('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
+    });
+    if (activeBtn && activeBtn.classList && activeBtn.classList.contains('filter-btn')) {
+        activeBtn.classList.add('bg-fixit-500','text-white','shadow-md');
+        activeBtn.classList.remove('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
+    }
+    const data = Array.isArray(window.STATE?.marketRequests) ? window.STATE.marketRequests : [];
+    const filtered = kat === 'all' ? data : data.filter(r => (r.category || '').trim() === kat);
+    const list = document.getElementById('market-list');
+    if (!list) return;
+    if (!filtered.length) { list.innerHTML = '<div class="text-center text-slate-400 py-10">Žádné poptávky v této kategorii.</div>'; return; }
+    list.innerHTML = filtered.map((req, i) => window.createBeautifulCard(req, true, i)).join('');
+};
+
 window.openPublicProfile = async function(userId) {
     if (!userId || !window.sb) return;
     const modal = document.getElementById("public-profile-modal");
@@ -469,22 +503,4 @@ window.openPublicProfile = async function(userId) {
 window.closePublicProfile = function() {
     const modal = document.getElementById("public-profile-modal");
     if (modal) { modal.classList.remove("opacity-100"); setTimeout(() => modal.classList.add("hidden"), 300); }
-};
-
-window.filterMarket = function(kat, triggerEl) {
-    const activeBtn = triggerEl || document.activeElement;
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('bg-fixit-500','text-white','shadow-md');
-        btn.classList.add('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
-    });
-    if (activeBtn && activeBtn.classList && activeBtn.classList.contains('filter-btn')) {
-        activeBtn.classList.add('bg-fixit-500','text-white','shadow-md');
-        activeBtn.classList.remove('bg-white','dark:bg-slate-800','border','border-slate-200','dark:border-slate-700','text-slate-600','dark:text-slate-300');
-    }
-    const data = Array.isArray(window.STATE?.marketRequests) ? window.STATE.marketRequests : [];
-    const filtered = kat === 'all' ? data : data.filter(r => (r.category || '').trim() === kat);
-    const list = document.getElementById('market-list');
-    if (!list) return;
-    if (!filtered.length) { list.innerHTML = '<div class="text-center text-slate-400 py-10">Žádné poptávky v této kategorii.</div>'; return; }
-    list.innerHTML = filtered.map((req, i) => window.createBeautifulCard(req, true, i)).join('');
 };
