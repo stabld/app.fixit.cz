@@ -441,6 +441,37 @@ window.initMarketMap = async function() {
     if(bounds.length>0)window._marketMap.fitBounds(bounds,{padding:[40,40],maxZoom:13});
     setTimeout(()=>window._marketMap&&window._marketMap.invalidateSize(),100);
 };
+window.openPublicProfile = async function(userId) {
+    if (!userId || !window.sb) return;
+    const modal = document.getElementById("public-profile-modal");
+    
+    document.getElementById("pp-name").innerText = "Načítám...";
+    document.getElementById("pp-bio").innerText = "Zjišťuji informace...";
+    document.getElementById("pp-city").innerHTML = "";
+    document.getElementById("pp-avatar").src = "https://api.dicebear.com/7.x/avataaars/svg?seed=loading";
+    
+    modal.classList.remove("hidden"); void modal.offsetWidth; modal.classList.add("opacity-100");
+
+    try {
+        const { data, error } = await window.sb.from('public_profiles').select('*').eq('id', userId).single();
+        if (data) {
+            document.getElementById("pp-name").innerText = data.full_name || "Uživatel";
+            document.getElementById("pp-role").innerText = data.role === "customer" ? "Zákazník" : "Řemeslník";
+            document.getElementById("pp-city").innerHTML = data.city ? `<i class="fa-solid fa-location-dot mr-1"></i> ${data.city}` : "";
+            document.getElementById("pp-rating").innerText = data.rating ? Number(data.rating).toFixed(1) : "5.0";
+            document.getElementById("pp-bio").innerText = data.bio || "Tento uživatel zatím nevyplnil žádný popis.";
+            document.getElementById("pp-avatar").src = data.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.full_name)}&backgroundColor=0f172a`;
+        } else {
+            document.getElementById("pp-name").innerText = "Profil nenalezen";
+            document.getElementById("pp-bio").innerText = "Tento uživatel si ještě neuložil veřejný profil (Musí kliknout na 'Uložit změny v profilu').";
+        }
+    } catch (e) { document.getElementById("pp-name").innerText = "Chyba načítání"; }
+};
+
+window.closePublicProfile = function() {
+    const modal = document.getElementById("public-profile-modal");
+    if (modal) { modal.classList.remove("opacity-100"); setTimeout(() => modal.classList.add("hidden"), 300); }
+};
 
 window.filterMarket = function(kat, triggerEl) {
     const activeBtn = triggerEl || document.activeElement;
