@@ -95,11 +95,10 @@ window.renderMessage = function(m, boxId) {
     const safeSender = window.escapeHtml(senderName || (isMe?"Já":"Uživatel"));
     const safeText = window.escapeHtml(m.text || "").replace(/\n/g, "<br>");
     d.className="flex "+(isMe?"justify-end":"justify-start");
-    d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2") + '">' + safeSender + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + safeText + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
+    d.innerHTML=`<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ${isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2"}">${safeSender}</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ${isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm"}"><p class="leading-relaxed">${safeText}</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ${isMe?"text-right":""}">${time}</p></div></div>`;
     box.appendChild(d);box.scrollTop=box.scrollHeight;
 };
 
-// OPRAVENÁ FUNKCE KTERÁ BYLA USEKNUTÁ
 window.subscribeMessages = function(requestId) {
     if(window.msgSubscription){try{window.sb.removeChannel(window.msgSubscription);}catch(e){}}
     if(!window.sb)return;
@@ -133,29 +132,64 @@ window.sendMsgC = async function() {
     if(window.sb) await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"craftsman"});
 };
 
+// OPRAVENO: Bezpečné generování HTML
 window.loadCustomerConversations = async function() {
-    const list=document.getElementById("conv-list");if(!list||!window.sb||!window.APP_USER)return;
+    const list=document.getElementById("conv-list");
+    if(!list||!window.sb||!window.APP_USER) return;
     const {data:reqs}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!reqs||reqs.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';return;}
-    list.innerHTML=reqs.map(r=>{
-        const statusDot = r.status==='active' ? '#22c55e' : r.status==='done' ? '#94a3b8' : '#f59e0b';
-        return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\\'' + (r.craftsman_name||"Řemeslník").replace(/'/g,"\\\\'") + '\\',\\'craftsman' + r.id + '\\',' + (r.craftsman_id ? '\\'' + r.craftsman_id + '\\'' : 'null') + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">' +
-        '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(r.craftsman_name||'c') + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">' + r.title + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + r.category + '</p></div>' +
-        '</div>';
+    if(!reqs||reqs.length===0){
+        list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';
+        return;
+    }
+    
+    list.innerHTML = reqs.map(r => {
+        const statusDot = r.status === 'active' ? '#22c55e' : r.status === 'done' ? '#94a3b8' : '#f59e0b';
+        const safeName = (r.craftsman_name || "Řemeslník").replace(/'/g, "\\'");
+        const craftIdParam = r.craftsman_id ? `'${r.craftsman_id}'` : 'null';
+        const seed = encodeURIComponent(r.craftsman_name || 'c');
+        
+        return `
+        <div id="conv-${r.id}" onclick="window.openConversation(${r.id}, '${safeName}', 'craftsman${r.id}', ${craftIdParam})" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">
+            <div class="relative shrink-0">
+                <img id="cav-${r.id}" src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100 object-cover">
+                <span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:${statusDot};border:2px solid white;"></span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm dark:text-white truncate">${r.title}</p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">${r.category}</p>
+            </div>
+        </div>`;
     }).join("");
 };
 
+// OPRAVENO: Bezpečné generování HTML
 window.loadCraftsmanConversations = async function() {
-    const list=document.getElementById("conv-list-c");if(!list||!window.sb||!window.APP_USER)return;
+    const list=document.getElementById("conv-list-c");
+    if(!list||!window.sb||!window.APP_USER) return;
     const {data:offers}=await window.sb.from("offers").select("*, requests(*)").eq("craftsman_id",window.APP_USER.id).order("created_at",{ascending:false});
-    if(!offers||offers.length===0){list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';return;}
-    list.innerHTML=offers.map(o=>{
-        const statusDot = o.requests?.status==='active' ? '#22c55e' : o.requests?.status==='done' ? '#94a3b8' : '#f59e0b';
-        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\\'' + (o.requests?.customer_name||"Zákazník").replace(/'/g,"\\\\'") + '\\',\\'customer' + o.request_id + '\\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">' +
-        '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.requests?.customer_name||'u') + '&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
-        '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate">' + (o.requests?.title||"Poptávka") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.customer_name||"Zákazník") + '</p></div>' +
-        '</div>';
+    if(!offers||offers.length===0){
+        list.innerHTML='<div class="p-8 text-center text-sm text-slate-400">Žádné konverzace.</div>';
+        return;
+    }
+    
+    list.innerHTML = offers.map(o => {
+        const statusDot = o.requests?.status === 'active' ? '#22c55e' : o.requests?.status === 'done' ? '#94a3b8' : '#f59e0b';
+        const safeName = (o.requests?.customer_name || "Zákazník").replace(/'/g, "\\'");
+        const seed = encodeURIComponent(o.requests?.customer_name || 'u');
+        const title = o.requests?.title || "Poptávka";
+        const cName = o.requests?.customer_name || "Zákazník";
+        
+        return `
+        <div id="conv-${o.request_id}" onclick="window.openConversation(${o.request_id}, '${safeName}', 'customer${o.request_id}')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all flex items-center gap-3">
+            <div class="relative shrink-0">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 bg-slate-100">
+                <span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:${statusDot};border:2px solid white;"></span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm dark:text-white truncate">${title}</p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">${cName}</p>
+            </div>
+        </div>`;
     }).join("");
 };
 
