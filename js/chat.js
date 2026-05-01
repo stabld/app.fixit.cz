@@ -27,21 +27,36 @@ window.showMsgPanel = function(role) {
     }
 };
 
+// OPRAVENO: Chytré načítání profilovek s pojistkou proti chybě 404
 window.getUserAvatar = async function(userId, fallbackSeed, fallbackBg) {
     const fallback = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(fallbackSeed||"user") + "&backgroundColor=" + (fallbackBg||"f59e0b");
     if (!userId || !window.sb) return fallback;
     if (window._avatarCache[userId]) return window._avatarCache[userId];
+    
     try {
         if (window.APP_USER && window.APP_USER.id === userId) {
             const url = window.APP_USER.user_metadata?.avatar_url;
             if (url) { window._avatarCache[userId] = url; return url; }
         }
+        
         const { data } = window.sb.storage.from("avatars").getPublicUrl(userId + ".jpg");
-        if (data?.publicUrl) {
-            window._avatarCache[userId] = data.publicUrl;
-            return data.publicUrl;
+        if (data && data.publicUrl) {
+            // Tady to zjistí, jestli fotka fakt existuje, dřív než ji to nacpe do UI
+            return await new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    window._avatarCache[userId] = data.publicUrl;
+                    resolve(data.publicUrl);
+                };
+                img.onerror = () => {
+                    window._avatarCache[userId] = fallback;
+                    resolve(fallback);
+                };
+                img.src = data.publicUrl;
+            });
         }
     } catch(e) {}
+    
     window._avatarCache[userId] = fallback;
     return fallback;
 };
@@ -229,7 +244,6 @@ window.loadCraftsmanConversations = async function() {
         return;
     }
     
-    // FILTRACE DUPLIKÁTŮ: Zabrání tomu, aby se stejná poptávka vypsala vícekrát
     const uniqueOffers = [];
     const seen = new Set();
     offers.forEach(o => {
@@ -242,12 +256,14 @@ window.loadCraftsmanConversations = async function() {
     list.innerHTML = uniqueOffers.map(o => {
         const statusDot = o.requests?.status === 'active' ? '#22c55e' : o.requests?.status === 'done' ? '#94a3b8' : '#f59e0b';
         const safeName = (o.requests?.customer_name || "Zákazník").replace(/'/g, "\\'");
+        const customerIdParam = o.requests?.customer_id ? `'${o.requests.customer_id}'` : 'null';
         const seed = encodeURIComponent(o.requests?.customer_name || 'u');
         const unreadCount = (window.STATE.unreadChats && window.STATE.unreadChats[o.request_id]) || 0;
         const unreadBadge = unreadCount > 0 ? '<div class="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ml-auto shrink-0 shadow-sm">' + unreadCount + '</div>' : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0 ml-auto"></i>';
         const isActiveClass = window.activeChatId === String(o.request_id) ? 'bg-white dark:bg-slate-800/50 border-fixit-500 border-l-4' : 'border-l-transparent';
 
-        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + safeName + '\',\'customer' + o.request_id + '\')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all duration-150 flex items-center gap-3 ' + isActiveClass + '">' +
+        // Tady se předává i ID zákazníka, aby fungovalo chytré načítání fotky!
+        return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + safeName + '\',\'customer' + o.request_id + '\',' + customerIdParam + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all duration-150 flex items-center gap-3 ' + isActiveClass + '">' +
         '<div class="relative shrink-0"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + seed + '&backgroundColor=f59e0b" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
         '<div class="flex-1 min-w-0"><p class="font-bold text-sm dark:text-white truncate leading-tight" id="clist-name-c-' + o.request_id + '">' + (o.requests?.customer_name || "Zákazník") + '</p><p class="text-xs text-slate-400 mt-0.5 truncate">' + (o.requests?.title || "Poptávka") + '</p></div>' +
         unreadBadge +
