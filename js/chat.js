@@ -313,11 +313,17 @@ window.initGlobalNotifications = function() {
             }
         })
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'offers' }, payload => {
-            if (window.APP_ROLE === "craftsman" && payload.new.craftsman_id === window.APP_USER.id && payload.new.status === "accepted") {
-                window.showToast("Nabídka přijata! ✅", "Zákazník přijal vaši nabídku.", "success");
-                window.addNotif("Nabídka přijata! ✅", "Můžete začít komunikovat.");
-                if (window.loadCraftsmanJobsFromDB) window.loadCraftsmanJobsFromDB();
-                if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
+            if (window.APP_ROLE === "craftsman" && payload.new.craftsman_id === window.APP_USER.id) {
+                if (payload.new.status === "accepted") {
+                    window.showToast("Nabídka přijata! ✅", "Zákazník přijal vaši nabídku.", "success");
+                    window.addNotif("Nabídka přijata! ✅", "Můžete začít komunikovat.");
+                    if (window.loadCraftsmanJobsFromDB) window.loadCraftsmanJobsFromDB();
+                    if (window.loadCraftsmanConversations) window.loadCraftsmanConversations();
+                } else if (payload.new.status === "rejected") {
+                    window.showToast("Nabídka odmítnuta ❌", "Zákazník si vybral někoho jiného.", "error");
+                    window.addNotif("Nabídka odmítnuta", "Vaše nabídka na zakázku nebyla přijata.");
+                    if (window.loadCraftsmanJobsFromDB) window.loadCraftsmanJobsFromDB();
+                }
             }
         })
         .subscribe();
