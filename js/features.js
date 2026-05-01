@@ -315,12 +315,35 @@ window.submitCraftsmanOffer = async function() {
 
 window.loadOffersForRequest = async function(requestId, requestTitle) {
     if(!window.sb)return;
-    const {data:offers}=await window.sb.from("offers").select("*").eq("request_id",requestId).order("created_at",{ascending:false});
+    // Načteme pouze ty nabídky, které NEJSOU odmítnuté (status !== 'rejected')
+    const {data:offers}=await window.sb.from("offers").select("*").eq("request_id",requestId).neq("status", "rejected").order("created_at",{ascending:false});
+    
     document.getElementById("offers-modal-title").innerText=requestTitle;
     const modalList=document.getElementById("offers-modal-list");
-    if(!offers||offers.length===0){modalList.innerHTML='<div class="text-center text-slate-400 py-12"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i><p>Zatím žádné nabídky.</p></div>';}
-    else{modalList.innerHTML=offers.map(o=>'<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Přijmout a zahájit zprávy</button></div>').join("");}
+    
+    if(!offers||offers.length===0){
+        modalList.innerHTML='<div class="text-center text-slate-400 py-12"><i class="fa-solid fa-inbox text-4xl mb-4 block"></i><p>Zatím žádné aktivní nabídky.</p></div>';
+    } else {
+        modalList.innerHTML=offers.map(o=>'<div class="p-5 border border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50 dark:bg-slate-800/50"><div class="flex items-center gap-4 mb-4"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(o.craftsman_name) + '&backgroundColor=0f172a" class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-200 dark:border-slate-700"><div><p class="font-extrabold dark:text-white">' + o.craftsman_name + '</p><p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">' + new Date(o.created_at).toLocaleDateString("cs") + '</p></div><span class="ml-auto font-black text-lg text-fixit-500">' + o.price + '</span></div><p class="text-sm text-slate-600 dark:text-slate-300 mb-5 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-100 dark:border-slate-700">' + o.message + '</p><div class="flex gap-2"><button onclick="window.rejectOffer(this, ' + o.id + ',' + requestId + ',\'' + (requestTitle||"").replace(/'/g,"\\'") + '\')" class="px-5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-500 rounded-xl transition shadow-sm"><i class="fa-solid fa-times text-lg"></i></button><button onclick="window.acceptOffer(' + o.id + ',' + requestId + ',\'' + (o.craftsman_name||"").replace(/'/g,"\\'") + '\'); window.closeOffersModal();" class="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3.5 rounded-xl font-bold text-sm transition shadow-md hover:scale-[1.02]">Přijmout a zahájit zprávy</button></div></div>').join("");
+    }
     const modal=document.getElementById("offers-modal");modal.classList.remove("hidden");void modal.offsetWidth;modal.classList.add("opacity-100");
+};
+
+// Funkce pro samotné odmítnutí
+window.rejectOffer = async function(btnNode, offerId, requestId, requestTitle) {
+    if(!window.sb) return;
+    btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
+    btnNode.disabled = true;
+    
+    try {
+        await window.sb.from("offers").update({status: "rejected"}).eq("id", offerId);
+        window.showToast("Nabídka skryta", "Řemeslník byl odmítnut.", "info");
+        window.loadOffersForRequest(requestId, requestTitle); // Okamžitě aktualizuje seznam
+    } catch(e) {
+        window.showToast("Chyba", "Nepodařilo se odmítnout nabídku.", "error");
+        btnNode.innerHTML = '<i class="fa-solid fa-times text-lg"></i>';
+        btnNode.disabled = false;
+    }
 };
 
 window.acceptOffer = async function(offerId, requestId, craftsmanName) {
