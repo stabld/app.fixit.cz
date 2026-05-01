@@ -3,6 +3,8 @@ window.clearMsgNotif = function() {
     window.msgNotifCount = 0;
     const badge = document.getElementById('sidebar-msg-badge');
     if (badge) badge.classList.add('hidden');
+    const bottomBadge = document.getElementById('bottom-msg-badge');
+    if (bottomBadge) bottomBadge.classList.add('hidden');
 };
 
 window.showConvList = function(role) {
@@ -99,6 +101,7 @@ window.renderMessage = function(m, boxId) {
     box.appendChild(d);box.scrollTop=box.scrollHeight;
 };
 
+// OPRAVENO: Pokud máš chat zrovna otevřený, neukáže se bublina (protože zprávu rovnou vidíš)
 window.subscribeMessages = function(requestId) {
     if(window.msgSubscription){try{window.sb.removeChannel(window.msgSubscription);}catch(e){}}
     if(!window.sb)return;
@@ -106,8 +109,7 @@ window.subscribeMessages = function(requestId) {
     window.msgSubscription=window.sb.channel("msgs-"+requestId).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+requestId},payload=>{
         if(payload.new.sender_id!==window.APP_USER?.id){
             window.renderMessage(payload.new,boxId);
-            window.showToast("Nová zpráva! 💬","Zpráva od "+(payload.new.sender_name||"řemeslníka")+".","info");
-            window.addNotif("Nová zpráva! 💬", "Zpráva od " + (payload.new.sender_name || "řemeslníka"));
+            // Záměrně odstraněn Toast a Notif. Když na chat koukáš, nepotřebuješ notifikaci.
         }
     }).subscribe();
 };
@@ -132,7 +134,6 @@ window.sendMsgC = async function() {
     if(window.sb) await window.sb.from("messages").insert({...msgBase,senderrole:window.APP_ROLE||"craftsman"});
 };
 
-// OPRAVENO: Bezpečné generování HTML
 window.loadCustomerConversations = async function() {
     const list=document.getElementById("conv-list");
     if(!list||!window.sb||!window.APP_USER) return;
@@ -162,7 +163,6 @@ window.loadCustomerConversations = async function() {
     }).join("");
 };
 
-// OPRAVENO: Bezpečné generování HTML
 window.loadCraftsmanConversations = async function() {
     const list=document.getElementById("conv-list-c");
     if(!list||!window.sb||!window.APP_USER) return;
@@ -193,7 +193,7 @@ window.loadCraftsmanConversations = async function() {
     }).join("");
 };
 
-// === GLOBÁLNÍ NOTIFIKACE ===
+// === GLOBÁLNÍ NOTIFIKACE (Oprava duplicit a cizích zpráv) ===
 window.initGlobalNotifications = function() {
     if (!window.sb || !window.APP_USER) return;
     if (window.globalNotifSub) { try { window.sb.removeChannel(window.globalNotifSub); } catch(e){} }
@@ -201,7 +201,13 @@ window.initGlobalNotifications = function() {
     window.globalNotifSub = window.sb.channel('global-notifs')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
             const msg = payload.new;
-            if (msg.sender_id !== window.APP_USER.id && window.activeChatId !== String(msg.conversation_id)) {
+            
+            // BEZPEČNOSTNÍ FILTR: Zkontrolujeme, jestli zpráva patří do konverzace tohoto uživatele
+            const isMyChat = window.APP_ROLE === "customer" 
+                ? window.STATE.requests.some(r => String(r.sbId) === String(msg.conversation_id))
+                : window.STATE.craftJobs.some(j => String(j.requestId) === String(msg.conversation_id));
+
+            if (isMyChat && msg.sender_id !== window.APP_USER.id && window.activeChatId !== String(msg.conversation_id)) {
                 window.showToast("Nová zpráva! 💬", "Napsal vám: " + (msg.sender_name || "Uživatel"), "info");
                 window.addNotif("Nová zpráva! 💬", "Zpráva od: " + msg.sender_name);
                 if (window.APP_ROLE === "customer") window.loadCustomerConversations();
