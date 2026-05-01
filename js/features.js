@@ -1,13 +1,16 @@
 // === POPTÁVKY, AI BOŘEK, TRŽIŠTĚ, MAPA A PROFIL ===
 window.extractPhotoFromDesc = function(rawDesc) {
-    if (!rawDesc) return { desc: "", photo: null, mime: null };
+    if (!rawDesc) return { desc: "", photos: [] };
     const parts = rawDesc.split("||PHOTO||");
-    if (parts.length > 1) {
-        const desc = parts[0].trim();
-        const photoParts = parts[1].split("||MIME||");
-        return { desc, photo: photoParts[0], mime: photoParts[1] };
+    const desc = parts[0].trim();
+    const photos = [];
+    for (let i = 1; i < parts.length; i++) {
+        const photoParts = parts[i].split("||MIME||");
+        if(photoParts.length >= 2) {
+            photos.push({ photo: photoParts[0], mime: photoParts[1].trim() });
+        }
     }
-    return { desc: rawDesc, photo: null, mime: null };
+    return { desc, photos };
 };
 
 window.openRatingModal = function(index, sbId) {
@@ -144,7 +147,6 @@ window.saveProfile = async function(btnNode) {
         const savedAvatarUrl = freshUser.user_metadata?.avatar_url || updateData.avatar_url;
         const displayUrl = savedAvatarUrl || ("https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (window.APP_ROLE==="customer"?"f59e0b":"0f172a"));
         
-        // --- TADY BYLA CHYBA: ODESLÁNÍ DO NOVÉ VEŘEJNÉ TABULKY ---
         try {
             await window.sb.from('public_profiles').upsert({
                 id: window.APP_USER.id,
@@ -154,10 +156,7 @@ window.saveProfile = async function(btnNode) {
                 city: updateData.city,
                 bio: updateData.bio
             });
-        } catch (dbErr) {
-            console.error("Nepodařilo se uložit veřejný profil:", dbErr);
-        }
-        // --------------------------------------------------------
+        } catch (dbErr) { console.error("Nepodařilo se uložit veřejný profil:", dbErr); }
 
         document.getElementById("user-name").innerText = name;
         document.getElementById("user-avatar").src = displayUrl;
@@ -174,18 +173,32 @@ window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
     return data.text;
 };
 
-window.handlePhoto = function(input) {
-    const file = input.files[0]; if (!file) return;
-    window.poptMime = file.type;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById("photo-preview").src = e.target.result;
-        document.getElementById("photo-preview").classList.remove("hidden");
-        window.poptBase64 = e.target.result.split(",")[1];
-        document.getElementById("photo-zone").querySelector("i").classList.add("hidden");
-        document.getElementById("photo-zone").querySelector("p").classList.add("hidden");
-    };
-    reader.readAsDataURL(file);
+window.handlePhoto = async function(input) {
+    const files = Array.from(input.files).slice(0, 5);
+    if (!files.length) return;
+
+    window.poptPhotos = [];
+    const gallery = document.getElementById("photo-gallery");
+    const zone = document.getElementById("photo-zone");
+
+    gallery.innerHTML = "";
+    gallery.classList.remove("hidden");
+    zone.classList.add("hidden");
+
+    for (let file of files) {
+        const reader = new FileReader();
+        const result = await new Promise(res => {
+            reader.onload = e => res(e.target.result);
+            reader.readAsDataURL(file);
+        });
+        window.poptPhotos.push({ base64: result.split(",")[1], mime: file.type });
+        
+        const img = document.createElement("img");
+        img.src = result;
+        img.className = "w-full h-20 object-cover rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 pointer-events-auto cursor-pointer";
+        img.onclick = (e) => { e.stopPropagation(); window.openLightbox(img.src); };
+        gallery.appendChild(img);
+    }
 };
 
 window.appendChat = function(role, text) {
@@ -202,7 +215,11 @@ window.processPopt = async function(text) {
     loading.classList.remove("hidden"); replyArea.classList.add("hidden");
     const sp = 'Jsi Bořek, profesionální technik. Vytvoř zadání pro řemeslníka.\nODPOVÍDEJ PŘESNĚ V TOMTO JSON FORMÁTU BEZ DALŠÍHO TEXTU:\n{"status":"question","message":"otázka"} nebo {"status":"done","nazev":"titulek","kategorie":"obor","popis":"popis","nalehavost":"Vysoká/Střední/Nízká","odhad_ceny":"cena Kč","rada":"rada"}';
     let parts = [{text}];
-    if (window.poptBase64 && window.poptMime) parts.push({inlineData:{mimeType:window.poptMime,data:window.poptBase64}});
+    if (window.poptPhotos && window.poptPhotos.length > 0) {
+        window.poptPhotos.forEach(p => {
+            parts.push({ inlineData: { mimeType: p.mime, data: p.base64 } });
+        });
+    }
     try {
         const raw = await window.callGeminiAPI(parts, sp, true);
         let clean = raw.replace(/```json/gi,"").replace(/```/g,"").trim();
@@ -225,10 +242,12 @@ window.processPopt = async function(text) {
 
 window.startAI = function() {
     const txt = document.getElementById("popt-input").value.trim();
-    if(!txt&&!window.poptBase64){window.showToast("Chybí popis","Popište závadu nebo nahrajte fotku.","error");return;}
+    if(!txt && (!window.poptPhotos || window.poptPhotos.length === 0)){
+        window.showToast("Chybí popis","Popište závadu nebo nahrajte fotku.","error");return;
+    }
     document.getElementById("popt-form").classList.add("hidden");
     document.getElementById("popt-chat").classList.remove("hidden");
-    window.poptHistoryText = txt||"Posílám fotografii k analýze.";
+    window.poptHistoryText = txt || "Posílám fotografie k analýze.";
     window.appendChat("user",window.poptHistoryText);
     window.processPopt(window.poptHistoryText);
 };
@@ -264,7 +283,12 @@ window.publishRequest = async function(btnNode) {
 
         const detailInfo = ["📍 Adresa: "+street+", "+city,"📞 Telefon: "+phone,"📅 Termín: "+timeframe,"🏠 Typ objektu: "+property,"🚗 Parkování: "+parking,...(budget?["💰 Rozpočet: "+budget]:[])].join('\n');
         let finalPopis=popis+"\n\n---\n📋 DOPLŇUJÍCÍ INFORMACE:\n"+detailInfo;
-        if(window.poptBase64&&window.poptMime) finalPopis+="\n||PHOTO||"+window.poptBase64+"||MIME||"+window.poptMime;
+        
+        if (window.poptPhotos && window.poptPhotos.length > 0) {
+            window.poptPhotos.forEach(p => {
+                finalPopis += "\n||PHOTO||" + p.base64 + "||MIME||" + p.mime;
+            });
+        }
 
         let sbId=null;
         if(window.sb&&window.APP_USER){
@@ -274,11 +298,14 @@ window.publishRequest = async function(btnNode) {
         }
         if (!window.STATE) window.STATE = { requests: [], craftJobs: [], marketRequests: [] };
         if (!window.STATE.requests) window.STATE.requests = [];
-        window.STATE.requests.unshift({sbId,title,kat,popis:finalPopis,time:new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:"waiting",photo:window.poptBase64,mime:window.poptMime});
-        window.refreshRequestsList(); window.refreshDashboard(); window.poptHistoryText=""; window.poptBase64=null; window.poptMime=null;
+        window.STATE.requests.unshift({sbId,title,kat,popis:finalPopis,time:new Date().toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:"waiting"});
+        window.refreshRequestsList(); window.refreshDashboard(); window.poptHistoryText=""; window.poptPhotos=[];
+        
         ["popt-input","f-street","f-city","f-phone","f-budget"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
-        document.getElementById("popt-chat-msgs").innerHTML=""; document.getElementById("photo-preview").classList.add("hidden");
-        const pz=document.getElementById("photo-zone");if(pz){pz.querySelector("i").classList.remove("hidden");pz.querySelector("p").classList.remove("hidden");}
+        document.getElementById("popt-chat-msgs").innerHTML=""; 
+        const gallery = document.getElementById("photo-gallery");
+        if(gallery) { gallery.innerHTML=""; gallery.classList.add("hidden"); }
+        const pz=document.getElementById("photo-zone");if(pz){pz.classList.remove("hidden");}
         ["popt-result","popt-tip","popt-chat","popt-finalize"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
         document.getElementById("btn-show-finalize").classList.remove("hidden"); document.getElementById("popt-form").classList.remove("hidden");
         if(btnNode&&btnNode.tagName){btnNode.innerHTML=orig;btnNode.disabled=false;}
@@ -298,9 +325,24 @@ window.openOfferModal = function(index) {
     document.getElementById("co-desc").innerHTML=extracted.desc.replace(/\n/g,"<br>");
     document.getElementById("co-price").value=req.price_estimate||"Dohodou";
     document.getElementById("co-msg").value='Dobrý den, mám zájem o vaši zakázku "' + req.title + '". Mám čas a vybavení, mohu pomoci.';
-    const photoWrap=document.getElementById("co-photo-wrap"),photoImg=document.getElementById("co-photo");
-    if(extracted.photo){photoImg.src="data:"+(extracted.mime||"image/jpeg")+";base64,"+extracted.photo;photoWrap.classList.remove("hidden");}
-    else photoWrap.classList.add("hidden");
+    
+    const photoWrap = document.getElementById("co-photo-wrap");
+    if(extracted.photos && extracted.photos.length > 0) {
+        photoWrap.innerHTML = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4"></div>';
+        const grid = photoWrap.querySelector('div');
+        extracted.photos.forEach(p => {
+            const img = document.createElement("img");
+            img.src = "data:" + p.mime + ";base64," + p.photo;
+            img.className = "w-full h-24 object-cover rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:opacity-80 transition";
+            img.onclick = () => window.openLightbox(img.src);
+            grid.appendChild(img);
+        });
+        photoWrap.classList.remove("hidden");
+    } else {
+        photoWrap.classList.add("hidden");
+        photoWrap.innerHTML = "";
+    }
+
     const modal=document.getElementById("craftsman-offer-modal");
     modal.classList.remove("hidden");void modal.offsetWidth;modal.classList.add("opacity-100");
 };
