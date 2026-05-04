@@ -1,4 +1,15 @@
 // === POPTÁVKY, AI BOŘEK, TRŽIŠTĚ, MAPA A PROFIL ===
+window.checkProfileCompletion = function() {
+    if (!window.APP_USER) return;
+    const meta = window.APP_USER.user_metadata || {};
+    // Pokud chybí buď telefon NEBO město
+    if (!meta.phone || !meta.city) {
+        document.querySelectorAll("#dash-profile-alert").forEach(el => el.classList.remove("hidden"));
+    } else {
+        document.querySelectorAll("#dash-profile-alert").forEach(el => el.classList.add("hidden"));
+    }
+};
+
 window.extractPhotoFromDesc = function(rawDesc) {
     if (!rawDesc) return { desc: "", photos: [] };
     const parts = rawDesc.split("||PHOTO||");
@@ -162,6 +173,7 @@ window.saveProfile = async function(btnNode) {
         document.getElementById("user-avatar").src = displayUrl;
         document.querySelectorAll("#prof-avatar-img").forEach(function(img) { img.src = displayUrl; });
         window.showToast("Profil uložen! ✅", "Vaše změny byly úspěšně uloženy.", "success");
+        window.checkProfileCompletion(); // Aktualizujeme stav banneru po uložení
     } catch(e) { window.showToast("Chyba ukládání", e.message, "error"); }
     finally { btnNode.innerHTML = orig; btnNode.disabled = false; }
 };
@@ -455,6 +467,7 @@ window.refreshCraftsmanJobs = function() {
 
 window.loadCraftsmanJobsFromDB = async function() {
     if(!window.sb||!window.APP_USER)return;
+    window.checkProfileCompletion();
     const {data}=await window.sb.from("offers").select("*, requests(title, category, status)").eq("craftsman_id",window.APP_USER.id);
     if(data&&data.length>0){
         window.STATE.craftJobs=data.map(o=>{ let s=o.status;if(o.requests?.status==="done")s="done"; return {title:o.requests?.title||"Zakázka",requestId:o.request_id,status:s,time:new Date(o.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"})}; });
@@ -464,6 +477,7 @@ window.loadCraftsmanJobsFromDB = async function() {
 
 window.loadCustomerRequestsFromDB = async function() {
     if(!window.sb||!window.APP_USER)return;
+    window.checkProfileCompletion();
     const {data}=await window.sb.from("requests").select("*").eq("customer_id",window.APP_USER.id).order("created_at",{ascending:false});
     if(data&&data.length>0){
         window.STATE.requests=data.map(r=>({sbId:r.id,title:r.title,kat:r.category,popis:r.description,time:new Date(r.created_at).toLocaleTimeString("cs",{hour:"2-digit",minute:"2-digit"}),status:r.status,craftsman_name:r.craftsman_name||null}));
