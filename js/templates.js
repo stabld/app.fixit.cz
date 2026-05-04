@@ -2,6 +2,17 @@ window.customerHTML = function(name) {
     const first = name.split(" ")[0];
     return `
     <div id="view-dash" class="hidden fade-up">
+        <div id="dash-profile-alert" class="hidden mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm fade-up">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-md"><i class="fa-solid fa-user-pen text-xl"></i></div>
+                <div class="text-left">
+                    <h4 class="font-bold text-slate-800 dark:text-white text-lg">Doplňte si svůj profil</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Přidejte si telefon a město, aby vás řemeslníci mohli snadno kontaktovat.</p>
+                </div>
+            </div>
+            <button onclick="window.goTab('profile','Můj profil')" class="shrink-0 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg hover:-translate-y-1">Přejít do nastavení</button>
+        </div>
+
         <div class="mb-10"><h2 class="text-3xl font-extrabold mb-2 dark:text-white">Vítejte, ${first} 👋</h2><p class="text-slate-500 text-lg">Přehled vašich aktivit na platformě Fixit.</p></div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
             <div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm"><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-3">Aktivní</p><p class="text-4xl font-black text-fixit-500" id="stat-active">0</p></div>
@@ -11,12 +22,24 @@ window.customerHTML = function(name) {
         </div>
         <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-8">
             <h3 class="text-xl font-extrabold mb-6 dark:text-white">Poslední poptávky</h3>
-            <div id="dash-requests-list"><p class="text-slate-400 text-center py-8">Zatím žádné poptávky. <button onclick="window.goTab('new','Nová poptávka')" class="text-fixit-500 font-bold hover:underline">Vytvořit první →</button></p></div>
+            
+            <div id="dash-requests-list">
+                <div class="bg-fixit-50 dark:bg-fixit-500/10 rounded-2xl p-8 text-center border border-fixit-100 dark:border-fixit-500/20">
+                    <div class="w-16 h-16 bg-fixit-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-fixit-500/30">
+                        <i class="fa-solid fa-plus text-2xl"></i>
+                    </div>
+                    <h4 class="text-xl font-black text-slate-800 dark:text-white mb-2">Začněte svou první poptávkou</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">Nechte Bořka, ať vám pomůže s popisem závady a najde vám nejlepšího řemeslníka.</p>
+                    <button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg hover:-translate-y-1">
+                        Vytvořit poptávku
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
     <div id="view-requests" class="hidden fade-up">
         <div class="flex items-center justify-between mb-8"><h2 class="text-3xl font-extrabold dark:text-white">Moje poptávky</h2><button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová</button></div>
-        
         <div id="requests-list" class="space-y-5">
             <div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
                 <div class="w-24 h-24 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -29,7 +52,6 @@ window.customerHTML = function(name) {
                 </button>
             </div>
         </div>
-
     </div>
     <div id="view-messages" class="hidden fade-up">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
@@ -96,7 +118,6 @@ window.customerHTML = function(name) {
             <div id="popt-form" class="space-y-6 relative z-10">
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="flex flex-col"><label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Co se pokazilo?</label><textarea id="popt-input" class="flex-1 w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 dark:text-white focus:ring-2 focus:ring-fixit-500 outline-none resize-none min-h-[180px] shadow-inner" placeholder="Opište svůj problém co nejpodrobněji..."></textarea></div>
-                    
                     <div class="flex flex-col">
                         <label class="font-extrabold text-sm text-slate-700 dark:text-slate-300 mb-3 block">Fotky závady (až 5 fotek)</label>
                         <div class="relative flex-1 min-h-[180px] group">
@@ -109,7 +130,6 @@ window.customerHTML = function(name) {
                             <div id="photo-gallery" class="hidden absolute inset-0 z-30 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 overflow-y-auto grid grid-cols-2 gap-2 content-start pointer-events-none"></div>
                         </div>
                     </div>
-
                 </div>
                 <button onclick="window.startAI()" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-fixit-500 dark:hover:bg-fixit-500 hover:text-white font-black py-5 rounded-2xl text-lg transition-all shadow-xl hover:-translate-y-1">Analyzovat problém s Bořkem</button>
             </div>
@@ -145,6 +165,17 @@ window.customerHTML = function(name) {
 window.craftsmanHTML = function(name) {
     return `
     <div id="view-market" class="hidden fade-up">
+        <div id="dash-profile-alert" class="hidden mb-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm fade-up">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center shrink-0 shadow-md"><i class="fa-solid fa-user-pen text-xl"></i></div>
+                <div class="text-left">
+                    <h4 class="font-bold text-slate-800 dark:text-white text-lg">Doplňte si svůj profil</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Přidejte si fotku, kontakt a popis služeb, ať u zákazníků vzbudíte důvěru.</p>
+                </div>
+            </div>
+            <button onclick="window.goTab('profile','Můj profil')" class="shrink-0 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition shadow-lg hover:-translate-y-1">Přejít do nastavení</button>
+        </div>
+
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-3xl font-extrabold dark:text-white">Tržiště zakázek</h2>
             <div class="flex items-center gap-2">
