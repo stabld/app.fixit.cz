@@ -16,7 +16,18 @@ window.customerHTML = function(name) {
     </div>
     <div id="view-requests" class="hidden fade-up">
         <div class="flex items-center justify-between mb-8"><h2 class="text-3xl font-extrabold dark:text-white">Moje poptávky</h2><button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová</button></div>
-        <div id="requests-list" class="space-y-5"><div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-folder-open text-5xl text-slate-300 dark:text-slate-600 mb-5 block"></i><p class="font-bold text-slate-500 text-lg">Zatím zde nic není.</p><button onclick="window.goTab('new','Nová poptávka')" class="mt-4 text-fixit-500 font-bold hover:underline text-sm">Vytvořit první poptávku →</button></div></div>
+        <div id="requests-list" class="space-y-5"><div id="empty-req" <div id="requests-list" class="space-y-5">
+    <div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+        <div class="w-24 h-24 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-magic text-4xl"></i>
+        </div>
+        <h3 class="font-black text-2xl text-slate-800 dark:text-white mb-2">Vaše první poptávka</h3>
+        <p class="font-medium text-slate-500 text-lg mb-8 max-w-md mx-auto">Popište, co potřebujete opravit, nahrajte fotku a náš AI asistent Bořek za vás připraví profi zadání pro řemeslníky.</p>
+        <button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-fixit-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 mx-auto">
+            <i class="fa-solid fa-plus"></i> Vytvořit první poptávku
+        </button>
+    </div>
+</div>
     </div>
     <div id="view-messages" class="hidden fade-up">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
