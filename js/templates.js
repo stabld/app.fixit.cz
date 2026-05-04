@@ -16,18 +16,20 @@ window.customerHTML = function(name) {
     </div>
     <div id="view-requests" class="hidden fade-up">
         <div class="flex items-center justify-between mb-8"><h2 class="text-3xl font-extrabold dark:text-white">Moje poptávky</h2><button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition hover:scale-105"><i class="fa-solid fa-plus"></i> Nová</button></div>
-        <div id="requests-list" class="space-y-5"><div id="empty-req" <div id="requests-list" class="space-y-5">
-    <div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
-        <div class="w-24 h-24 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fa-solid fa-magic text-4xl"></i>
+        
+        <div id="requests-list" class="space-y-5">
+            <div id="empty-req" class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="w-24 h-24 bg-fixit-50 dark:bg-fixit-500/10 text-fixit-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-magic text-4xl"></i>
+                </div>
+                <h3 class="font-black text-2xl text-slate-800 dark:text-white mb-2">Vaše první poptávka</h3>
+                <p class="font-medium text-slate-500 text-lg mb-8 max-w-md mx-auto">Popište, co potřebujete opravit, nahrajte fotku a náš AI asistent Bořek za vás připraví profi zadání pro řemeslníky.</p>
+                <button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-fixit-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 mx-auto">
+                    <i class="fa-solid fa-plus"></i> Vytvořit první poptávku
+                </button>
+            </div>
         </div>
-        <h3 class="font-black text-2xl text-slate-800 dark:text-white mb-2">Vaše první poptávka</h3>
-        <p class="font-medium text-slate-500 text-lg mb-8 max-w-md mx-auto">Popište, co potřebujete opravit, nahrajte fotku a náš AI asistent Bořek za vás připraví profi zadání pro řemeslníky.</p>
-        <button onclick="window.goTab('new','Nová poptávka')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-fixit-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 mx-auto">
-            <i class="fa-solid fa-plus"></i> Vytvořit první poptávku
-        </button>
-    </div>
-</div>
+
     </div>
     <div id="view-messages" class="hidden fade-up">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
@@ -166,7 +168,20 @@ window.craftsmanHTML = function(name) {
     <div id="view-jobs" class="hidden fade-up">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Moje práce</h2>
         <div class="grid grid-cols-3 gap-5 mb-8"><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-fixit-500" id="jobs-active-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Aktivní</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black dark:text-white" id="jobs-done-count">0</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Dokončené</p></div><div class="bg-white dark:bg-slate-800/80 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm text-center"><p class="text-4xl font-black text-yellow-500" id="jobs-rating">5.0 ⭐</p><p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mt-2">Hodnocení</p></div></div>
-        <div id="my-jobs-list" class="space-y-4"><div class="text-center p-12 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl"><i class="fa-solid fa-hammer text-5xl text-slate-300 dark:text-slate-600 mb-4 block"></i><p class="font-bold text-slate-500 text-lg">Zatím nemáte žádné aktivní zakázky.</p></div></div>
+        
+        <div id="my-jobs-list" class="space-y-4">
+            <div class="text-center p-16 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
+                <div class="w-24 h-24 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-hammer text-4xl"></i>
+                </div>
+                <h3 class="font-black text-2xl text-slate-800 dark:text-white mb-2">Zatím nemáte aktivní zakázky</h3>
+                <p class="font-medium text-slate-500 text-lg mb-8 max-w-md mx-auto">Podívejte se na tržiště a najděte si zákazníky ve vašem okolí, kteří právě teď potřebují pomoct.</p>
+                <button onclick="window.goTab('market','Tržiště zakázek')" class="bg-fixit-500 hover:bg-fixit-600 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-fixit-500/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 mx-auto">
+                    <i class="fa-solid fa-map-location-dot"></i> Prohlédnout dostupné zakázky
+                </button>
+            </div>
+        </div>
+
     </div>
     <div id="view-c-messages" class="hidden fade-up max-w-4xl">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Zprávy</h2>
