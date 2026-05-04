@@ -34,11 +34,33 @@ window.showErr = function(m) { const e = document.getElementById("auth-error"); 
 window.showOk = function(m) { const e = document.getElementById("auth-ok"); e.innerText = m; e.classList.remove("hidden"); document.getElementById("auth-error").classList.add("hidden"); };
 window.clearMsg = function() { document.getElementById("auth-error").classList.add("hidden"); document.getElementById("auth-ok").classList.add("hidden"); };
 
+// FUNKCE PRO ZOBRAZENÍ/SKRYTÍ HESLA (OČKO)
+window.togglePassword = function(inputId, btnNode) {
+    const inp = document.getElementById(inputId);
+    const icon = btnNode.querySelector("i");
+    if (inp.type === "password") {
+        inp.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        inp.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+};
+
 window.doRegister = async function() {
     if (!window.sb) return window.showErr("Chyba připojení.");
 
-    // --- KONTROLA SÍLY HESLA ---
     const password = document.getElementById("reg-pass").value;
+    const confirmPassword = document.getElementById("reg-pass-confirm").value;
+
+    // --- KONTROLA SHODY HESEL ---
+    if (password !== confirmPassword) {
+        return window.showErr("Hesla se neshodují. Zkontrolujte je prosím.");
+    }
+
+    // --- KONTROLA SÍLY HESLA ---
     if (password.length < 8) { 
         return window.showErr("Heslo musí mít alespoň 8 znaků."); 
     }
@@ -95,7 +117,6 @@ window.doLogout = async function() { if(window.sb) await window.sb.auth.signOut(
 
 // === OTEVÍRÁNÍ A ZAVÍRÁNÍ OKEN PRO HESLO ===
 window.openForgotPw = function() {
-    // Schováme případné přihlašovací okno
     const authModal = document.getElementById("auth-modal");
     if(authModal) authModal.classList.add("hidden");
     
@@ -118,11 +139,9 @@ window.sendResetLink = async function() {
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Odesílám...'; btn.disabled = true;
 
     try {
-        // Zavolá Supabase, aby odeslal e-mail. Po kliknutí uživatele přesměruje zpět na web.
         const { data, error } = await window.sb.auth.resetPasswordForEmail(email, {
             redirectTo: window.location.origin + window.location.pathname,
         });
-        
         if (error) throw error;
         
         window.closeForgotPw();
@@ -134,12 +153,10 @@ window.sendResetLink = async function() {
     }
 };
 
-// === 2. ODCHYCENÍ KLIKNUTÍ NA E-MAIL (Změna hesla) ===
-// Nasloucháme, jestli se aplikace nespustila kvůli kliknutí na odkaz "Obnovit heslo"
+// === 2. ODCHYCENÍ KLIKNUTÍ NA E-MAIL ===
 if (window.sb) {
     window.sb.auth.onAuthStateChange((event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
-            // Uživatel kliknul na odkaz v e-mailu a je "speciálně" dočasně přihlášený pro změnu hesla
             const m = document.getElementById("new-pw-modal");
             m.classList.remove("hidden"); void m.offsetWidth; m.classList.add("opacity-100");
         }
@@ -150,11 +167,9 @@ if (window.sb) {
 window.saveNewPassword = async function() {
     const pw = document.getElementById("new-pw-input").value;
     
-    // --- KONTROLA SÍLY HESLA ---
     if (pw.length < 8) { window.showToast("Slabé heslo", "Heslo musí mít alespoň 8 znaků.", "error"); return; }
     if (!/[A-Z]/.test(pw)) { window.showToast("Slabé heslo", "Heslo musí obsahovat alespoň jedno velké písmeno.", "error"); return; }
     if (!/[0-9]/.test(pw)) { window.showToast("Slabé heslo", "Heslo musí obsahovat alespoň jednu číslici.", "error"); return; }
-    // ---------------------------
     
     const btn = document.getElementById("btn-save-new-pw");
     const orig = btn.innerHTML;
