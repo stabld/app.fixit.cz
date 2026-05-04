@@ -36,10 +36,24 @@ window.clearMsg = function() { document.getElementById("auth-error").classList.a
 
 window.doRegister = async function() {
     if (!window.sb) return window.showErr("Chyba připojení.");
+
+    // --- KONTROLA SÍLY HESLA ---
+    const password = document.getElementById("reg-pass").value;
+    if (password.length < 8) { 
+        return window.showErr("Heslo musí mít alespoň 8 znaků."); 
+    }
+    if (!/[A-Z]/.test(password)) { 
+        return window.showErr("Heslo musí obsahovat alespoň jedno velké písmeno."); 
+    }
+    if (!/[0-9]/.test(password)) { 
+        return window.showErr("Heslo musí obsahovat alespoň jednu číslici."); 
+    }
+    // ---------------------------
+
     const btn = document.getElementById("btn-do-reg");
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Vytvářím...'; btn.disabled = true;
     try {
-        const { error } = await window.sb.auth.signUp({ email: document.getElementById("reg-email").value, password: document.getElementById("reg-pass").value, options: { data: { full_name: document.getElementById("reg-name").value, role: window.APP_ROLE } } });
+        const { error } = await window.sb.auth.signUp({ email: document.getElementById("reg-email").value, password: password, options: { data: { full_name: document.getElementById("reg-name").value, role: window.APP_ROLE } } });
         if (error) throw error;
         window.showOk("Účet vytvořen! Nyní se přihlaste.");
         setTimeout(() => window.switchTab("login"), 1800);
@@ -135,7 +149,12 @@ if (window.sb) {
 // === 3. ULOŽENÍ NOVÉHO HESLA ===
 window.saveNewPassword = async function() {
     const pw = document.getElementById("new-pw-input").value;
-    if (pw.length < 6) { window.showToast("Příliš krátké", "Heslo musí mít alespoň 6 znaků.", "error"); return; }
+    
+    // --- KONTROLA SÍLY HESLA ---
+    if (pw.length < 8) { window.showToast("Slabé heslo", "Heslo musí mít alespoň 8 znaků.", "error"); return; }
+    if (!/[A-Z]/.test(pw)) { window.showToast("Slabé heslo", "Heslo musí obsahovat alespoň jedno velké písmeno.", "error"); return; }
+    if (!/[0-9]/.test(pw)) { window.showToast("Slabé heslo", "Heslo musí obsahovat alespoň jednu číslici.", "error"); return; }
+    // ---------------------------
     
     const btn = document.getElementById("btn-save-new-pw");
     const orig = btn.innerHTML;
