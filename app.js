@@ -1,4 +1,4 @@
-// === START APLIKACE A KONTROLA SESSION ===
+// === START APLIKACE REMEXO A KONTROLA SESSION ===
 window.addEventListener('load', async () => {
     if (window.sb) {
         const { data: { session } } = await window.sb.auth.getSession();
@@ -24,7 +24,7 @@ window.addEventListener('load', async () => {
     }
 });
 
-// === HLAVNÍ INICIALIZACE MODULŮ ===
+// === HLAVNÍ INICIALIZACE MODULŮ REMEXO ===
 window.initApp = function(role, name) {
     const avatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + encodeURIComponent(name) + "&backgroundColor=" + (role==="customer"?"f59e0b":"0f172a");
     const el = (id) => document.getElementById(id);
@@ -62,10 +62,10 @@ window.initApp = function(role, name) {
             ["prof-name","prof-email","prof-phone","prof-city","prof-bio"].forEach(id => {
                 const pel = el(id); if(!pel) return;
                 if(id==="prof-name") pel.value = name;
-                else if(id==="prof-email") pel.value = window.APP_USER.email||"";
-                else if(id==="prof-phone") pel.value = meta.phone||"";
-                else if(id==="prof-city") pel.value = meta.city||"";
-                else if(id==="prof-bio") pel.value = meta.bio||"";
+                if(id==="prof-email") pel.value = window.APP_USER.email||"";
+                if(id==="prof-phone") pel.value = meta.phone||"";
+                if(id==="prof-city") pel.value = meta.city||"";
+                if(id==="prof-bio") pel.value = meta.bio||"";
             });
             if(el("prof-avatar-img")) el("prof-avatar-img").src = displayAv;
             if(el("prof-role-badge")) el("prof-role-badge").innerText = role==="customer"?"Zákazník":"Řemeslník";
@@ -86,7 +86,8 @@ window.initApp = function(role, name) {
         if (window.initGlobalNotifications) window.initGlobalNotifications();
     }, 500);
 
+    // UNIKÁTNÍ UVÍTÁNÍ POD NOVOU ZNAČKOU
     if (window.showToast) {
-        setTimeout(() => window.showToast("Vítej, " + name + "! 👋", "Aplikace je připravena.", "success"), 600);
+        setTimeout(() => window.showToast("Vítej v Remexo, " + name + "! 👋", "Aplikace je připravena.", "success"), 600);
     }
 };
