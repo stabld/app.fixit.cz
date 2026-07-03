@@ -76,9 +76,9 @@ window.openConversation = async function(requestId, partnerName, partnerSeed, pa
         avatarEl.style.backgroundImage = "url('" + avUrl + "')";
     }
     
-    document.querySelectorAll(".conv-item").forEach(el=>el.classList.remove("bg-white","dark:bg-slate-800/50","border-fixit-500","border-l-4"));
+    document.querySelectorAll(".conv-item").forEach(el=>el.classList.remove("bg-white","dark:bg-slate-800/50","border--500","border-l-4"));
     const ac=document.getElementById("conv-"+requestId);
-    if(ac)ac.classList.add("bg-white","dark:bg-slate-800/50","border-fixit-500","border-l-4");
+    if(ac)ac.classList.add("bg-white","dark:bg-slate-800/50","border-remexo-500","border-l-4");
     
     if (!window.STATE.unreadChats) window.STATE.unreadChats = {};
     window.STATE.unreadChats[requestId] = 0;
@@ -90,7 +90,7 @@ window.openConversation = async function(requestId, partnerName, partnerSeed, pa
 window.loadMessages = async function(requestId) {
     const boxId = window.APP_ROLE==="customer"?"chat-msgs":"chat-msgs-c";
     const box = document.getElementById(boxId); if(!box)return;
-    box.innerHTML='<div class="text-center text-slate-400 text-sm py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-fixit-500 mb-3 block"></i>Načítám zprávy...</div>';
+    box.innerHTML='<div class="text-center text-slate-400 text-sm py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-remexo-500 mb-3 block"></i>Načítám zprávy...</div>';
     if(!window.sb){box.innerHTML='<div class="text-center text-slate-400 text-sm py-8">Nepřipojeno.</div>';return;}
     const {data,error}=await window.sb.from("messages").select("*").eq("conversation_id",String(requestId)).order("created_at",{ascending:true});
     if(error){box.innerHTML='<div class="text-center text-red-400 text-sm py-8">Chyba načítání.</div>';return;}
@@ -144,7 +144,7 @@ window.renderMessage = function(m, boxId) {
     const safeSender = window.escapeHtml(senderName || (isMe?"Já":"Uživatel"));
     const safeText = window.escapeHtml(m.text || "").replace(/\n/g, "<br>");
     d.className="flex "+(isMe?"justify-end":"justify-start");
-    d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-fixit-500 text-right mr-2":"text-slate-400 ml-2") + '">' + safeSender + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-fixit-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + safeText + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
+    d.innerHTML='<div class="max-w-[75%]"><p class="text-[10px] font-bold mb-1.5 uppercase tracking-wide ' + (isMe?"text-remexo-500 text-right mr-2":"text-slate-400 ml-2") + '">' + safeSender + '</p><div class="px-5 py-3 rounded-2xl text-sm shadow-sm ' + (isMe?"bg-remexo-500 text-white rounded-br-sm":"bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-700 rounded-bl-sm") + '"><p class="leading-relaxed">' + safeText + '</p><p class="text-[10px] opacity-50 mt-1.5 font-medium ' + (isMe?"text-right":"") + '">' + time + '</p></div></div>';
     box.appendChild(d);box.scrollTop=box.scrollHeight;
 };
 
@@ -215,7 +215,7 @@ window.loadCustomerConversations = async function() {
         const seed = encodeURIComponent(r.craftsman_name || 'c');
         const unreadCount = (window.STATE.unreadChats && window.STATE.unreadChats[r.id]) || 0;
         const unreadBadge = unreadCount > 0 ? '<div class="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ml-auto shrink-0 shadow-sm">' + unreadCount + '</div>' : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0 ml-auto"></i>';
-        const isActiveClass = window.activeChatId === String(r.id) ? 'bg-white dark:bg-slate-800/50 border-fixit-500 border-l-4' : 'border-l-transparent';
+        const isActiveClass = window.activeChatId === String(r.id) ? 'bg-white dark:bg-slate-800/50 border-remexo-500 border-l-4' : 'border-l-transparent';
 
         return '<div id="conv-' + r.id + '" onclick="window.openConversation(' + r.id + ',\'' + safeName + '\',\'craftsman' + r.id + '\',' + craftIdParam + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all duration-150 flex items-center gap-3 ' + isActiveClass + '">' +
         '<div class="relative shrink-0"><img id="cav-' + r.id + '" src="https://api.dicebear.com/7.x/avataaars/svg?seed=' + seed + '&backgroundColor=0f172a" class="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 object-cover"><span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + statusDot + ';border:2px solid white;"></span></div>' +
@@ -260,7 +260,7 @@ window.loadCraftsmanConversations = async function() {
         const seed = encodeURIComponent(o.requests?.customer_name || 'u');
         const unreadCount = (window.STATE.unreadChats && window.STATE.unreadChats[o.request_id]) || 0;
         const unreadBadge = unreadCount > 0 ? '<div class="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ml-auto shrink-0 shadow-sm">' + unreadCount + '</div>' : '<i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 shrink-0 ml-auto"></i>';
-        const isActiveClass = window.activeChatId === String(o.request_id) ? 'bg-white dark:bg-slate-800/50 border-fixit-500 border-l-4' : 'border-l-transparent';
+        const isActiveClass = window.activeChatId === String(o.request_id) ? 'bg-white dark:bg-slate-800/50 border-remexo-500 border-l-4' : 'border-l-transparent';
 
         // Tady se předává i ID zákazníka, aby fungovalo chytré načítání fotky!
         return '<div id="conv-' + o.request_id + '" onclick="window.openConversation(' + o.request_id + ',\'' + safeName + '\',\'customer' + o.request_id + '\',' + customerIdParam + ')" class="conv-item px-4 py-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800/80 transition-all duration-150 flex items-center gap-3 ' + isActiveClass + '">' +
