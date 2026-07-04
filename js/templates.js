@@ -38,7 +38,7 @@ window.customerHTML = function(name) {
     </div>
     <div id="view-payments" class="hidden fade-up max-w-4xl">
         <h2 class="text-3xl font-extrabold mb-8 dark:text-white">Platby & Escrow</h2>
-        <div class="bg-gradient-to-br from-remexo-500 to-remexo-600 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/10 text-9xl"><i class="fa-solid fa-shield-halved"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-80 mb-2 relative z-10">Peníze v bezpečné úschově</p><p class="text-5xl font-black mb-4 relative z-10">0 Kč</p><p class="text-sm opacity-90 relative z-10">Peníze jsou zablokovány u remexo do vašeho potvrzení o dokončení opravy.</p></div>
+        <div class="bg-gradient-to-br from-remexo-500 to-remexo-600 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden"><div class="absolute -right-10 -top-10 text-white/10 text-9xl"><i class="fa-solid fa-shield-halved"></i></div><p class="text-xs font-black uppercase tracking-widest opacity-80 mb-2 relative z-10">Peníze v bezpečné úschově</p><p class="text-5xl font-black mb-4 relative z-10">0 Kč</p><p class="text-sm opacity-90 relative z-10">Peníze jsou zablokovány u Remexo do vašeho potvrzení o dokončení opravy.</p></div>
         <div class="bg-white dark:bg-slate-800/80 rounded-3xl border border-slate-200 dark:border-slate-700 p-8 text-center text-sm text-slate-400 py-12">Zatím neproběhly žádné platby.</div>
     </div>
     <div id="view-profile" class="hidden fade-up max-w-4xl mx-auto">
