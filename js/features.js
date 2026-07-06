@@ -570,3 +570,30 @@ window.closePublicProfile = function() {
     const modal = document.getElementById("public-profile-modal");
     if (modal) { modal.classList.remove("opacity-100"); setTimeout(() => modal.classList.add("hidden"), 300); }
 };
+// === PŘEDVYPLNĚNÍ POPTÁVKY Z LANDING PAGE ===
+// Tuto funkci přidej na KONEC souboru js/features.js (nebo kamkoliv do něj)
+window.applyPendingPoptavka = function() {
+    const data = window.PENDING_POPTAVKA;
+    if (!data) return;
+    window.PENDING_POPTAVKA = null;
+
+    window.goTab("new", "Nová poptávka");
+
+    setTimeout(() => {
+        const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val || ""; };
+        setText("r-nazev", data.title);
+        setText("r-kat", data.kategorie);
+        setText("r-nal", data.nalehavost);
+        setText("r-cena", data.cena);
+        setText("r-popis", data.popis);
+
+        const formEl = document.getElementById("popt-form");
+        const resultEl = document.getElementById("popt-result");
+        if (formEl) formEl.classList.add("hidden");
+        if (resultEl) resultEl.classList.remove("hidden");
+
+        if (window.showToast) {
+            window.showToast("Poptávka načtena! 📋", "Zkontrolujte údaje a pokračujte k adrese.", "success");
+        }
+    }, 300);
+};
