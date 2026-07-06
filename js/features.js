@@ -173,18 +173,20 @@ window.callGeminiAPI = async function(parts, systemPrompt, useJson) {
     return data.text;
 };
 
-// VYLEPŠENÍ 1: Komprese nahrávaných fotek pro AI Bořka
-window.handlePhoto = async function(input) {
+window.handlePhoto = async function(input, galleryId, zoneId) {
+    galleryId = galleryId || "photo-gallery";
+    zoneId = zoneId || "photo-zone";
+
     const files = Array.from(input.files).slice(0, 5);
     if (!files.length) return;
 
-    window.poptPhotos = [];
-    const gallery = document.getElementById("photo-gallery");
-    const zone = document.getElementById("photo-zone");
+    window.poptPhotos = window.poptPhotos || [];
+    const gallery = document.getElementById(galleryId);
+    const zone = document.getElementById(zoneId);
 
     gallery.innerHTML = "";
     gallery.classList.remove("hidden");
-    zone.classList.add("hidden");
+    if (zone) zone.classList.add("hidden");
 
     for (let file of files) {
         const compressedBase64 = await new Promise((resolve) => {
@@ -198,7 +200,7 @@ window.handlePhoto = async function(input) {
                     const canvas = document.createElement("canvas");
                     canvas.width = w; canvas.height = h;
                     canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-                    resolve(canvas.toDataURL("image/jpeg", 0.8)); // Zkomprimuje a zmenší
+                    resolve(canvas.toDataURL("image/jpeg", 0.8));
                 };
                 img.onerror = () => resolve(null);
                 img.src = e.target.result;
