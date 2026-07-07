@@ -242,3 +242,33 @@ window.closeLightbox = function() {
     document.body.style.overflow = "";
 };
 document.addEventListener("keydown", function(e) { if(e.key === "Escape") window.closeLightbox(); });
+window.formatPhone = function(input) {
+    // Odstraníme vše kromě čísel a znaménka plus
+    let val = input.value.replace(/[^\d+]/g, '');
+
+    // Pokud uživatel to pole úplně vymazal, necháme ho prázdné
+    if (val.length === 0) {
+        input.value = '';
+        return;
+    }
+
+    // Zajistíme, že plus je jen na začátku. Pokud chybí, automaticky přidáme +420
+    if (val[0] !== '+') {
+        val = '+' + (val.startsWith('420') || val.startsWith('421') ? '' : '420') + val.replace(/\+/g, '');
+    } else {
+        val = '+' + val.replace(/\+/g, '');
+    }
+
+    // Hezké formátování pro CZ/SK s mezerami (např. +420 123 456 789)
+    if (val.startsWith('+420') || val.startsWith('+421')) {
+        let rest = val.substring(4);
+        let formatted = val.substring(0, 4);
+        if (rest.length > 0) formatted += ' ' + rest.substring(0, 3);
+        if (rest.length > 3) formatted += ' ' + rest.substring(3, 6);
+        if (rest.length > 6) formatted += ' ' + rest.substring(6, 9);
+        input.value = formatted;
+    } else {
+        // Pro případné jiné zahraniční předvolby jen omezíme znaky
+        input.value = val.substring(0, 16);
+    }
+};
