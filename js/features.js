@@ -138,6 +138,15 @@ window.saveProfile = async function(btnNode) {
             const { data: urlData } = window.sb.storage.from("avatars").getPublicUrl(path);
             updateData.avatar_url = urlData.publicUrl; window._profilePhotoBlob = null;
         }
+        const phoneInput = document.getElementById('prof-phone');
+    if (phoneInput) {
+        const cleanPhone = phoneInput.value.replace(/\s+/g, '').replace('+', '');
+        // Počítáme s tím, že tam máš +420 (3 číslice) + 9 číslic = 12 znaků
+        if (cleanPhone.length !== 12 && cleanPhone.length !== 0) {
+            window.showToast("Chyba", "Telefonní číslo musí mít 9 číslic.", "error");
+            return;
+        }
+    }
         btnNode.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Ukládám profil...';
         const { data, error } = await window.sb.auth.updateUser({ data: updateData });
         if (error) throw error;
