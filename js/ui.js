@@ -272,3 +272,21 @@ window.formatPhone = function(input) {
         input.value = val.substring(0, 16);
     }
 };
+window.openModal = function(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("hidden");
+    void el.offsetWidth;
+    el.classList.add("opacity-100");
+    document.body.style.overflow = "hidden";
+};
+ 
+window.closeModal = function(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("opacity-100");
+    setTimeout(() => {
+        el.classList.add("hidden");
+        document.body.style.overflow = "";
+    }, 300);
+};
