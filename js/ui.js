@@ -13,7 +13,7 @@
     window.addEventListener('load', function() { setTimeout(hideLoader, 1800); });
 })();
 
-window.showToast = function(title, message, type) {
+window.showToast = function(title, message, type, isMessage) {
     type = type || 'success';
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -26,22 +26,22 @@ window.showToast = function(title, message, type) {
         '<button class="toast-close" onclick="this.closest(\'.toast\').remove()"><i class="fa-solid fa-times"></i></button>' +
         '<div class="toast-progress"></div>';
     container.appendChild(toast);
-    window.addNotif(title, message);
+    window.addNotif(title, message, isMessage);
     setTimeout(function() {
         toast.classList.add('hiding');
         setTimeout(function() { if (toast.parentNode) toast.remove(); }, 350);
     }, 4500);
 };
 
-window.addNotif = function(title, message) {
+window.addNotif = function(title, message, isMessage) {
     if (!window.notifCount) window.notifCount = 0;
     if (!window.notifItems) window.notifItems = [];
-
+ 
     window.notifCount++;
     window.notifItems.unshift({ title, message, time: new Date().toLocaleTimeString('cs', {hour:'2-digit', minute:'2-digit'}) });
     if (window.notifItems.length > 10) window.notifItems.pop();
     
-    // Zvoneček nahoře
+    // Zvoneček nahoře - reaguje na VŠECHNY notifikace (tohle zůstává stejné)
     const badge = document.getElementById('notif-badge');
     if (badge) {
         badge.innerText = window.notifCount > 9 ? '9+' : window.notifCount;
@@ -49,17 +49,19 @@ window.addNotif = function(title, message) {
         badge.classList.remove('shake'); void badge.offsetWidth; badge.classList.add('shake');
     }
     
-    // Bublinky u "Zpráv" (v menu a na mobilu dole)
-    const sidebarBadge = document.getElementById('sidebar-msg-badge');
-    const bottomBadge = document.getElementById('bottom-msg-badge');
-    if (sidebarBadge || bottomBadge) {
-        window.msgNotifCount = (window.msgNotifCount || 0) + 1;
-        const txt = window.msgNotifCount > 9 ? '9+' : window.msgNotifCount;
-        if(sidebarBadge) { sidebarBadge.innerText = txt; sidebarBadge.classList.remove('hidden'); }
-        if(bottomBadge) { bottomBadge.innerText = txt; bottomBadge.classList.remove('hidden'); }
+    // Bublinky u "Zpráv" (v menu a na mobilu dole) - JEN pro skutečné nové zprávy v chatu
+    if (isMessage) {
+        const sidebarBadge = document.getElementById('sidebar-msg-badge');
+        const bottomBadge = document.getElementById('bottom-msg-badge');
+        if (sidebarBadge || bottomBadge) {
+            window.msgNotifCount = (window.msgNotifCount || 0) + 1;
+            const txt = window.msgNotifCount > 9 ? '9+' : window.msgNotifCount;
+            if(sidebarBadge) { sidebarBadge.innerText = txt; sidebarBadge.classList.remove('hidden'); }
+            if(bottomBadge) { bottomBadge.innerText = txt; bottomBadge.classList.remove('hidden'); }
+        }
     }
     
-    // Seznam oznámení
+    // Seznam oznámení - zůstává pro VŠECHNY notifikace (bez rozdílu)
     const list = document.getElementById('notif-list');
     if (list) {
         const empty = document.getElementById('notif-empty'); if (empty) empty.remove();
