@@ -229,10 +229,25 @@ window.handlePhoto = async function(input, galleryId, zoneId) {
     }
 };
 
-window.appendChat = function(role, text) {
+window.appendChat = function(role, text, photos) {
     const box = document.getElementById("popt-chat-msgs");
     const d = document.createElement("div");
-    if (role==="user") { d.className="poptavka-bubble-user text-sm font-medium"; d.innerText=text; }
+    if (role==="user") {
+        d.className="poptavka-bubble-user text-sm font-medium";
+        d.innerText = text;
+        if (photos && photos.length > 0) {
+            const grid = document.createElement("div");
+            grid.className = "flex flex-wrap gap-2 mt-3";
+            photos.forEach(p => {
+                const img = document.createElement("img");
+                img.src = "data:" + p.mime + ";base64," + p.base64;
+                img.className = "w-16 h-16 object-cover rounded-lg border border-white/30 shadow-sm cursor-pointer hover:opacity-80 transition";
+                img.onclick = (e) => { e.stopPropagation(); window.openLightbox(img.src); };
+                grid.appendChild(img);
+            });
+            d.appendChild(grid);
+        }
+    }
     else { d.className="poptavka-bubble-ai text-sm flex items-start gap-3"; d.innerHTML='<div class="w-8 h-8 bg--500 rounded-full flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-hard-hat text-xs"></i></div><div>' + text + '</div>'; }
     box.appendChild(d); box.scrollTop=box.scrollHeight;
 };
@@ -276,7 +291,7 @@ window.startAI = function() {
     document.getElementById("popt-form").classList.add("hidden");
     document.getElementById("popt-chat").classList.remove("hidden");
     window.poptHistoryText = txt || "Posílám fotografie k analýze.";
-    window.appendChat("user",window.poptHistoryText);
+    window.appendChat("user",window.poptHistoryText,window.poptPhotos);
     window.processPopt(window.poptHistoryText);
 };
 
