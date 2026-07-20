@@ -133,39 +133,39 @@
             <div id="form-reg" class="hidden space-y-4">
                 <div class="relative">
                     <input type="text" id="reg-name" placeholder="Vaše jméno a příjmení" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-remexo-500 outline-none dark:text-white">
-                    <div class="absolute right-2 top-1/2 -translate-y-1/2 group cursor-help flex items-center p-2 z-10 pointer-events-auto">
-                        <i class="fa-solid fa-circle-question text-slate-300 hover:text-remexo-500 transition text-lg"></i>
-                        <div class="absolute top-1/2 -translate-y-1/2 right-full mr-3 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] hidden md:block">Jméno uvidí ostatní uživatelé, aby věděli, s kým komunikují.</div>
-                    </div>
+                    <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 group flex items-center p-2 z-10 pointer-events-auto outline-none">
+                        <i class="fa-solid fa-circle-question text-slate-300 group-hover:text-remexo-500 group-focus:text-remexo-500 transition text-lg"></i>
+                        <div class="absolute bottom-full right-0 mb-2 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60]">Jméno uvidí ostatní uživatelé, aby věděli, s kým komunikují.</div>
+                    </button>
                 </div>
 
                 <div class="relative">
                     <input type="email" id="reg-email" placeholder="Váš e-mail" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-remexo-500 outline-none dark:text-white">
-                    <div class="absolute right-2 top-1/2 -translate-y-1/2 group cursor-help flex items-center p-2 z-10 pointer-events-auto">
-                        <i class="fa-solid fa-circle-question text-slate-300 hover:text-remexo-500 transition text-lg"></i>
-                        <div class="absolute top-1/2 -translate-y-1/2 right-full mr-3 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] hidden md:block">E-mail slouží k přihlášení a důležitým notifikacím. Nikomu ho neukazujeme.</div>
-                    </div>
+                    <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 group flex items-center p-2 z-10 pointer-events-auto outline-none">
+                        <i class="fa-solid fa-circle-question text-slate-300 group-hover:text-remexo-500 group-focus:text-remexo-500 transition text-lg"></i>
+                        <div class="absolute bottom-full right-0 mb-2 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60]">E-mail slouží k přihlášení a důležitým notifikacím. Nikomu ho neukazujeme.</div>
+                    </button>
                 </div>
 
                 <div class="relative">
                     <input type="password" id="reg-pass" placeholder="Nové heslo (Min. 8 znaků, 1 velké, 1 číslo)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-24 py-3 text-sm focus:ring-2 focus:ring-remexo-500 outline-none dark:text-white">
                     <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center z-10 pointer-events-auto">
-                        <button type="button" onclick="window.togglePassword('reg-pass', this)" class="text-slate-400 hover:text-remexo-500 transition p-2 cursor-pointer"><i class="fa-solid fa-eye text-lg"></i></button>
-                        <div class="group cursor-help flex items-center p-2">
-                            <i class="fa-solid fa-circle-question text-slate-300 hover:text-remexo-500 transition text-lg"></i>
-                            <div class="absolute top-1/2 -translate-y-1/2 right-full mr-3 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] hidden md:block">Silné heslo chrání vaše zprávy a bezpečné platby.</div>
-                        </div>
+                        <button type="button" onclick="window.togglePassword('reg-pass', this)" class="text-slate-400 hover:text-remexo-500 transition p-2 cursor-pointer outline-none"><i class="fa-solid fa-eye text-lg"></i></button>
+                        <button type="button" class="group flex items-center p-2 outline-none">
+                            <i class="fa-solid fa-circle-question text-slate-300 group-hover:text-remexo-500 group-focus:text-remexo-500 transition text-lg"></i>
+                            <div class="absolute bottom-full right-0 mb-2 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60]">Silné heslo chrání vaše zprávy a bezpečné platby.</div>
+                        </button>
                     </div>
                 </div>
 
                 <div class="relative">
                     <input type="password" id="reg-pass-confirm" placeholder="Zopakujte heslo pro kontrolu" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-24 py-3 text-sm focus:ring-2 focus:ring-remexo-500 outline-none dark:text-white">
                     <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center z-10 pointer-events-auto">
-                        <button type="button" onclick="window.togglePassword('reg-pass-confirm', this)" class="text-slate-400 hover:text-remexo-500 transition p-2 cursor-pointer"><i class="fa-solid fa-eye text-lg"></i></button>
-                        <div class="group cursor-help flex items-center p-2">
-                            <i class="fa-solid fa-circle-question text-slate-300 hover:text-remexo-500 transition text-lg"></i>
-                            <div class="absolute top-1/2 -translate-y-1/2 right-full mr-3 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] hidden md:block">Pojistka, abychom měli jistotu, že ve vašem hesle není překlep.</div>
-                        </div>
+                        <button type="button" onclick="window.togglePassword('reg-pass-confirm', this)" class="text-slate-400 hover:text-remexo-500 transition p-2 cursor-pointer outline-none"><i class="fa-solid fa-eye text-lg"></i></button>
+                        <button type="button" class="group flex items-center p-2 outline-none">
+                            <i class="fa-solid fa-circle-question text-slate-300 group-hover:text-remexo-500 group-focus:text-remexo-500 transition text-lg"></i>
+                            <div class="absolute bottom-full right-0 mb-2 w-56 p-3 bg-remexo-500 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-focus:opacity-100 transition-opacity z-[60]">Pojistka, abychom měli jistotu, že ve vašem hesle není překlep.</div>
+                        </button>
                     </div>
                 </div>
 
