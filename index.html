@@ -49,6 +49,36 @@
             }
         })();
     </script>
+    <style>
+        /* --- OPRAVA TLAČÍTKA V HLAVIČCE --- */
+        
+        /* 1. Vnutí tlačítku, aby zůstalo v horní liště vedle ostatních ikon a nevyskakovalo ven */
+        #header-cta, 
+        #header-cta button {
+            position: static !important;
+            top: auto !important;
+            right: auto !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+
+        /* 2. Úprava pro mobily: Schováme text a necháme jen oranžové kolečko s helmou, aby se to do lišty hezky vešlo */
+        @media (max-width: 768px) {
+            #header-cta button span {
+                display: none !important;
+            }
+            #header-cta button {
+                padding: 0 !important;
+                width: 40px !important;
+                height: 40px !important;
+                justify-content: center !important;
+                border-radius: 50% !important; /* Udělá z toho dokonalé kolečko */
+            }
+            #header-cta button i {
+                margin: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body class="antialiased bg-slate-50 text-slate-900 dark:bg-remexo-dark dark:text-white">
 
